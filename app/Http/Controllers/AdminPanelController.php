@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\MongoService;
 use App\Models\AssemblyConstituency;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class AdminPanelController extends Controller
 {
