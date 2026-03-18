@@ -35,10 +35,10 @@ class MongoService
     {
         if ($doc === null) return null;
 
-        // Convert BSON to array, handling special types
+        // Convert BSON to array
         $arr = json_decode(json_encode($doc), true);
 
-        // Recursively convert any nested arrays/objects that might still be BSON
+        // Recursively convert MongoDB JSON format to proper values
         $arr = $this->recursiveConvert($arr);
 
         // Remove MongoDB internal _id field
@@ -47,27 +47,34 @@ class MongoService
     }
 
     /**
-     * Recursively convert BSON objects to safe values.
+     * Recursively convert MongoDB-specific JSON formats to safe values.
      */
     protected function recursiveConvert($value)
     {
-        if (is_array($value)) {
-            foreach ($value as $key => $item) {
-                $value[$key] = $this->recursiveConvert($item);
-            }
+        if (!is_array($value)) {
             return $value;
         }
 
-        if (is_object($value)) {
-            // Convert BSON objects to string representation
-            if ($value instanceof \MongoDB\BSON\UTCDateTime) {
-                return $value->toDateTime()->format('Y-m-d H:i:s');
+        // Check for MongoDB date format: {"$date": {"$numberLong": "..."}}
+        if (isset($value['$date'])) {
+            if (is_array($value['$date']) && isset($value['$date']['$numberLong'])) {
+                $timestamp = (int)($value['$date']['$numberLong'] / 1000);
+                return date('Y-m-d H:i:s', $timestamp);
             }
-            if ($value instanceof \MongoDB\BSON\ObjectId) {
-                return (string)$value;
+            if (is_string($value['$date'])) {
+                return $value['$date'];
             }
-            // For other objects, try to convert to array
-            return json_decode(json_encode($value), true);
+            return (string)$value['$date'];
+        }
+
+        // Check for MongoDB ObjectId format: {"$oid": "..."}
+        if (isset($value['$oid'])) {
+            return (string)$value['$oid'];
+        }
+
+        // Recursively process array elements
+        foreach ($value as $key => $item) {
+            $value[$key] = $this->recursiveConvert($item);
         }
 
         return $value;
