@@ -53,4 +53,8 @@ Route::prefix('vanigam')->group(function () {
     // Referral
     Route::post('/get-referral', [VanigamController::class, 'getReferral']);
     Route::post('/increment-referral', [VanigamController::class, 'incrementReferral']);
+
+    // Loan Request
+    Route::post('/loan-request', [VanigamController::class, 'loanRequest']);
+    Route::post('/check-loan-status', [VanigamController::class, 'checkLoanStatus']);
 });

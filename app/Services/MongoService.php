@@ -379,4 +379,87 @@ class MongoService
             return [];
         }
     }
+
+    /**
+     * Store a loan request in the loan_requests collection.
+     */
+    public function storeLoanRequest(array $data): void
+    {
+        try {
+            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $loanRequestsCollection = $db->selectCollection('loan_requests');
+            $loanRequestsCollection->insertOne($data);
+        } catch (Exception $e) {
+            Log::error("MongoService::storeLoanRequest Exception: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get loan request by unique_id.
+     */
+    public function getLoanRequestByUniqueId(string $uniqueId): ?array
+    {
+        try {
+            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $loanRequestsCollection = $db->selectCollection('loan_requests');
+            $doc = $loanRequestsCollection->findOne(['unique_id' => $uniqueId]);
+            if ($doc) {
+                return $this->toArray($doc);
+            }
+            return null;
+        } catch (Exception $e) {
+            Log::error("MongoService::getLoanRequestByUniqueId Exception: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get loan request by mobile number.
+     */
+    public function getLoanRequestByMobile(string $mobile): ?array
+    {
+        try {
+            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $loanRequestsCollection = $db->selectCollection('loan_requests');
+            $doc = $loanRequestsCollection->findOne(['mobile' => $mobile]);
+            if ($doc) {
+                return $this->toArray($doc);
+            }
+            return null;
+        } catch (Exception $e) {
+            Log::error("MongoService::getLoanRequestByMobile Exception: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Delete member by unique_id.
+     */
+    public function deleteMemberByUniqueId(string $uniqueId): bool
+    {
+        try {
+            $result = $this->collection->deleteOne(['unique_id' => $uniqueId]);
+            Log::info("Deleted member: $uniqueId, deletedCount: " . $result->getDeletedCount());
+            return $result->getDeletedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::deleteMemberByUniqueId Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Delete loan request by unique_id.
+     */
+    public function deleteLoanRequestByUniqueId(string $uniqueId): bool
+    {
+        try {
+            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $loanRequestsCollection = $db->selectCollection('loan_requests');
+            $result = $loanRequestsCollection->deleteOne(['unique_id' => $uniqueId]);
+            return $result->getDeletedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::deleteLoanRequestByUniqueId Exception: " . $e->getMessage());
+            return false;
+        }
+    }
 }

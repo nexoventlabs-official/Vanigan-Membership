@@ -180,6 +180,26 @@
           </div>
         </div>
 
+        <!-- Loan Request Section -->
+        @if($loan_request)
+        <div class="section">
+          <div class="section-header"><h3><i class="bi bi-cash-coin" style="color:#ef6c00;"></i> Loan Application</h3></div>
+          <div class="section-body">
+            <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:12px;padding:16px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                <span class="badge badge-orange" style="font-size:0.8rem;padding:6px 12px;">Applied for 25L Loan</span>
+                <span class="badge badge-green" style="font-size:0.75rem;">{{ ucfirst($loan_request->status ?? 'pending') }}</span>
+              </div>
+              <div class="detail-item"><span class="detail-label">Business Type</span><span class="detail-value">{{ $loan_request->business_type ?? 'N/A' }}</span></div>
+              <div class="detail-item"><span class="detail-label">Business Name</span><span class="detail-value">{{ $loan_request->business_name ?? 'N/A' }}</span></div>
+              @if(!empty($loan_request->created_at))
+              <div class="detail-item"><span class="detail-label">Applied On</span><span class="detail-value">{{ $loan_request->created_at }}</span></div>
+              @endif
+            </div>
+          </div>
+        </div>
+        @endif
+
         <!-- Referral Section -->
         <div class="section">
           <div class="section-header"><h3><i class="bi bi-share-fill" style="color:#ef6c00;"></i> Referral Info</h3></div>

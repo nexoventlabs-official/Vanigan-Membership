@@ -104,10 +104,19 @@ class AdminPanelController extends Controller
             }
         }
 
+        // Fetch loan request data
+        $loanRequest = null;
+        try {
+            $loanRequest = $this->mongo->getLoanRequestByUniqueId($uniqueId);
+        } catch (Exception $e) {
+            \Log::error("Error fetching loan request: " . $e->getMessage());
+        }
+
         return view('admin.user-detail', [
             'member' => (object) $member,
             'referred_members' => $referredMembers,
             'referred_by_member' => $referredByMember ? (object) $referredByMember : null,
+            'loan_request' => $loanRequest ? (object) $loanRequest : null,
         ]);
     }
 

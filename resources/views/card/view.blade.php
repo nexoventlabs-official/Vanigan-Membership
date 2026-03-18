@@ -92,11 +92,6 @@
         overflow: hidden;
         border-radius: 12px;
         box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        transition: transform 0.3s ease;
-      }
-
-      .card-face:hover {
-        transform: translateY(-4px);
       }
 
       /* Use <img> tags for backgrounds so they render in print & download */

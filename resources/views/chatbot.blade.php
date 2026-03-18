@@ -659,7 +659,8 @@
         CONFIRM_ALL: 12,
         GENERATING: 13,
         DONE: 14,
-        AWAIT_RETURNING_PIN: 15
+        AWAIT_RETURNING_PIN: 15,
+        LOAN_BUSINESS_NAME: 16
       };
 
       let state = S.WELCOME;
@@ -917,6 +918,55 @@
         lang_label: { en: 'Language', ta: 'மொழி' },
         lang_en: { en: 'English', ta: 'English' },
         lang_ta: { en: 'தமிழ்', ta: 'தமிழ்' },
+
+        // Unverified user prompts
+        unverified_refer_msg: {
+          en: 'Please verify your mobile number and complete registration to access referral features.',
+          ta: 'பரிந்துரை அம்சங்களை அணுக உங்கள் மொபைல் எண்ணைச் சரிபார்த்து பதிவை முடிக்கவும்.'
+        },
+        unverified_organizer_msg: {
+          en: 'Please verify your mobile number and complete registration to become an organizer.',
+          ta: 'நிர்வாகியாக இணைய உங்கள் மொபைல் எண்ணைச் சரிபார்த்து பதிவை முடிக்கவும்.'
+        },
+        btn_verify_mobile: { en: 'Verify Mobile Number', ta: 'மொபைல் எண் சரிபார்' },
+        btn_register: { en: 'Register', ta: 'பதிவு செய்' },
+
+        // Request Loan
+        btn_request_loan: { en: 'Request Loan', ta: 'கடன் கோரிக்கை' },
+        loan_intro: {
+          en: 'We have dedicated schemes for Pvt Ltd companies, Partnership Businesses & Import Export businesses, wherein we provide upto 25L interest free loan.<br><br>Do you have any of these businesses: Pvt Ltd companies, Partnership Businesses or Import Export businesses?',
+          ta: 'Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் மற்றும் இறக்குமதி ஏற்றுமதி வணிகங்களுக்கு பிரத்யேக திட்டங்கள் உள்ளன, இதில் 25 லட்சம் வரை வட்டியில்லா கடன் வழங்குகிறோம்.<br><br>உங்களிடம் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் அல்லது இறக்குமதி ஏற்றுமதி வணிகங்கள் உள்ளதா?'
+        },
+        btn_yes: { en: 'Yes', ta: 'ஆம்' },
+        btn_no: { en: 'No', ta: 'இல்லை' },
+        loan_great: {
+          en: 'Great! Please select your business type:',
+          ta: 'அருமை! உங்கள் வணிக வகையைத் தேர்ந்தெடுக்கவும்:'
+        },
+        loan_no_eligible: {
+          en: 'Currently, our interest-free loan schemes are available only for Pvt Ltd companies, Partnership Businesses & Import Export businesses. We will notify you when new schemes are available.',
+          ta: 'தற்போது, வட்டியில்லா கடன் திட்டங்கள் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் மற்றும் இறக்குமதி ஏற்றுமதி வணிகங்களுக்கு மட்டுமே கிடைக்கும். புதிய திட்டங்கள் வரும்போது உங்களுக்குத் தெரிவிப்போம்.'
+        },
+        btn_pvt_ltd: { en: 'Pvt Ltd Company', ta: 'Pvt Ltd நிறுவனம்' },
+        btn_partnership: { en: 'Partnership Business', ta: 'கூட்டாண்மை வணிகம்' },
+        btn_import_export: { en: 'Import Export Business', ta: 'இறக்குமதி ஏற்றுமதி வணிகம்' },
+        loan_enter_business_name: {
+          en: 'Please share your business name:',
+          ta: 'உங்கள் வணிகப் பெயரைப் பகிரவும்:'
+        },
+        btn_submit: { en: 'Submit', ta: 'சமர்ப்பி' },
+        loan_thanks: {
+          en: 'Thanks for applying for the 25L interest-free loan! Our team will contact you soon.',
+          ta: '25 லட்சம் வட்டியில்லா கடனுக்கு விண்ணப்பித்ததற்கு நன்றி! எங்கள் குழு விரைவில் தொடர்பு கொள்ளும்.'
+        },
+        loan_already_applied: {
+          en: 'You have already applied for the 25L interest-free loan. Our team will contact you soon.',
+          ta: '25 லட்சம் வட்டியில்லா கடனுக்கு நீங்கள் ஏற்கனவே விண்ணப்பித்துள்ளீர்கள். எங்கள் குழு விரைவில் தொடர்பு கொள்ளும்.'
+        },
+
+        // Help & Support buttons
+        btn_email: { en: 'Email Us', ta: 'மின்னஞ்சல் அனுப்பு' },
+        btn_call: { en: 'Call Us', ta: 'அழைக்க' },
 
         // Summary labels
         lbl_name: { en: 'Name', ta: 'பெயர்' },
@@ -1198,7 +1248,15 @@
         closeSidebar();
         const user = getUser();
         if (!user || !user.memberData || !user.memberData.unique_id) {
-          await botReply(L('ref_complete_first'), 600);
+          let h = '<i class="bi bi-exclamation-circle" style="color:#f9a825;font-size:1.2rem;"></i> <strong>' + L('sb_refer') + '</strong>';
+          h += '<div style="margin-top:10px;padding:14px;background:#fff8e1;border-radius:12px;border:1px solid #ffe082;font-size:0.9rem;line-height:1.6;">';
+          h += '<p>' + L('unverified_refer_msg') + '</p>';
+          h += '</div>';
+          h += '<div class="action-buttons" style="margin-top:12px;">';
+          h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
+          h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
+          h += '</div>';
+          await botReply(h, 600);
           return;
         }
         try {
@@ -1283,7 +1341,15 @@
         closeSidebar();
         const user = getUser();
         if (!user || !user.memberData || !user.memberData.unique_id) {
-          await botReply(L('org_complete_first'), 600);
+          let h = '<i class="bi bi-exclamation-circle" style="color:#f9a825;font-size:1.2rem;"></i> <strong>' + L('sb_organizer') + '</strong>';
+          h += '<div style="margin-top:10px;padding:14px;background:#fff8e1;border-radius:12px;border:1px solid #ffe082;font-size:0.9rem;line-height:1.6;">';
+          h += '<p>' + L('unverified_organizer_msg') + '</p>';
+          h += '</div>';
+          h += '<div class="action-buttons" style="margin-top:12px;">';
+          h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
+          h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
+          h += '</div>';
+          await botReply(h, 600);
           return;
         }
         const rc = user.memberData.referral_count || 0;
@@ -1391,6 +1457,10 @@
         h += '<hr style="border:none;border-top:1px solid #e0e0e0;margin:10px 0;">';
         h += '<p style="font-size:0.82rem;color:#888;">' + L('help_contact_hint') + '</p>';
         h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<a href="mailto:support@vanigan.org" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-envelope"></i> ' + L('btn_email') + '</a>';
+        h += '<a href="tel:+919876543210" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-telephone"></i> ' + L('btn_call') + '</a>';
+        h += '</div>';
         await botReply(h, 800);
       };
 
@@ -1431,6 +1501,165 @@
         addDateChip();
         addBanner();
       };
+
+      /* ── Helper Functions for Unverified Users ── */
+      window.doStartVerify = async function () {
+        userMsg('<i class="bi bi-telephone"></i> ' + L('btn_verify_mobile'));
+        state = S.AWAIT_MOBILE;
+        unlockInput();
+        setMobileInput();
+        await botReply(L('ask_mobile'), 700);
+      };
+
+      window.doStartRegister = async function () {
+        userMsg('<i class="bi bi-person-plus"></i> ' + L('btn_register'));
+        state = S.AWAIT_MOBILE;
+        unlockInput();
+        setMobileInput();
+        await botReply(L('ask_mobile'), 700);
+      };
+
+      /* ── Request Loan Flow ── */
+      let loanBusinessType = '';
+      let loanBusinessName = '';
+
+      window.doRequestLoan = async function () {
+        const user = getUser();
+        if (!user || !user.memberData || !user.memberData.unique_id) {
+          let h = '<i class="bi bi-exclamation-circle" style="color:#f9a825;font-size:1.2rem;"></i> <strong>' + L('btn_request_loan') + '</strong>';
+          h += '<div style="margin-top:10px;padding:14px;background:#fff8e1;border-radius:12px;border:1px solid #ffe082;font-size:0.9rem;line-height:1.6;">';
+          h += '<p>' + L('unverified_refer_msg') + '</p>';
+          h += '</div>';
+          h += '<div class="action-buttons" style="margin-top:12px;">';
+          h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
+          h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
+          h += '</div>';
+          await botReply(h, 600);
+          return;
+        }
+
+        // Check if user has already applied for loan from API (by mobile number)
+        userMsg('<i class="bi bi-cash-coin"></i> ' + L('btn_request_loan'));
+        showTyping();
+        try {
+          const memberMobile = user.memberData.mobile || user.memberData.contact_number || user.mobile || mobile;
+          const res = await api('/api/vanigam/check-loan-status', {
+            unique_id: user.memberData.unique_id,
+            mobile: memberMobile
+          });
+          hideTyping();
+          if (res && res.success && res.has_applied === true) {
+            let h = '<i class="bi bi-check-circle" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('btn_request_loan') + '</strong>';
+            h += '<div style="margin-top:10px;padding:14px;background:#e8f5e9;border-radius:12px;border:1px solid #c8e6c9;font-size:0.9rem;line-height:1.6;">';
+            h += '<p>' + L('loan_already_applied') + '</p>';
+            if (res.loan_request && res.loan_request.business_name) {
+              h += '<p style="margin-top:8px;font-size:0.8rem;color:#666;"><strong>Business:</strong> ' + res.loan_request.business_name + ' (' + res.loan_request.business_type + ')</p>';
+            }
+            h += '</div>';
+            h += '<div class="action-buttons" style="margin-top:12px;">';
+            h += '<a href="mailto:support@vanigan.org" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-envelope"></i> ' + L('btn_email') + '</a>';
+            h += '<a href="tel:+919876543210" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-telephone"></i> ' + L('btn_call') + '</a>';
+            h += '</div>';
+            await botReply(h, 600);
+            return;
+          }
+        } catch(e) {
+          hideTyping();
+          console.error('Loan status check error:', e);
+          // Continue if API fails
+        }
+
+        let h = '<i class="bi bi-cash-coin" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('btn_request_loan') + '</strong>';
+        h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;font-size:0.9rem;line-height:1.6;">';
+        h += '<p>' + L('loan_intro') + '</p>';
+        h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="doLoanYes()"><i class="bi bi-check-lg"></i> ' + L('btn_yes') + '</button>';
+        h += '<button class="action-btn cancel" onclick="doLoanNo()"><i class="bi bi-x-lg"></i> ' + L('btn_no') + '</button>';
+        h += '</div>';
+        await botReply(h, 800);
+      };
+
+      window.doLoanYes = async function () {
+        userMsg('<i class="bi bi-check-lg"></i> ' + L('btn_yes'));
+        let h = '<i class="bi bi-building" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('loan_great') + '</strong>';
+        h += '<div class="action-buttons" style="margin-top:12px;flex-direction:column;">';
+        h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Pvt Ltd Company\')" style="width:100%;justify-content:center;"><i class="bi bi-building"></i> ' + L('btn_pvt_ltd') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Partnership Business\')" style="width:100%;justify-content:center;"><i class="bi bi-people"></i> ' + L('btn_partnership') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Import Export Business\')" style="width:100%;justify-content:center;"><i class="bi bi-globe2"></i> ' + L('btn_import_export') + '</button>';
+        h += '</div>';
+        await botReply(h, 800);
+      };
+
+      window.doLoanNo = async function () {
+        userMsg('<i class="bi bi-x-lg"></i> ' + L('btn_no'));
+        let h = '<i class="bi bi-info-circle" style="color:#2e7d32;font-size:1.2rem;"></i>';
+        h += '<div style="margin-top:10px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;font-size:0.9rem;line-height:1.6;">';
+        h += '<p>' + L('loan_no_eligible') + '</p>';
+        h += '</div>';
+        h += buildQuickActions();
+        await botReply(h, 800);
+      };
+
+      window.doSelectBusinessType = async function (type) {
+        loanBusinessType = type;
+        const displayType = type === 'Pvt Ltd Company' ? L('btn_pvt_ltd') : type === 'Partnership Business' ? L('btn_partnership') : L('btn_import_export');
+        userMsg('<i class="bi bi-building"></i> ' + displayType);
+        state = S.LOAN_BUSINESS_NAME;
+        let h = '<i class="bi bi-pencil" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('loan_enter_business_name') + '</strong>';
+        h += '<div style="margin-top:10px;">';
+        h += '<input type="text" id="businessNameInput" placeholder="Enter business name" style="width:100%;padding:12px 16px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;">';
+        h += '</div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="doSubmitBusinessName()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_submit') + '</button></div>';
+        await botReply(h, 800);
+        setTimeout(() => { const inp = document.getElementById('businessNameInput'); if (inp) inp.focus(); }, 900);
+      };
+
+      window.doSubmitBusinessName = async function () {
+        const inp = document.getElementById('businessNameInput');
+        if (!inp || !inp.value.trim()) {
+          inp.style.borderColor = '#d32f2f';
+          inp.focus();
+          return;
+        }
+        loanBusinessName = inp.value.trim();
+        userMsg('<i class="bi bi-building"></i> ' + loanBusinessName);
+        state = S.DONE;
+        showTyping();
+
+        // Submit loan request to API
+        const user = getUser();
+        let submitSuccess = false;
+        try {
+          const res = await api('/api/vanigam/loan-request', {
+            unique_id: user.memberData.unique_id,
+            business_type: loanBusinessType,
+            business_name: loanBusinessName
+          });
+          if (res && res.success) {
+            submitSuccess = true;
+          }
+        } catch(e) {
+          console.error('Loan submission error:', e);
+        }
+
+        hideTyping();
+
+        let h = '<i class="bi bi-check-circle" style="color:#2e7d32;font-size:1.5rem;"></i> <strong style="color:#2e7d32;">' + L('loan_thanks') + '</strong>';
+        h += buildQuickActions();
+        await botReply(h, 1000);
+        loanBusinessType = '';
+        loanBusinessName = '';
+      };
+
+      function buildQuickActions() {
+        let h = '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+        h += '</div>';
+        return h;
+      }
 
       /* ── Update Details Handlers ── */
       window.doMenuUpdateDetails = async function () {
@@ -2233,9 +2462,12 @@
         const cardUrl = '/card-view';
         let h = '<div class="card-preview-wrap">';
         h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">';
-        // Front Card
+        // Front Card with download icon
         h += '<div style="flex:1;min-width:220px;max-width:380px;">';
-        h += '<div class="card-label">Front</div>';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+        h += '<div class="card-label" style="margin-bottom:0;">Front</div>';
+        h += '<button onclick="window.open(\'' + cardUrl + '\',\'_blank\')" style="border:none;background:#2e7d32;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;box-shadow:0 2px 6px rgba(46,125,50,0.3);" title="Download"><i class="bi bi-download"></i></button>';
+        h += '</div>';
         h += '<div style="position:relative;width:100%;padding-bottom:146%;background:url(https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232516/vanigan/templates/ID_Front.png) center/contain no-repeat;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.12);cursor:pointer;" onclick="window.open(\'' + cardUrl + '\',\'_blank\')">';
         if (m.photo_url) h += '<img src="' + m.photo_url + '" style="position:absolute;top:31.8%;left:50%;transform:translateX(-50%);width:32.5%;border-radius:16px;border:3px solid #009245;aspect-ratio:1;object-fit:cover;">';
         h += '<div style="position:absolute;top:57%;left:0;right:0;text-align:center;padding:0 12px;">';
@@ -2245,9 +2477,12 @@
         h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (m.district || '') + '</p>';
         h += '<p style="font-size:0.7rem;margin:3px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
         h += '</div></div></div>';
-        // Back Card
+        // Back Card with download icon
         h += '<div style="flex:1;min-width:220px;max-width:380px;">';
-        h += '<div class="card-label">Back</div>';
+        h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+        h += '<div class="card-label" style="margin-bottom:0;">Back</div>';
+        h += '<button onclick="window.open(\'' + cardUrl + '\',\'_blank\')" style="border:none;background:#2e7d32;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.85rem;box-shadow:0 2px 6px rgba(46,125,50,0.3);" title="Download"><i class="bi bi-download"></i></button>';
+        h += '</div>';
         h += '<div style="position:relative;width:100%;padding-bottom:146%;background:url(https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png) center/contain no-repeat;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.12);cursor:pointer;" onclick="window.open(\'' + cardUrl + '\',\'_blank\')">';
         h += '<div style="position:absolute;top:28%;left:6%;right:6%;font-size:0.65rem;line-height:1.3;display:flex;flex-direction:column;gap:4px;">';
         h += '<div style="display:grid;grid-template-columns:48% 5% 47%;align-items:start;min-height:16px;"><span style="font-weight:700;">DATE OF BIRTH</span><span style="font-weight:700;">:</span><span>' + (m.dob || 'xxxxxx') + '</span></div>';
@@ -2266,11 +2501,14 @@
         h += '</div></div>';
         h += '</div></div>';
         h += '</div>';
-        // Action buttons
-        h += '<div class="card-actions">';
-        h += '<button class="card-action-btn primary" onclick="window.open(\'/card-view\',\'_blank\')"><i class="bi bi-eye"></i> ' + L('btn_view_card') + '</button>';
-        h += '<button class="card-action-btn primary" onclick="window.open(\'/card-view\',\'_blank\')"><i class="bi bi-download"></i> ' + L('btn_download') + '</button>';
-        h += '<button class="card-action-btn secondary" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('btn_share') + '</button>';
+        // WhatsApp-style reply buttons
+        h += '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+        h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:8px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doRequestLoan()"><i class="bi bi-cash-coin"></i> ' + L('btn_request_loan') + '</button>';
         h += '</div>';
         h += '</div>';
         return h;

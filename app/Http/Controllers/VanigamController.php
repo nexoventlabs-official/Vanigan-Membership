@@ -833,4 +833,100 @@ class VanigamController extends Controller
             return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
         }
     }
+
+    /**
+     * POST /api/vanigam/loan-request
+     * Submit a loan request from a member
+     */
+    public function loanRequest(Request $request)
+    {
+        try {
+            $uniqueId = $request->input('unique_id');
+            $businessType = $request->input('business_type');
+            $businessName = $request->input('business_name');
+
+            if (!$uniqueId || !$businessType || !$businessName) {
+                return response()->json(['success' => false, 'message' => 'Missing required fields.'], 400);
+            }
+
+            $member = $this->mongo->findMemberByUniqueId($uniqueId);
+            if (!$member) {
+                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+            }
+
+            // Store loan request
+            $loanRequest = [
+                'unique_id' => $uniqueId,
+                'member_name' => $member['name'] ?? '',
+                'mobile' => $member['mobile'] ?? '',
+                'business_type' => $businessType,
+                'business_name' => $businessName,
+                'status' => 'pending',
+                'created_at' => new \MongoDB\BSON\UTCDateTime(now()->timestamp * 1000),
+            ];
+
+            $this->mongo->storeLoanRequest($loanRequest);
+
+            Log::info("Loan request submitted: " . json_encode($loanRequest));
+
+            return response()->json(['success' => true, 'message' => 'Loan request submitted successfully.']);
+        } catch (Exception $e) {
+            Log::error('VanigamController::loanRequest Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+        }
+    }
+
+    /**
+     * POST /api/vanigam/check-loan-status
+     * Check if a member has already applied for a loan (by mobile number)
+     */
+    public function checkLoanStatus(Request $request)
+    {
+        try {
+            $uniqueId = $request->input('unique_id');
+            $mobile = $request->input('mobile');
+
+            if (!$uniqueId && !$mobile) {
+                return response()->json(['success' => false, 'message' => 'Missing unique_id or mobile.'], 400);
+            }
+
+            $loanRequest = null;
+
+            // First check by mobile number (to prevent same mobile from applying multiple times)
+            if ($mobile) {
+                $loanRequest = $this->mongo->getLoanRequestByMobile($mobile);
+            }
+
+            // If not found by mobile and unique_id is provided, check by unique_id
+            if (!$loanRequest && $uniqueId) {
+                $loanRequest = $this->mongo->getLoanRequestByUniqueId($uniqueId);
+            }
+
+            // Also check by getting member's mobile from unique_id
+            if (!$loanRequest && $uniqueId) {
+                $member = $this->mongo->findMemberByUniqueId($uniqueId);
+                if ($member && !empty($member['mobile'])) {
+                    $loanRequest = $this->mongo->getLoanRequestByMobile($member['mobile']);
+                }
+            }
+
+            if ($loanRequest) {
+                return response()->json([
+                    'success' => true,
+                    'has_applied' => true,
+                    'loan_request' => [
+                        'business_type' => $loanRequest['business_type'] ?? '',
+                        'business_name' => $loanRequest['business_name'] ?? '',
+                        'status' => $loanRequest['status'] ?? 'pending',
+                        'created_at' => $loanRequest['created_at'] ?? '',
+                    ]
+                ]);
+            }
+
+            return response()->json(['success' => true, 'has_applied' => false]);
+        } catch (Exception $e) {
+            Log::error('VanigamController::checkLoanStatus Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+        }
+    }
 }
