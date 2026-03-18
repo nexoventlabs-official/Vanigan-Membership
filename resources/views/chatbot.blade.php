@@ -692,8 +692,8 @@
 
         // Mobile
         ask_mobile: {
-          en: '\uD83D\uDCF1 Please enter your <strong>10-digit mobile number</strong> to verify:',
-          ta: '\uD83D\uDCF1 சங்கமத்தில் இருந்து தங்களைத் தொடர்புகொள்ள மற்றும் உறுப்பினர் அடையாள அட்டையில் பதிவு செய்ய தங்களின் <strong>10 இலக்க மொபைல் எண்ணைப்</strong> பதிவிடவும்:'
+          en: '\uD83D\uDCF1 <div style="margin-bottom:12px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;font-size:0.88rem;line-height:1.7;color:#333;"><strong>Persons holding Private Limited (PVT LTD) companies</strong><br><br><strong>Persons holding Partnership (Partnership Deed) companies</strong><br><br><strong>Persons holding Import & Export business companies</strong><br><br>may contact the Sangamam to receive an <strong>interest-free loan of ₹25 Lakhs</strong>. Thank you.</div>Please enter your <strong>10-digit mobile number</strong> to verify:',
+          ta: '\uD83D\uDCF1 <div style="margin-bottom:12px;padding:14px;background:#f0f9f1;border-radius:12px;border:1px solid #c8e6c9;font-size:0.88rem;line-height:1.7;color:#333;"><strong>பிரைவேட் லிமிடெட் (PVT LTD) நிறுவனம் வைத்திருக்கும் நபர்கள்</strong><br><br><strong>பார்ட்னர்ஷிப் (Partnership Deed) நிறுவனம் வைத்திருக்கும் நபர்கள்</strong><br><br><strong>ஏற்றுமதி இறக்குமதி தொழில் செய்யும் நிறுவனங்கள் வைத்து இருக்கும் நபர்கள்</strong><br><br>தொடர்பு கொள்ளவும், சங்கமத்தில் இருந்து <strong>வட்டியில்லா கடனாக ரூபாய் 25 லட்சம்</strong> பெற்றுத் தரப்படும். நன்றி.</div>சங்கமத்தில் இருந்து தங்களைத் தொடர்புகொள்ள மற்றும் உறுப்பினர் அடையாள அட்டையில் பதிவு செய்ய தங்களின் <strong>10 இலக்க மொபைல் எண்ணைப்</strong> பதிவிடவும்:'
         },
         invalid_mobile: { en: '\u274C Please enter a valid <strong>10-digit mobile number</strong>.', ta: '\u274C சரியான <strong>10 இலக்க மொபைல் எண்ணை</strong> உள்ளிடவும்.' },
         ph_mobile: { en: 'Enter 10-digit mobile number...', ta: '10 இலக்க மொபைல் எண்ணை உள்ளிடவும்...' },
@@ -1539,6 +1539,7 @@
           '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigam" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>' +
           '<div class="bubble">' +
           '<div class="banner-text">' + L('banner_welcome') + '<br><br>' +
+          '<div style="margin:10px 0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;"><video src="https://res.cloudinary.com/de3qyhqfg/video/upload/v1773815558/vanigan/welcome_video.mp4" controls playsinline preload="metadata" style="width:100%;display:block;border-radius:12px;"></video></div>' +
           L('banner_hello') + '<br><br>' +
           '<em style="color:#667781;font-size:0.85rem;">' + L('banner_tap_start') + '</em>' +
           '<span class="time">' + now() + '</span></div>' +
