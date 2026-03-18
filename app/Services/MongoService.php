@@ -15,15 +15,17 @@ use Exception;
  */
 class MongoService
 {
+    protected Client $client;
     protected Collection $collection;
+    protected string $database;
 
     public function __construct()
     {
         $url      = env('MONGO_URL', 'mongodb://localhost:27017');
-        $database = env('MONGO_DB_NAME', 'vanigan');
+        $this->database = env('MONGO_DB_NAME', 'vanigan');
 
-        $client = new Client($url);
-        $this->collection = $client->selectDatabase($database)->selectCollection('members');
+        $this->client = new Client($url);
+        $this->collection = $this->client->selectDatabase($this->database)->selectCollection('members');
     }
 
     /**
@@ -386,7 +388,7 @@ class MongoService
     public function storeLoanRequest(array $data): void
     {
         try {
-            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $db = $this->client->selectDatabase($this->database);
             $loanRequestsCollection = $db->selectCollection('loan_requests');
             $loanRequestsCollection->insertOne($data);
         } catch (Exception $e) {
@@ -400,7 +402,7 @@ class MongoService
     public function getLoanRequestByUniqueId(string $uniqueId): ?array
     {
         try {
-            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $db = $this->client->selectDatabase($this->database);
             $loanRequestsCollection = $db->selectCollection('loan_requests');
             $doc = $loanRequestsCollection->findOne(['unique_id' => $uniqueId]);
             if ($doc) {
@@ -419,7 +421,7 @@ class MongoService
     public function getLoanRequestByMobile(string $mobile): ?array
     {
         try {
-            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $db = $this->client->selectDatabase($this->database);
             $loanRequestsCollection = $db->selectCollection('loan_requests');
             $doc = $loanRequestsCollection->findOne(['mobile' => $mobile]);
             if ($doc) {
@@ -453,7 +455,7 @@ class MongoService
     public function deleteLoanRequestByUniqueId(string $uniqueId): bool
     {
         try {
-            $db = $this->client->selectDatabase(config('database.connections.mongodb.database'));
+            $db = $this->client->selectDatabase($this->database);
             $loanRequestsCollection = $db->selectCollection('loan_requests');
             $result = $loanRequestsCollection->deleteOne(['unique_id' => $uniqueId]);
             return $result->getDeletedCount() > 0;
