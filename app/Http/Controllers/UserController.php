@@ -898,7 +898,7 @@ class UserController extends Controller
 
     /**
      * POST /api/chat/forgot-pin
-     * Send OTP for PIN reset (voice OTP like Python Flask)
+     * Send OTP for PIN reset (Voice OTP via 2Factor.in)
      */
     public function forgotPin(Request $request)
     {
