@@ -4,10 +4,23 @@ namespace App\Services;
 
 use App\Models\AssemblyConstituency;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 
 class VoterService
 {
+    protected $cache;
+
+    public function __construct(CacheService $cache)
+    {
+        $this->cache = $cache;
+    }
+
+    /**
+     * Initialization helper for static methods to get CacheService instance
+     */
+    private static function getCacheService(): CacheService
+    {
+        return app(CacheService::class);
+    }
     /**
      * Find a voter by EPIC number across all assembly tables
      * Results are cached for 10 minutes since voter data is read-only
@@ -18,8 +31,8 @@ class VoterService
     public static function findByEpicNo(string $epicNo): ?array
     {
         $cacheKey = "voter:epic:{$epicNo}";
-        
-        return Cache::remember($cacheKey, 600, function () use ($epicNo) {
+
+        return self::getCacheService()->remember($cacheKey, 600, function () use ($epicNo) {
             $tables = AssemblyConstituency::getAllVoterTables();
             
             // Search across all assembly tables using UNION
@@ -208,9 +221,9 @@ class VoterService
     public static function clearCache(?string $epicNo = null): void
     {
         if ($epicNo) {
-            Cache::forget("voter:epic:{$epicNo}");
+            self::getCacheService()->forget("voter:epic:{$epicNo}");
         } else {
-            Cache::forget('assembly_tables');
+            self::getCacheService()->forget('assembly_tables');
             // Note: Individual voter caches will expire naturally after 10 minutes
         }
     }

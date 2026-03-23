@@ -4,16 +4,17 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Exception;
 
 class TwoFactorOtpService
 {
     protected $apiKey;
+    protected $cache;
 
-    public function __construct()
+    public function __construct(CacheService $cache)
     {
         $this->apiKey = config('services.twofactor.api_key');
+        $this->cache = $cache;
     }
 
     /**
@@ -31,7 +32,7 @@ class TwoFactorOtpService
                 if (($data['Status'] ?? '') === 'Success') {
                     $sessionId = $data['Details'] ?? '';
                     // Store session ID in cache for verification (valid 10 minutes)
-                    Cache::put('otp_session:' . $mobile, $sessionId, 600);
+                    $this->cache->put('otp_session:' . $mobile, $sessionId, 600);
                     Log::info("2Factor Voice OTP sent to {$mobile}, Session: {$sessionId}");
                     return ['success' => true, 'message' => 'OTP sent via voice call'];
                 }
@@ -53,7 +54,7 @@ class TwoFactorOtpService
     public function verifyOtp($mobile, $code)
     {
         try {
-            $sessionId = Cache::get('otp_session:' . $mobile);
+            $sessionId = $this->cache->get('otp_session:' . $mobile);
             if (!$sessionId) {
                 return ['success' => false, 'error' => 'OTP session expired. Please request a new OTP.'];
             }
@@ -65,7 +66,7 @@ class TwoFactorOtpService
             if ($response->successful()) {
                 $data = $response->json();
                 if (($data['Status'] ?? '') === 'Success' && ($data['Details'] ?? '') === 'OTP Matched') {
-                    Cache::forget('otp_session:' . $mobile);
+                    $this->cache->forget('otp_session:' . $mobile);
                     Log::info("2Factor OTP verified for {$mobile}");
                     return ['success' => true, 'message' => 'OTP verified successfully'];
                 } else {

@@ -258,6 +258,46 @@ class AdminPanelController extends Controller
         }
     }
 
+    public function reports(Request $request)
+    {
+        $filter = $request->input('filter', 'today');
+        $fromDate = $request->input('from', '');
+        $toDate = $request->input('to', '');
+
+        // Calculate date range based on filter
+        switch ($filter) {
+            case 'weekly':
+                $from = now()->startOfWeek()->format('Y-m-d');
+                $to = now()->format('Y-m-d');
+                break;
+            case 'monthly':
+                $from = now()->startOfMonth()->format('Y-m-d');
+                $to = now()->format('Y-m-d');
+                break;
+            case 'custom':
+                $from = $fromDate ?: now()->format('Y-m-d');
+                $to = $toDate ?: now()->format('Y-m-d');
+                break;
+            default: // today
+                $filter = 'today';
+                $from = now()->format('Y-m-d');
+                $to = now()->format('Y-m-d');
+                break;
+        }
+
+        $reportData = $this->mongo->getReportMembers($from, $to);
+
+        return view('admin.reports', [
+            'members' => $reportData['members'],
+            'total' => $reportData['total'],
+            'referral_count' => $reportData['referral_count'],
+            'total_referral_count' => $reportData['total_referral_count'] ?? 0,
+            'filter' => $filter,
+            'from' => $from,
+            'to' => $to,
+        ]);
+    }
+
     public function voterDetail(string $epicNo)
     {
         try {

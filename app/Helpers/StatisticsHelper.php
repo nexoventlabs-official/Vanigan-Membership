@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Models\GeneratedVoter;
 use App\Models\GenerationStat;
@@ -25,7 +24,7 @@ class StatisticsHelper
     public static function getDashboardStats()
     {
         try {
-            return Cache::remember('stats:dashboard', 60, function () {
+            return app(\App\Services\CacheService::class)->remember('stats:dashboard', 60, function () {
                 $stats = [
                     'total_generated' => 0,
                     'total_generations' => 0,
@@ -259,9 +258,9 @@ class StatisticsHelper
     public static function clearCache()
     {
         try {
-            Cache::forget('stats:dashboard');
-            Cache::forget('stats:assembly');
-            Cache::forget('stats:district');
+            app(\App\Services\CacheService::class)->forget('stats:dashboard');
+            app(\App\Services\CacheService::class)->forget('stats:assembly');
+            app(\App\Services\CacheService::class)->forget('stats:district');
             Log::info("Statistics cache cleared");
         } catch (Exception $e) {
             Log::error("StatisticsHelper::clearCache Error: " . $e->getMessage());

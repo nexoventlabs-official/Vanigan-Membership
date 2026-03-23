@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for Tamil Nadu Vanigargalin Sangamam */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.chat-container {
+    max-width: 400px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.message-bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin-bottom: 8px;
+    word-wrap: break-word;
+}
+
+.message-user {
+    background: #007bff;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.message-bot {
+    background: white;
+    color: #333;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.input-container {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    padding: 16px;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-primary {
+    background: #007bff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.form-control {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ID Card Styles */
+.id-card {
+    width: 350px;
+    height: 220px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.id-card-header {
+    background: rgba(255,255,255,0.1);
+    padding: 8px 16px;
+    text-align: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.id-card-content {
+    padding: 16px;
+    color: white;
+    height: calc(100% - 40px);
+    display: flex;
+    gap: 12px;
+}
+
+.member-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.member-details {
+    flex: 1;
+    font-size: 11px;
+}
+
+.member-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.member-id {
+    font-size: 10px;
+    opacity: 0.8;
+    margin-bottom: 8px;
+}
+
+.qr-code {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .chat-container {
+        max-width: 100%;
+    }
+    
+    .input-container {
+        max-width: 100%;
+    }
+    
+    .id-card {
+        width: 100%;
+        max-width: 350px;
+    }
+}

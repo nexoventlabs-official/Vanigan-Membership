@@ -7,7 +7,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Models\GeneratedVoter;
 use App\Models\GenerationStat;
@@ -189,7 +188,7 @@ class GenerateCardJob implements ShouldQueue
         }
 
         // Store in cache for 1 hour
-        Cache::put('job:' . $this->jobId, $jobStatus, 3600);
+        app(\App\Services\CacheService::class)->put('job:' . $this->jobId, $jobStatus, 3600);
 
         Log::info("Job {$this->jobId} status: {$status} ({$progress}%)");
     }

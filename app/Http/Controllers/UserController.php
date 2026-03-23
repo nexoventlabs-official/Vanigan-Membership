@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use App\Models\OtpSession;
@@ -14,15 +13,18 @@ use App\Models\VerifiedMobile;
 use App\Models\VolunteerRequest;
 use App\Models\BoothAgentRequest;
 use App\Services\OtpService;
+use App\Services\CacheService;
 use App\Helpers\SecurityHelper;
 
 class UserController extends Controller
 {
     protected $otpService;
+    protected $cache;
 
-    public function __construct(OtpService $otpService)
+    public function __construct(OtpService $otpService, CacheService $cache)
     {
         $this->otpService = $otpService;
+        $this->cache = $cache;
     }
 
     /**
@@ -40,7 +42,7 @@ class UserController extends Controller
 
             // Check rate limit (3 OTPs per 5 minutes per IP)
             $rateLimitKey = 'otp_limit:' . $request->ip();
-            $otpCount = Cache::get($rateLimitKey, 0);
+            $otpCount = $this->cache->get($rateLimitKey, 0);
 
             if ($otpCount >= 3) {
                 return response()->json([
@@ -90,7 +92,7 @@ class UserController extends Controller
             );
 
             // Increment rate limit counter
-            Cache::put($rateLimitKey, $otpCount + 1, 300); // 5 minutes
+            $this->cache->put($rateLimitKey, $otpCount + 1, 300); // 5 minutes
 
             $response = [
                 'success' => true,
@@ -344,7 +346,7 @@ class UserController extends Controller
     public function cardStatus($jobId)
     {
         try {
-            $jobStatus = Cache::get('job:' . $jobId);
+            $jobStatus = $this->cache->get('job:' . $jobId);
 
             if (!$jobStatus) {
                 return response()->json([
@@ -519,7 +521,7 @@ class UserController extends Controller
             }
 
             // Check cache for production jobs
-            $jobStatus = Cache::get('job:' . $jobId);
+            $jobStatus = $this->cache->get('job:' . $jobId);
 
             if (!$jobStatus) {
                 return view('user.card-generating', ['jobId' => $jobId]);
@@ -898,7 +900,7 @@ class UserController extends Controller
 
     /**
      * POST /api/chat/forgot-pin
-     * Send OTP for PIN reset (Voice OTP via 2Factor.in)
+     * Send OTP for PIN reset (voice OTP like Python Flask)
      */
     public function forgotPin(Request $request)
     {

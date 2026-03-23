@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use App\Services\TwoFactorOtpService;
+use App\Services\CacheService;
 use App\Services\MongoService;
 use App\Helpers\VoterHelper;
 use Endroid\QrCode\QrCode;
@@ -17,12 +17,14 @@ class VanigamController extends Controller
     protected $otpService;
     protected $mongo;
     protected $cloudinary;
+    protected $cache;
 
-    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo)
+    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo, CacheService $cache)
     {
         $this->otpService = $otpService;
         $this->mongo = $mongo;
-        $this->cloudinary = new \Cloudinary\Cloudinary(env('CLOUDINARY_URL'));
+        $this->cache = $cache;
+        $this->cloudinary = new \Cloudinary\Cloudinary(config('cloudinary.cloud_url'));
     }
 
     /**
@@ -39,28 +41,30 @@ class VanigamController extends Controller
 
             // Rate limit: 3 OTPs per 5 minutes per IP
             $rateLimitKey = 'otp_limit:' . $request->ip();
-            $otpCount = Cache::get($rateLimitKey, 0);
+            $otpCount = $this->cache->get($rateLimitKey, 0);
             if ($otpCount >= 3) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Too many OTP requests. Please try after 5 minutes.',
+                    'error_code' => 'OTP_RATE_LIMIT',
                 ], 429);
             }
 
             // Cooldown: 60s between OTP requests for same mobile
             $cooldownKey = 'otp_cooldown:' . $mobile;
-            if (Cache::has($cooldownKey)) {
+            if ($this->cache->has($cooldownKey)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'OTP already sent. Please wait before requesting again.',
+                    'error_code' => 'OTP_COOLDOWN',
                 ], 429);
             }
 
             $result = $this->otpService->sendOtp($mobile);
 
             if ($result['success']) {
-                Cache::put($rateLimitKey, $otpCount + 1, 300);
-                Cache::put($cooldownKey, true, 60);
+                $this->cache->put($rateLimitKey, $otpCount + 1, 300);
+                $this->cache->put($cooldownKey, true, 60);
 
                 return response()->json([
                     'success' => true,
@@ -72,11 +76,12 @@ class VanigamController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $result['error'] ?? 'Could not send OTP.',
+                'error_code' => 'OTP_SEND_FAILED',
             ], 500);
 
         } catch (Exception $e) {
             Log::error('VanigamController::sendOtp Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -123,7 +128,7 @@ class VanigamController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::checkMember Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -178,11 +183,12 @@ class VanigamController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $result['error'] ?? 'Invalid OTP.',
+                'error_code' => 'INVALID_OTP',
             ], 400);
 
         } catch (Exception $e) {
             Log::error('VanigamController::verifyOtp Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -205,6 +211,7 @@ class VanigamController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'EPIC Number not found. Please check and try again.',
+                    'error_code' => 'EPIC_NOT_FOUND',
                 ], 404);
             }
 
@@ -220,7 +227,7 @@ class VanigamController extends Controller
 
         } catch (Exception $e) {
             Log::error('VanigamController::validateEpic Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -231,7 +238,7 @@ class VanigamController extends Controller
     {
         try {
             $request->validate([
-                'photo' => 'required|image|max:10240',
+                'photo' => 'required|image|max:15360',
                 'epic_no' => 'required|string|max:20',
             ]);
 
@@ -256,7 +263,7 @@ class VanigamController extends Controller
             $photoUrl = $result['secure_url'] ?? '';
 
             if (!$photoUrl) {
-                return response()->json(['success' => false, 'message' => 'Photo upload failed.'], 500);
+                return response()->json(['success' => false, 'message' => 'Photo upload failed.', 'error_code' => 'PHOTO_UPLOAD_FAILED'], 500);
             }
 
             Log::info("Photo uploaded for {$epicNo}: {$photoUrl}");
@@ -269,7 +276,80 @@ class VanigamController extends Controller
 
         } catch (Exception $e) {
             Log::error('VanigamController::uploadPhoto Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Photo upload failed: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Photo upload failed: ' . $e->getMessage(), 'error_code' => 'INTERNAL_ERROR'], 500);
+        }
+    }
+
+    /**
+     * POST /api/vanigam/validate-photo
+     * Validate photo before PIN setup (real-time validation)
+     */
+    public function validatePhotoUpload(Request $request)
+    {
+        try {
+            $request->validate([
+                'photo' => 'required|image|max:15360',
+                'epic_no' => 'nullable|string|max:20',
+            ]);
+
+            $photo = $request->file('photo');
+
+            // Validate file format
+            if (!in_array($photo->extension(), ['jpg', 'jpeg', 'png'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only JPG/PNG photos allowed.',
+                    'error_code' => 'INVALID_PHOTO_FORMAT',
+                ], 400);
+            }
+
+            // Validate file size (max 15MB for real-time validation)
+            if ($photo->getSize() > 15 * 1024 * 1024) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Photo size must be less than 15MB.',
+                    'error_code' => 'PHOTO_TOO_LARGE',
+                ], 400);
+            }
+
+            // Basic image validation: ensure it's a valid image file
+            $imageInfo = @getimagesize($photo->getRealPath());
+            if ($imageInfo === false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid image file. Please upload a valid photo.',
+                    'error_code' => 'INVALID_IMAGE_FILE',
+                ], 400);
+            }
+
+            // Get image dimensions
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+
+            // Validate image dimensions (must be at least 200x200)
+            if ($width < 200 || $height < 200) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Photo is too small. Minimum resolution: 200x200 pixels.',
+                    'error_code' => 'PHOTO_TOO_SMALL',
+                ], 400);
+            }
+
+            // Validation passed
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo validated successfully.',
+                'width' => $width,
+                'height' => $height,
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('VanigamController::validatePhotoUpload Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Photo validation failed: ' . $e->getMessage(),
+                'error_code' => 'INTERNAL_ERROR'
+            ], 500);
         }
     }
 
@@ -292,6 +372,7 @@ class VanigamController extends Controller
                 'address' => 'nullable|string|max:300',
                 'skipped_details' => 'nullable|boolean',
                 'pin' => 'nullable|digits:4',
+                'manually_entered' => 'nullable|boolean',  // Flag for manually entered voter data
             ]);
 
             $mobile = $request->input('mobile');
@@ -305,8 +386,16 @@ class VanigamController extends Controller
             $address = $request->input('address', '');
             $skippedDetails = $request->input('skipped_details', false);
 
-            // Generate unique member ID
-            $uniqueId = $this->mongo->generateUniqueId();
+            // Check if mobile already exists - reuse unique_id if so, generate new if not
+            // This prevents unique_id from changing on duplicate calls
+            $existingMemberForMobile = $this->mongo->findMemberByMobile($mobile);
+            if ($existingMemberForMobile && !empty($existingMemberForMobile['unique_id'])) {
+                $uniqueId = $existingMemberForMobile['unique_id'];
+                Log::info("Reusing existing unique_id for returning mobile: {$mobile}");
+            } else {
+                $uniqueId = $this->mongo->generateUniqueId();
+                Log::info("Generated new unique_id for new mobile: {$mobile}");
+            }
 
             // Calculate age from DOB
             $age = '';
@@ -353,6 +442,8 @@ class VanigamController extends Controller
                 'contact_number' => '+91 ' . $mobile,
                 'details_completed' => !$skippedDetails,
                 'referred_by' => $request->input('referrer_unique_id', ''),
+                'manually_entered' => $request->input('manually_entered', false),  // Flag for manual entries
+                'created_at' => now()->toISOString(),
             ];
 
             // Hash PIN if provided
@@ -364,7 +455,13 @@ class VanigamController extends Controller
             // Save to MongoDB
             $this->mongo->upsertMember($epicNo, $memberData);
 
-            Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}");
+            // If manually entered, also save to the separate manual_entries collection
+            // This keeps manual entries isolated for admin review while still generating cards
+            if ($request->input('manually_entered', false)) {
+                $this->mongo->storeManualEntry($memberData);
+            }
+
+            Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}" . ($request->input('manually_entered') ? ' (Manual Entry)' : ''));
 
             return response()->json([
                 'success' => true,
@@ -390,12 +487,14 @@ class VanigamController extends Controller
                 'dob' => 'nullable|string|max:20',
                 'blood_group' => 'nullable|string|max:10',
                 'address' => 'nullable|string|max:300',
+                'unique_id' => 'nullable|string|max:30',
             ]);
 
             $epicNo = strtoupper(trim($request->input('epic_no')));
             $dob = $request->input('dob', '');
             $bloodGroup = $request->input('blood_group', '');
             $address = $request->input('address', '');
+            $requestUniqueId = $request->input('unique_id', '');
 
             // Calculate age from DOB
             $age = '';
@@ -415,8 +514,19 @@ class VanigamController extends Controller
                 }
             }
 
-            // Get existing member to check for old card images
-            $existingMember = $this->mongo->findMemberByEpic($epicNo);
+            // Look up member by unique_id first (safe for duplicate EPICs), fall back to epic_no
+            $existingMember = null;
+            if ($requestUniqueId) {
+                $existingMember = $this->mongo->findMemberByUniqueId($requestUniqueId);
+            }
+            if (!$existingMember) {
+                $existingMember = $this->mongo->findMemberByEpic($epicNo);
+            }
+
+            // Validate member exists before proceeding
+            if (!$existingMember || empty($existingMember['unique_id'])) {
+                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+            }
 
             $details = [
                 'dob' => $dob,
@@ -428,33 +538,31 @@ class VanigamController extends Controller
             ];
 
             // Update QR URL from /complete/ to /verify/ since details are now filled
-            if ($existingMember && !empty($existingMember['unique_id'])) {
-                $details['qr_url'] = config('app.url') . '/member/verify/' . $existingMember['unique_id'];
-            }
+            $details['qr_url'] = config('app.url') . '/member/verify/' . $existingMember['unique_id'];
 
             // Delete old card images from Cloudinary if they exist
-            if ($existingMember && !empty($existingMember['unique_id'])) {
-                $uniqueId = $existingMember['unique_id'];
-                try {
-                    if (!empty($existingMember['card_front_url'])) {
-                        $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
-                    }
-                    if (!empty($existingMember['card_back_url'])) {
-                        $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
-                    }
-                    // Clear card URLs so new ones will be generated
-                    $details['card_front_url'] = '';
-                    $details['card_back_url'] = '';
-                    Log::info("Old card images removed for {$uniqueId} after details update");
-                } catch (Exception $e) {
-                    Log::warning("Could not delete old Cloudinary cards for {$uniqueId}: " . $e->getMessage());
+            $uniqueId = $existingMember['unique_id'];
+            try {
+                if (!empty($existingMember['card_front_url'])) {
+                    $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
                 }
+                if (!empty($existingMember['card_back_url'])) {
+                    $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
+                }
+                // Clear card URLs so new ones will be generated
+                $details['card_front_url'] = '';
+                $details['card_back_url'] = '';
+                Log::info("Old card images removed for {$uniqueId} after details update");
+            } catch (Exception $e) {
+                Log::warning("Could not delete old Cloudinary cards for {$uniqueId}: " . $e->getMessage());
             }
 
-            $updated = $this->mongo->updateMemberDetails($epicNo, $details);
+            // Update by unique_id instead of epic_no to prevent wrong member update
+            // when duplicate EPICs exist across different mobiles
+            $updated = $this->mongo->updateMemberDetailsByUniqueId($existingMember['unique_id'], $details);
 
             if ($updated) {
-                $member = $this->mongo->findMemberByEpic($epicNo);
+                $member = $this->mongo->findMemberByUniqueId($existingMember['unique_id']);
                 return response()->json([
                     'success' => true,
                     'message' => 'Details updated successfully.',
@@ -555,6 +663,11 @@ class VanigamController extends Controller
                 abort(404, 'Member not found.');
             }
 
+            // If details already completed, redirect to verify page (3D card view)
+            if (!empty($member['details_completed']) && $member['details_completed']) {
+                return redirect()->route('member.verify', ['uniqueId' => $uniqueId]);
+            }
+
             return view('member.complete', [
                 'member' => (object) $member,
                 'unique_id' => $uniqueId,
@@ -617,10 +730,10 @@ class VanigamController extends Controller
                 return response()->json(['success' => true]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.'], 400);
+            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.', 'error_code' => 'INVALID_PIN'], 400);
         } catch (Exception $e) {
             Log::error('VanigamController::verifyMemberPin Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -649,10 +762,132 @@ class VanigamController extends Controller
 
     /**
      * GET /api/health
+     * Health check endpoint with Redis connectivity testing
      */
     public function health()
     {
-        return response()->json(['status' => 'ok', 'app' => 'Tamil Nadu Vanigargalin Sangamam']);
+        try {
+            $health = [
+                'success' => true,
+                'app' => 'Tamil Nadu Vanigargalin Sangamam',
+                'timestamp' => now()->toIso8601String(),
+                'uptime' => floor(microtime(true)),
+            ];
+
+            // Check MySQL connections
+            try {
+                \Illuminate\Support\Facades\DB::connection('mysql')->getPdo();
+                $health['mysql'] = 'ok';
+            } catch (\Exception $e) {
+                $health['mysql'] = 'error';
+                $health['mysql_error'] = $e->getMessage();
+            }
+
+            try {
+                \Illuminate\Support\Facades\DB::connection('voters')->getPdo();
+                $health['voters_db'] = 'ok';
+            } catch (\Exception $e) {
+                $health['voters_db'] = 'error';
+                $health['voters_db_error'] = $e->getMessage();
+            }
+
+            // Check Cache (including Redis connectivity)
+            try {
+                $cacheDriver = config('cache.default');
+
+                if ($cacheDriver === 'redis') {
+                    // Test Redis PING explicitly - wrap in try-catch for extra safety
+                    try {
+                        $redisTest = $this->cache->testRedisPing();
+
+                        if ($redisTest['status'] === 'ok') {
+                            $health['redis'] = 'ok';
+                            $health['cache'] = 'ok (redis)';
+                        } elseif ($redisTest['status'] === 'unavailable') {
+                            $health['redis'] = 'unavailable';
+                            $health['cache'] = 'unavailable (redis fallback to file)';
+                            $health['redis_error'] = $redisTest['message'];
+                        } else {
+                            $health['redis'] = $redisTest['status'];
+                            $health['cache'] = $redisTest['status'] . ' (redis)';
+                            if (isset($redisTest['message'])) {
+                                $health['redis_message'] = $redisTest['message'];
+                            }
+                        }
+                    } catch (\Exception $redisException) {
+                        // Redis test threw exception - report as unavailable but app is still ok
+                        $health['redis'] = 'unavailable';
+                        $health['cache'] = 'ok (file fallback)';
+                        $health['redis_error'] = $redisException->getMessage();
+                        Log::warning('Redis health check error (fallback active)', [
+                            'exception' => $redisException->getMessage(),
+                        ]);
+                    }
+                } else {
+                    // File or other cache driver
+                    try {
+                        $this->cache->get('health_check_test');
+                        $health['cache'] = 'ok (' . $cacheDriver . ')';
+                    } catch (\Exception $cacheException) {
+                        $health['cache'] = 'error (' . $cacheDriver . ')';
+                        $health['cache_error'] = $cacheException->getMessage();
+                    }
+                }
+            } catch (\Exception $e) {
+                $health['cache'] = 'error';
+                $health['cache_error'] = $e->getMessage();
+                Log::warning('Health check cache test failed', ['exception' => $e->getMessage()]);
+            }
+
+            return response()->json($health);
+
+        } catch (\Exception $e) {
+            Log::error('Health check failed', ['exception' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'error_code' => 'HEALTH_CHECK_FAILED',
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /api/vanigam/get-referred-members
+     * Get all members referred by a specific member.
+     */
+    public function getReferredMembers(Request $request)
+    {
+        try {
+            $request->validate([
+                'unique_id' => 'required|string',
+            ]);
+
+            $uniqueId = $request->input('unique_id');
+            $members = $this->mongo->getMembersReferredBy($uniqueId);
+
+            // Return only safe fields for each referred member
+            $safeMembers = array_map(function ($m) {
+                return [
+                    'unique_id'   => $m['unique_id'] ?? '',
+                    'name'        => $m['name'] ?? '',
+                    'epic_no'     => $m['epic_no'] ?? '',
+                    'assembly'    => $m['assembly'] ?? '',
+                    'district'    => $m['district'] ?? '',
+                    'photo_url'   => $m['photo_url'] ?? '',
+                    'mobile'      => $m['mobile'] ?? '',
+                    'created_at'  => $m['created_at'] ?? '',
+                ];
+            }, $members);
+
+            return response()->json([
+                'success' => true,
+                'members' => $safeMembers,
+                'count'   => count($safeMembers),
+            ]);
+        } catch (Exception $e) {
+            Log::error('VanigamController::getReferredMembers Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+        }
     }
 
     /**
@@ -663,8 +898,8 @@ class VanigamController extends Controller
     {
         try {
             $key = $request->input('confirm_key');
-            if ($key !== env('MONGO_RESET_KEY', 'vanigam-reset-2026')) {
-                return response()->json(['success' => false, 'message' => 'Invalid confirmation key.'], 403);
+            if ($key !== config('vanigam.reset_key')) {
+                return response()->json(['success' => false, 'message' => 'Invalid confirmation key.', 'error_code' => 'INVALID_RESET_KEY'], 403);
             }
 
             $result = $this->mongo->deleteAllMembers();
@@ -676,10 +911,10 @@ class VanigamController extends Controller
                     'deleted_count' => $deletedCount,
                 ]);
             }
-            return response()->json(['success' => false, 'message' => 'Failed to reset MongoDB.'], 500);
+            return response()->json(['success' => false, 'message' => 'Failed to reset MongoDB.', 'error_code' => 'RESET_FAILED'], 500);
         } catch (Exception $e) {
             Log::error('VanigamController::resetMembers Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -728,7 +963,7 @@ class VanigamController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::uploadCardImages Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Card image upload failed.'], 500);
+            return response()->json(['success' => false, 'message' => 'Card image upload failed.', 'error_code' => 'CARD_UPLOAD_FAILED'], 500);
         }
     }
 
@@ -746,7 +981,7 @@ class VanigamController extends Controller
 
             $member = $this->mongo->findMemberByMobile($request->input('mobile'));
             if (!$member || empty($member['pin_hash'])) {
-                return response()->json(['success' => false, 'message' => 'Member not found or PIN not set.'], 404);
+                return response()->json(['success' => false, 'message' => 'Member not found or PIN not set.', 'error_code' => 'MEMBER_OR_PIN_NOT_FOUND'], 404);
             }
 
             if (password_verify($request->input('pin'), $member['pin_hash'])) {
@@ -758,10 +993,10 @@ class VanigamController extends Controller
                 ]);
             }
 
-            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.'], 400);
+            return response()->json(['success' => false, 'message' => 'Invalid PIN. Please try again.', 'error_code' => 'INVALID_PIN'], 400);
         } catch (Exception $e) {
             Log::error('VanigamController::verifyPin Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -775,12 +1010,12 @@ class VanigamController extends Controller
             $uniqueId = $request->input('unique_id');
             Log::info("getReferral called with unique_id: " . ($uniqueId ?? 'null'));
             if (!$uniqueId) {
-                return response()->json(['success' => false, 'message' => 'Missing unique_id.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing unique_id.', 'error_code' => 'MISSING_UNIQUE_ID'], 400);
             }
 
             $referralId = $this->mongo->getOrCreateReferralId($uniqueId);
             if (!$referralId) {
-                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+                return response()->json(['success' => false, 'message' => 'Member not found.', 'error_code' => 'MEMBER_NOT_FOUND'], 404);
             }
 
             $member = $this->mongo->findMemberByUniqueId($uniqueId);
@@ -795,7 +1030,7 @@ class VanigamController extends Controller
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::getReferral Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -822,7 +1057,7 @@ class VanigamController extends Controller
         try {
             $referrerUniqueId = $request->input('referrer_unique_id');
             if (!$referrerUniqueId) {
-                return response()->json(['success' => false, 'message' => 'Missing referrer ID.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing referrer ID.', 'error_code' => 'MISSING_REFERRER_ID'], 400);
             }
 
             $this->mongo->incrementReferralCount($referrerUniqueId);
@@ -830,7 +1065,7 @@ class VanigamController extends Controller
             return response()->json(['success' => true]);
         } catch (Exception $e) {
             Log::error('VanigamController::incrementReferral Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -846,12 +1081,12 @@ class VanigamController extends Controller
             $businessName = $request->input('business_name');
 
             if (!$uniqueId || !$businessType || !$businessName) {
-                return response()->json(['success' => false, 'message' => 'Missing required fields.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing required fields.', 'error_code' => 'MISSING_REQUIRED_FIELDS'], 400);
             }
 
             $member = $this->mongo->findMemberByUniqueId($uniqueId);
             if (!$member) {
-                return response()->json(['success' => false, 'message' => 'Member not found.'], 404);
+                return response()->json(['success' => false, 'message' => 'Member not found.', 'error_code' => 'MEMBER_NOT_FOUND'], 404);
             }
 
             // Store loan request
@@ -862,7 +1097,7 @@ class VanigamController extends Controller
                 'business_type' => $businessType,
                 'business_name' => $businessName,
                 'status' => 'pending',
-                'created_at' => new \MongoDB\BSON\UTCDateTime(now()->timestamp * 1000),
+                'created_at' => now()->toISOString(),
             ];
 
             $this->mongo->storeLoanRequest($loanRequest);
@@ -872,7 +1107,7 @@ class VanigamController extends Controller
             return response()->json(['success' => true, 'message' => 'Loan request submitted successfully.']);
         } catch (Exception $e) {
             Log::error('VanigamController::loanRequest Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -887,7 +1122,7 @@ class VanigamController extends Controller
             $mobile = $request->input('mobile');
 
             if (!$uniqueId && !$mobile) {
-                return response()->json(['success' => false, 'message' => 'Missing unique_id or mobile.'], 400);
+                return response()->json(['success' => false, 'message' => 'Missing unique_id or mobile.', 'error_code' => 'MISSING_PARAMETERS'], 400);
             }
 
             $loanRequest = null;
@@ -926,7 +1161,7 @@ class VanigamController extends Controller
             return response()->json(['success' => true, 'has_applied' => false]);
         } catch (Exception $e) {
             Log::error('VanigamController::checkLoanStatus Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An error occurred.'], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 }

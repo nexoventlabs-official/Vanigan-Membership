@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 
 class AssemblyConstituency extends Model
 {
@@ -29,7 +28,7 @@ class AssemblyConstituency extends Model
      */
     public static function getAllAssemblies()
     {
-        return Cache::remember('assembly_tables', 600, function () {
+        return app(\App\Services\CacheService::class)->remember('assembly_tables', 600, function () {
             return self::orderBy('assembly_no')->get();
         });
     }

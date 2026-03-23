@@ -234,10 +234,10 @@
               existing.hasCard = true;
               localStorage.setItem('vanigam_member', JSON.stringify(existing));
             } catch(e) {}
-            // Trigger card image re-generation via iframe
+            // Trigger card image re-generation via iframe (pass uid for API fetch)
             const iframe = document.createElement('iframe');
             iframe.style.cssText = 'position:absolute;left:-9999px;width:600px;height:1200px;';
-            iframe.src = '/card-view?autosave=1';
+            iframe.src = '/card-view?autosave=1&uid={{ $unique_id }}';
             document.body.appendChild(iframe);
           }
           setTimeout(() => { window.location.href = '/member/verify/{{ $unique_id }}'; }, 5000);

@@ -16,9 +16,9 @@ class OtpService
             // LOCAL TESTING MODE - Show OTP in logs and return success
             if (config('app.env') === 'local') {
                 Log::info("🧪 LOCAL TESTING MODE - OTP for {$mobile}: {$otp}");
-                
+
                 // Also store in cache for easy retrieval in testing
-                cache()->put("test_otp_{$mobile}", $otp, 300); // 5 minutes
+                app(\App\Services\CacheService::class)->put("test_otp_{$mobile}", $otp, 300); // 5 minutes
                 
                 return [
                     'success' => true, 

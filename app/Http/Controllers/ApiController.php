@@ -3,10 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
+use App\Services\CacheService;
+use Illuminate\Support\Facades\Log;
 
 class ApiController extends Controller
 {
+    protected $cache;
+
+    public function __construct(CacheService $cache)
+    {
+        $this->cache = $cache;
+    }
+
     /**
      * GET /api/health
      * Health check endpoint
@@ -15,7 +23,7 @@ class ApiController extends Controller
     {
         try {
             $health = [
-                'status' => 'ok',
+                'success' => true,
                 'timestamp' => now()->toIso8601String(),
                 'uptime' => floor(microtime(true)),
             ];
@@ -37,28 +45,54 @@ class ApiController extends Controller
                 $health['voters_db_error'] = $e->getMessage();
             }
 
-            // Check Cache (skip Redis for local testing)
+            // Check Cache (including Redis connectivity)
             try {
                 $cacheDriver = config('cache.default');
-                if ($cacheDriver === 'file' || $cacheDriver === 'array') {
-                    Cache::get('health_check');
-                    $health['cache'] = 'ok (' . $cacheDriver . ')';
+
+                if ($cacheDriver === 'redis') {
+                    // Test Redis PING explicitly
+                    $redisTest = $this->cache->testRedisPing();
+
+                    if ($redisTest['status'] === 'ok') {
+                        $health['redis'] = 'ok';
+                        $health['cache'] = 'ok (redis)';
+                    } elseif ($redisTest['status'] === 'unavailable') {
+                        $health['redis'] = 'unavailable';
+                        $health['cache'] = 'error (redis)';
+                        $health['redis_error'] = $redisTest['message'];
+                    } else {
+                        $health['redis'] = $redisTest['status'];
+                        $health['cache'] = $redisTest['status'] . ' (redis)';
+                        if (isset($redisTest['message'])) {
+                            $health['redis_message'] = $redisTest['message'];
+                        }
+                    }
                 } else {
-                    // Skip Redis check for now
-                    $health['cache'] = 'skipped (using ' . $cacheDriver . ')';
+                    // File or other cache driver
+                    try {
+                        $this->cache->get('health_check_test');
+                        $health['cache'] = 'ok (' . $cacheDriver . ')';
+                    } catch (\Exception $cacheException) {
+                        $health['cache'] = 'error (' . $cacheDriver . ')';
+                        $health['cache_error'] = $cacheException->getMessage();
+                    }
                 }
             } catch (\Exception $e) {
                 $health['cache'] = 'error';
                 $health['cache_error'] = $e->getMessage();
+                Log::warning('Health check cache test failed', ['exception' => $e->getMessage()]);
             }
 
             return response()->json($health);
 
         } catch (\Exception $e) {
+            Log::error('Health check failed', ['exception' => $e->getMessage()]);
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => $e->getMessage(),
+                'error_code' => 'HEALTH_CHECK_FAILED',
             ], 500);
         }
     }
 }
+

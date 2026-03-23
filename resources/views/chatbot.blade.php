@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 
   <title>Tamil Nadu Vanigargalin Sangamam — Digital Member ID Card Generator</title>
   <meta name="description" content="Tamil Nadu Vanigargalin Sangamam Card Generator. Generate your free digital member ID card.">
@@ -14,6 +17,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Cropper.js for photo crop/rotate -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js" defer></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -351,6 +357,51 @@
     #photoInput, #cameraInput { display: none; }
     .photo-upload-btn, .photo-camera-btn { min-width: 140px; justify-content: center; }
 
+    /* Photo Crop Modal */
+    .crop-modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 200;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .crop-modal-overlay.open { display: flex; }
+    .crop-modal {
+      background: var(--color-surface); border-radius: 16px; width: 100%; max-width: 420px;
+      overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    .crop-modal-header {
+      background: linear-gradient(135deg, var(--color-header-start), var(--color-header-end));
+      color: #fff; padding: 14px 18px; font-weight: 700; font-size: 0.95rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .crop-modal-body { padding: 12px; position: relative; background: #111; }
+    .crop-modal-body img { display: block; max-width: 100%; max-height: 55vh; margin: 0 auto; }
+    .crop-modal-controls {
+      display: flex; justify-content: center; gap: 10px; padding: 12px 16px;
+      background: var(--color-surface-alt); border-top: 1px solid var(--color-border);
+    }
+    .crop-ctrl-btn {
+      width: 44px; height: 44px; border: none; border-radius: 50%;
+      background: var(--color-surface); color: var(--color-text);
+      font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.1s; box-shadow: var(--shadow-sm);
+    }
+    .crop-ctrl-btn:hover { background: var(--color-surface-hover); }
+    .crop-ctrl-btn:active { transform: scale(0.93); }
+    .crop-modal-actions {
+      display: flex; gap: 10px; padding: 14px 16px;
+      background: var(--color-surface); border-top: 1px solid var(--color-border);
+    }
+    .crop-modal-actions button {
+      flex: 1; padding: 12px; border: none; border-radius: 12px;
+      font-size: 0.92rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .crop-modal-actions button:active { transform: scale(0.97); }
+    .crop-modal-actions .crop-cancel { background: var(--color-surface-alt); color: var(--color-text); }
+    .crop-modal-actions .crop-confirm { background: var(--color-primary); color: #fff; box-shadow: var(--shadow-btn); }
+    .crop-modal-actions .crop-confirm:hover { background: var(--color-primary-dark); }
+
     /* Scrollbar (WebKit) */
     .chat-messages::-webkit-scrollbar { width: 6px; }
     .chat-messages::-webkit-scrollbar-track { background: transparent; }
@@ -484,36 +535,177 @@
     .sb-profile .profile-row .p-label { color: var(--color-sidebar-label); }
     .sb-profile .profile-row .p-value { font-weight: 600; color: var(--color-sidebar-profile-value); text-align: right; max-width: 60%; }
 
-    /* Responsive */
-    @media (max-width: 900px) {
-      .chat-messages { padding: 15px 5%; }
-      .chat-input-area { padding: 10px 5% max(10px, env(safe-area-inset-bottom)); }
+    /* ═══════════════════════════════════════════════════════════════
+       RESPONSIVE DESIGN - Full UI/UX Audit & Fix for All Screen Sizes
+       Mobile (320px-480px), Tablet (768px-1024px), Laptop (1024px-1440px), Desktop (1440px+)
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* Large Desktop (1440px+) */
+    @media (min-width: 1440px) {
+      .chat-messages { padding: 24px 12%; }
+      .chat-input-area { padding: 14px 12% max(14px, env(safe-area-inset-bottom)); }
+      .message .bubble { max-width: 650px; }
+      .sidebar-panel { width: 380px; }
     }
-    @media (max-width: 600px) {
+
+    /* Laptop (1024px-1440px) */
+    @media (min-width: 1024px) and (max-width: 1439px) {
+      .chat-messages { padding: 20px 8%; }
+      .chat-input-area { padding: 12px 8% max(12px, env(safe-area-inset-bottom)); }
+      .message .bubble { max-width: 580px; }
+    }
+
+    /* Tablet (768px-1024px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .chat-messages { padding: 18px 5%; }
+      .chat-input-area { padding: 12px 5% max(12px, env(safe-area-inset-bottom)); }
+      .message .bubble { max-width: 520px; font-size: 0.95rem; }
+      .sidebar-panel { width: 340px; }
+      .card3d-scene { width: 180px; height: 252px; }
+    }
+
+    /* Small Tablet / Large Mobile (600px-768px) */
+    @media (min-width: 600px) and (max-width: 767px) {
+      .chat-messages { padding: 15px 4%; }
+      .chat-input-area { padding: 10px 4% max(10px, env(safe-area-inset-bottom)); }
+      .message .bubble { max-width: 90%; }
+      .sidebar-panel { width: 320px; }
+    }
+
+    /* Mobile (480px-600px) */
+    @media (min-width: 480px) and (max-width: 599px) {
       .chat-messages { padding: 12px 10px; }
-      .chat-input-area { padding: 8px 10px max(8px, env(safe-area-inset-bottom)); gap: 8px; }
-      .message .bubble { max-width: 88%; font-size: 0.9rem; padding: 8px 12px; }
+      .chat-input-area { padding: 10px 12px max(10px, env(safe-area-inset-bottom)); gap: 10px; }
+      .message .bubble { max-width: 88%; font-size: 0.9rem; padding: 10px 14px; }
       .banner-message .bubble { max-width: 95%; }
-      .chat-header { padding: max(10px, env(safe-area-inset-top)) 12px 10px 12px; gap: 10px; }
-      .chat-header .avatar { width: 38px; height: 38px; }
+      .chat-header { padding: max(12px, env(safe-area-inset-top)) 14px 12px 14px; gap: 12px; }
+      .chat-header .avatar { width: 40px; height: 40px; }
       .chat-header .info h4 { font-size: 0.95rem; }
-      .chat-header .info .status { font-size: 0.75rem; }
-      .chat-input-area .send-btn, .chat-input-area .attach-btn { width: 42px; height: 42px; font-size: 1.15rem; }
-      .input-wrapper input { padding: 12px 14px; font-size: 0.9rem; }
-      .bot-avatar-img { width: 30px; height: 30px; }
-      .user-avatar-svg { width: 30px; height: 30px; font-size: 1rem; }
-      .card-preview-wrap .card-img { max-width: 100%; }
-      .action-buttons { gap: 8px; }
-      .action-btn { padding: 8px 16px; font-size: 0.82rem; }
-      .sidebar-panel { width: 300px; }
+      .chat-header .info .status { font-size: 0.78rem; }
+      .chat-input-area .send-btn, .chat-input-area .attach-btn {
+        width: 44px; height: 44px; font-size: 1.2rem; /* 44px minimum touch target */
+      }
+      .input-wrapper input { padding: 12px 16px; font-size: 0.92rem; min-height: 44px; }
+      .action-btn { padding: 10px 18px; font-size: 0.85rem; min-height: 44px; }
+      .sidebar-panel { width: 300px; max-width: 85vw; }
     }
+
+    /* Small Mobile (320px-480px) */
+    @media (max-width: 479px) {
+      .chat-messages { padding: 10px 8px; }
+      .chat-input-area { padding: 8px 10px max(8px, env(safe-area-inset-bottom)); gap: 8px; }
+      .message .bubble { max-width: 92%; font-size: 0.88rem; padding: 8px 12px; }
+      .banner-message .bubble { max-width: 98%; }
+      .chat-header { padding: max(10px, env(safe-area-inset-top)) 10px 10px 10px; gap: 10px; }
+      .chat-header .avatar { width: 36px; height: 36px; }
+      .chat-header .info h4 { font-size: 0.88rem; line-height: 1.2; }
+      .chat-header .info .status { font-size: 0.72rem; }
+      .chat-header .actions { font-size: 1.2rem; }
+      .chat-input-area .send-btn, .chat-input-area .attach-btn {
+        width: 44px; height: 44px; font-size: 1.15rem; /* 44px minimum touch target */
+        flex-shrink: 0;
+      }
+      .input-wrapper input {
+        padding: 10px 14px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        min-height: 44px;
+      }
+      .bot-avatar-img { width: 28px; height: 28px; }
+      .user-avatar-svg { width: 28px; height: 28px; font-size: 0.9rem; }
+      .card-preview-wrap .card-img { max-width: 100%; }
+      .action-buttons { gap: 6px; flex-wrap: wrap; }
+      .action-btn {
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        min-height: 44px; /* Touch target */
+        flex: 1 1 calc(50% - 3px);
+        justify-content: center;
+      }
+      .voter-details-card { padding: 10px 12px; }
+      .voter-details-card .detail-row { font-size: 0.82rem; }
+      .member-summary { padding: 14px; }
+      .member-summary .row { font-size: 0.83rem; }
+      .sidebar-panel { width: 300px; max-width: 90vw; }
+      .sb-menu-item { padding: 14px 16px; gap: 12px; }
+      .sb-menu-item i { font-size: 1.15rem; }
+      .upload-area { padding: 16px; }
+      .upload-area i { font-size: 1.8rem; }
+      .upload-area p { font-size: 0.82rem; }
+      /* Card preview adjustments for small screens */
+      .card-preview-wrap > div > div { min-width: 100% !important; max-width: 100% !important; }
+    }
+
+    /* Extra Small Mobile (320px-380px) */
     @media (max-width: 380px) {
-      .chat-messages { padding: 10px 6px; }
+      .chat-messages { padding: 8px 6px; }
       .chat-input-area { padding: 6px 8px max(6px, env(safe-area-inset-bottom)); gap: 6px; }
-      .message .bubble { max-width: 90%; font-size: 0.85rem; }
-      .chat-header .info h4 { font-size: 0.88rem; }
-      .input-wrapper input { padding: 10px 12px; font-size: 0.85rem; }
-      .chat-input-area .send-btn, .chat-input-area .attach-btn { width: 38px; height: 38px; font-size: 1.05rem; }
+      .message .bubble { max-width: 94%; font-size: 0.85rem; padding: 8px 10px; }
+      .chat-header .info h4 { font-size: 0.82rem; }
+      .chat-header .info .status { font-size: 0.68rem; }
+      .chat-header { gap: 8px; }
+      .input-wrapper input { padding: 10px 12px; font-size: 16px; }
+      .action-btn { padding: 10px 12px; font-size: 0.8rem; }
+      .btn-reply { padding: 12px 8px; font-size: 0.9rem; }
+      .date-chip { font-size: 0.7rem; padding: 3px 10px; }
+      .sidebar-panel { width: 280px; max-width: 92vw; }
+      .card3d-scene { width: 160px; height: 224px; }
+    }
+
+    /* Ensure no horizontal overflow at any breakpoint */
+    html, body, .chat-app {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    .message .bubble {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      hyphens: auto;
+    }
+
+    /* Fix z-index stacking for sidebar and overlays */
+    .chat-wallpaper { z-index: 0; }
+    .chat-messages { z-index: 1; }
+    .chat-header { z-index: 10; }
+    .chat-input-area { z-index: 10; }
+    .sidebar-overlay { z-index: 100; }
+    .sidebar-panel { z-index: 101; }
+
+    /* Safe area support for notched devices */
+    @supports (padding: max(0px)) {
+      .chat-header {
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+      .chat-input-area {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+      }
+      .sidebar-panel {
+        padding-top: max(0px, env(safe-area-inset-top));
+      }
+    }
+
+    /* ID Card - Always English, must not break on smaller devices */
+    .card-preview-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .card-preview-wrap > div {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 500px) {
+      .card-preview-wrap > div {
+        flex-direction: column;
+      }
+      .card-preview-wrap > div > div {
+        width: 100%;
+        min-width: 100%;
+      }
     }
 
     /* Auto dark mode from OS preference */
@@ -638,6 +830,30 @@
     <input type="file" id="cameraInput" accept="image/png,image/jpeg,image/jpg" capture="environment">
   </div>
 
+  <!-- Photo Crop/Rotate Modal -->
+  <div class="crop-modal-overlay" id="cropModalOverlay">
+    <div class="crop-modal">
+      <div class="crop-modal-header">
+        <i class="bi bi-crop"></i> Crop & Adjust Photo
+      </div>
+      <div class="crop-modal-body">
+        <img id="cropImage" src="" alt="Crop preview">
+      </div>
+      <div class="crop-modal-controls">
+        <button class="crop-ctrl-btn" onclick="cropRotate(-90)" title="Rotate Left"><i class="bi bi-arrow-counterclockwise"></i></button>
+        <button class="crop-ctrl-btn" onclick="cropRotate(90)" title="Rotate Right"><i class="bi bi-arrow-clockwise"></i></button>
+        <button class="crop-ctrl-btn" onclick="cropFlipH()" title="Flip Horizontal"><i class="bi bi-symmetry-vertical"></i></button>
+        <button class="crop-ctrl-btn" onclick="cropZoomIn()" title="Zoom In"><i class="bi bi-zoom-in"></i></button>
+        <button class="crop-ctrl-btn" onclick="cropZoomOut()" title="Zoom Out"><i class="bi bi-zoom-out"></i></button>
+        <button class="crop-ctrl-btn" onclick="cropReset()" title="Reset"><i class="bi bi-arrow-repeat"></i></button>
+      </div>
+      <div class="crop-modal-actions">
+        <button class="crop-cancel" onclick="cropCancel()"><i class="bi bi-x-lg"></i> Cancel</button>
+        <button class="crop-confirm" onclick="cropConfirm()"><i class="bi bi-check-lg"></i> Use Photo</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       /* ────────────────────────────────────────────────────────
@@ -660,7 +876,10 @@
         GENERATING: 13,
         DONE: 14,
         AWAIT_RETURNING_PIN: 15,
-        LOAN_BUSINESS_NAME: 16
+        LOAN_BUSINESS_NAME: 16,
+        AWAIT_MANUAL_NAME: 17,
+        AWAIT_MANUAL_ASSEMBLY: 18,
+        MANUAL_CONFIRM: 19
       };
 
       let state = S.WELCOME;
@@ -675,7 +894,7 @@
       let referrerRefId = urlParams.get('ref_id') || '';
 
       /* ── Language System ── */
-      let currentLang = localStorage.getItem('vanigam_lang') || 'en';
+      let currentLang = localStorage.getItem('vanigam_lang') || 'ta';
       const T = {
         // Header
         header_title: { en: 'Tamil Nadu Vanigargalin Sangamam', ta: 'தமிழ்நாடு வணிகர்களின் சங்கமம்' },
@@ -733,6 +952,23 @@
         btn_no_reenter: { en: 'No, Re-enter', ta: 'இல்லை, மீண்டும் உள்ளிடு' },
         reenter_epic: { en: 'Okay! Please enter your <strong>EPIC Number</strong> again:', ta: 'சரி! உங்கள் <strong>EPIC எண்ணை</strong> மீண்டும் உள்ளிடவும்:' },
         epic_not_found: { en: 'EPIC Number not found. Please check and try again.', ta: 'EPIC எண் கிடைக்கவில்லை. சரிபார்த்து மீண்டும் முயற்சிக்கவும்.' },
+        invalid_epic_format: { en: '❌ Please enter a valid EPIC number (3 letters + 7 numbers, e.g., AYR0489518).', ta: '❌ சரியான EPIC எண்ணை உள்ளிடவும் (3 எழுத்துகள் + 7 எண்கள், எ.கா., AYR0489518).' },
+        epic_not_found_manual: {
+          en: 'Your EPIC details are not found in our database. Would you like to:<br><strong>1. Try again</strong> - Re-enter your EPIC number<br><strong>2. Add manually</strong> - Enter your details manually and proceed',
+          ta: 'உங்கள் EPIC விவரங்கள் எங்கள் தரவுத்தளத்தில் கிடைக்கவில்லை. நீங்கள் என்ன செய்ய விரும்புகிறீர்கள்:<br><strong>1. மீண்டும் முயற்சி செய்</strong> - உங்கள் EPIC எண்ணை மீண்டும் உள்ளிடவும்<br><strong>2. கைமுறையாக சேர்</strong> - உங்கள் விவரங்களை கைமுறையாக உள்ளிடவும்'
+        },
+        btn_try_again: { en: 'Try Again', ta: 'மீண்டும் முயற்சி செய்' },
+        btn_add_manually: { en: 'Add Manually', ta: 'கைமுறையாக சேர்' },
+        enter_name: { en: 'Please enter your <strong>full name</strong>:', ta: '<strong>உங்கள் முழு பெயரை</strong> உள்ளிடவும்:' },
+        ph_name: { en: 'Enter your full name...', ta: 'உங்கள் முழு பெயரை உள்ளிடவும்...' },
+        enter_assembly: { en: 'Please enter your <strong>assembly/taluk</strong>:', ta: '<strong>உங்கள் சட்டமன்றத் தொகுதி</strong>ஐ உள்ளிடவும்:' },
+        ph_assembly: { en: 'Enter assembly name...', ta: 'சட்டமன்றப் பெயரை உள்ளிடவும்...' },
+        manual_confirm_title: { en: 'Please confirm your details:', ta: 'உங்கள் விவரங்களை உறுதிப்படுத்தவும்:' },
+        manual_confirm_note: { en: 'These details will be saved with manual verification flag', ta: 'இந்த விவரங்கள் கைமுறை சரிபார்ப்பு கொடியுடன் சேமிக்கப்படும்' },
+        btn_confirm_proceed: { en: 'Confirm & Proceed', ta: 'உறுதிப்படுத்து & தொடர்' },
+        invalid_name: { en: '❌ Please enter a valid name (at least 2 characters)', ta: '❌ சரியான பெயரை உள்ளிடவும் (குறைந்தது 2 எழுத்துகள்)' },
+        invalid_assembly: { en: '❌ Please enter a valid assembly/taluk (at least 2 characters)', ta: '❌ சரியான சட்டமன்றத் தொகுதியை உள்ளிடவும் (குறைந்தது 2 எழுத்துகள்)' },
+        confirm_to_proceed: { en: '❌ Please type "Confirm" to proceed, or click the confirm button above.', ta: '❌ தொடர "உறுதிப்படுத்து" என தட்டச்சு செய்யவும், அல்லது மேலே உள்ள உறுதிப்படுத்து பொத்தானை அழுத்தவும்.' },
         validate_fail: { en: 'Could not validate. Please try again.', ta: 'சரிபார்க்க இயலவில்லை. மீண்டும் முயற்சிக்கவும்.' },
         yes_or_no: { en: 'Please type <strong>Yes</strong> or <strong>No</strong>.', ta: '<strong>ஆம்</strong> அல்லது <strong>இல்லை</strong> என தட்டச்சு செய்யவும்.' },
 
@@ -743,6 +979,8 @@
         please_upload_photo: { en: '\uD83D\uDCF7 Please use the buttons below to <strong>upload your photo</strong>.', ta: '\uD83D\uDCF7 உங்கள் <strong>புகைப்படத்தைப் பதிவேற்ற</strong> கீழே உள்ள பொத்தான்களைப் பயன்படுத்தவும்.' },
         photo_uploaded: { en: 'Photo uploaded', ta: 'புகைப்படம் பதிவேற்றப்பட்டது' },
         photo_too_large: { en: '\u274C File size exceeds <strong>5 MB</strong>. Please upload a smaller photo.', ta: '\u274C கோப்பு அளவு <strong>5 MB</strong>ஐ தாண்டிவிட்டது. சிறிய புகைப்படத்தைப் பதிவேற்றவும்.' },
+        photo_invalid_format: { en: '❌ Invalid file format. Please upload a JPG or PNG photo.', ta: '❌ தவறான கோப்பு வடிவம். JPG அல்லது PNG புகைப்படத்தைப் பதிவேற்றவும்.' },
+        photo_validation_failed: { en: '❌ <strong>Photo validation failed:</strong><br>Please ensure your face is clear and visible in the photo.', ta: '❌ <strong>புகைப்பட சரிபார்ப்பு தோல்வி:</strong><br>உங்கள் முகம் புகைப்படத்தில் தெளிவாகவும் தெரியும்படியும் இருப்பதை உறுதிப்படுத்தவும்.' },
         photo_upload_failed: { en: '\u274C Photo upload failed. Please try again.', ta: '\u274C புகைப்படம் பதிவேற்றம் தோல்வி. மீண்டும் முயற்சிக்கவும்.' },
         btn_reupload: { en: 'Re-upload Photo', ta: 'மீண்டும் பதிவேற்று' },
         ph_upload: { en: 'Click the upload button below...', ta: 'கீழே உள்ள பதிவேற்று பொத்தானை அழுத்தவும்...' },
@@ -853,6 +1091,14 @@
         sb_logout: { en: 'Logout', ta: 'வெளியேறு' },
         sb_logout_desc: { en: 'Sign out and clear session', ta: 'வெளியேறி அமர்வை அழிக்கவும்' },
         sb_drag_hint: { en: 'Drag to rotate', ta: 'சுழற்ற இழுக்கவும்' },
+
+        // Your Members
+        sb_your_members: { en: 'Your Members', ta: 'உங்கள் உறுப்பினர்கள்' },
+        sb_your_members_desc: { en: 'View members you referred', ta: 'நீங்கள் பரிந்துரைத்த உறுப்பினர்களைக் காணவும்' },
+        your_members_title: { en: 'Your Referred Members', ta: 'உங்கள் பரிந்துரை உறுப்பினர்கள்' },
+        your_members_count: { en: '{count} members referred', ta: '{count} உறுப்பினர்கள் பரிந்துரைக்கப்பட்டனர்' },
+        no_referred_members: { en: 'You don\'t have any referred members yet', ta: 'உங்களிடம் இதுவரை பரிந்துரைக்கப்பட்ட உறுப்பினர்கள் இல்லை' },
+        no_referred_hint: { en: 'Share your referral link with friends and family to grow your network!', ta: 'உங்கள் நெட்வொர்க்கை வளர்க்க நண்பர்கள் மற்றும் குடும்பத்தினருடன் உங்கள் பரிந்துரை இணைப்பைப் பகிரவும்!' },
 
         // Referral
         ref_your_link: { en: 'Your Referral Link', ta: 'உங்கள் பரிந்துரை இணைப்பு' },
@@ -1177,6 +1423,7 @@
         html += '<button onclick="event.stopPropagation();sidebarCopyRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Copy Referral Link"><i class="bi bi-clipboard"></i></button>';
         html += '<button onclick="event.stopPropagation();sidebarShareRef()" style="border:none;background:#e8f5e9;color:#2e7d32;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;" title="Share Referral Link"><i class="bi bi-send"></i></button>';
         html += '</div></div>';
+        html += '<div class="sb-menu-item" onclick="doMenuYourMembers()"><i class="bi bi-people"></i><div class="sb-menu-text"><h5>' + L('sb_your_members') + '</h5><p>' + L('sb_your_members_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i><div class="sb-menu-text"><h5>' + L('sb_organizer') + '</h5><p>' + L('sb_organizer_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i><div class="sb-menu-text"><h5>' + L('sb_wings') + '</h5><p>' + L('sb_wings_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
         html += '<div class="sb-menu-item" onclick="doMenuHelp()"><i class="bi bi-question-circle"></i><div class="sb-menu-text"><h5>' + L('sb_help') + '</h5><p>' + L('sb_help_desc') + '</p></div><span class="sb-menu-arrow"><i class="bi bi-chevron-right"></i></span></div>';
@@ -1388,6 +1635,92 @@
           h += '</div>';
         }
         await botReply(h, 800);
+      };
+
+      window.doMenuYourMembers = async function () {
+        closeSidebar();
+        const user = getUser();
+        if (!user || !user.memberData || !user.memberData.unique_id) {
+          let h = '<i class="bi bi-exclamation-circle" style="color:#f9a825;font-size:1.2rem;"></i> <strong>' + L('sb_your_members') + '</strong>';
+          h += '<div style="margin-top:10px;padding:14px;background:#fff8e1;border-radius:12px;border:1px solid #ffe082;font-size:0.9rem;line-height:1.6;">';
+          h += '<p>' + L('unverified_refer_msg') + '</p>';
+          h += '</div>';
+          h += '<div class="action-buttons" style="margin-top:12px;">';
+          h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
+          h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
+          h += '</div>';
+          await botReply(h, 600);
+          return;
+        }
+        try {
+          showTyping();
+          const res = await api('/api/vanigam/get-referred-members', { unique_id: user.memberData.unique_id });
+          hideTyping();
+          if (res.success && res.members && res.members.length > 0) {
+            let h = '<i class="bi bi-people-fill" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('your_members_title') + '</strong>';
+            h += '<div style="margin-top:6px;font-size:0.8rem;color:#555;">' + L('your_members_count', { count: res.count }) + '</div>';
+            h += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">';
+            for (let i = 0; i < res.members.length; i++) {
+              const m = res.members[i];
+              h += '<div style="display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(135deg,#f0f9f1,#e8f5e9);border-radius:12px;border:1px solid #c8e6c9;">';
+              // Photo
+              if (m.photo_url) {
+                h += '<img src="' + m.photo_url + '" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #2e7d32;flex-shrink:0;">';
+              } else {
+                h += '<div style="width:48px;height:48px;border-radius:50%;background:#c8e6c9;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem;color:#2e7d32;"><i class="bi bi-person-fill"></i></div>';
+              }
+              // Info
+              h += '<div style="flex:1;min-width:0;">';
+              h += '<div style="font-weight:700;font-size:0.9rem;color:#1b5e20;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (m.name || 'Member') + '</div>';
+              h += '<div style="font-size:0.75rem;color:#555;margin-top:2px;"><span style="font-weight:600;color:#2e7d32;">' + (m.unique_id || '') + '</span></div>';
+              h += '<div style="font-size:0.72rem;color:#888;margin-top:1px;">';
+              if (m.epic_no && !m.epic_no.startsWith('MANUAL_')) h += 'EPIC: ' + m.epic_no + ' &bull; ';
+              if (m.assembly) h += m.assembly;
+              if (m.district) h += ', ' + m.district;
+              h += '</div>';
+              h += '</div>';
+              // Serial number
+              h += '<div style="font-size:0.7rem;font-weight:700;color:#aaa;flex-shrink:0;">#' + (i + 1) + '</div>';
+              h += '</div>';
+            }
+            h += '</div>';
+            // Share/Copy buttons at the bottom
+            h += '<div style="margin-top:12px;display:flex;gap:8px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuRefer()" style="flex:1;"><i class="bi bi-share"></i> ' + L('ref_share') + '</button>';
+            h += '<button class="action-btn confirm" onclick="doMenuOrganizer()" style="flex:1;"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+            h += '</div>';
+            await botReply(h, 800);
+          } else {
+            // No referred members — show message + share/copy buttons
+            let refLink = '';
+            try {
+              const refRes = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
+              if (refRes.success) refLink = refRes.referral_link;
+            } catch(e) {}
+
+            let h = '<i class="bi bi-people" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('your_members_title') + '</strong>';
+            h += '<div style="margin-top:14px;text-align:center;padding:24px 16px;background:#f0f9f1;border-radius:14px;border:1px solid #c8e6c9;">';
+            h += '<i class="bi bi-person-x" style="font-size:2.5rem;color:#a5d6a7;"></i>';
+            h += '<p style="font-weight:700;color:#1b5e20;margin:12px 0 6px;font-size:0.95rem;">' + L('no_referred_members') + '</p>';
+            h += '<p style="font-size:0.82rem;color:#666;line-height:1.5;">' + L('no_referred_hint') + '</p>';
+            h += '</div>';
+            if (refLink) {
+              h += '<div style="margin-top:10px;padding:12px;background:#f0f9f1;border-radius:10px;border:1px solid #c8e6c9;">';
+              h += '<code style="word-break:break-all;font-size:0.82rem;color:#1b5e20;">' + refLink + '</code>';
+              h += '</div>';
+              h += '<div style="margin-top:10px;display:flex;gap:8px;">';
+              h += '<button class="action-btn confirm" onclick="copyReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-clipboard"></i> ' + L('ref_copy') + '</button>';
+              h += '<button class="action-btn confirm" onclick="shareReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share') + '</button>';
+              h += '</div>';
+            } else {
+              h += '<div style="margin-top:10px;display:flex;gap:8px;">';
+              h += '<button class="action-btn confirm" onclick="doMenuRefer()" style="flex:1;"><i class="bi bi-share"></i> ' + L('ref_share') + '</button>';
+              h += '<button class="action-btn confirm" onclick="doMenuRefer()" style="flex:1;"><i class="bi bi-clipboard"></i> ' + L('ref_copy') + '</button>';
+              h += '</div>';
+            }
+            await botReply(h, 800);
+          }
+        } catch(e) { hideTyping(); console.error('Your Members error:', e); await botReply(L('something_wrong'), 600); }
       };
 
       window.doMenuWings = async function () {
@@ -1699,11 +2032,13 @@
         userMsg('<i class="bi bi-check-lg"></i> Save Details');
         lockInput(); showTyping();
         try {
+          const _user = getUser();
           const res = await api('/api/vanigam/save-details', {
             epic_no: epic,
             dob: dob,
             blood_group: bloodGroup,
             address: address,
+            unique_id: (_user && _user.memberData) ? _user.memberData.unique_id : '',
           });
           hideTyping();
           if (res.success && res.member) {
@@ -1715,10 +2050,11 @@
             h += buildCardPreviewHtml(res.member);
             await botReply(h, 1200);
             updateSidebarContent();
-            // Auto-save updated card images
+            // Auto-save updated card images (pass uid for reliable API fetch)
+            const _uid = res.member.unique_id || '';
             const iframe = document.createElement('iframe');
             iframe.style.cssText = 'position:absolute;left:-9999px;width:600px;height:1200px;';
-            iframe.src = '/card-view?autosave=1';
+            iframe.src = '/card-view?autosave=1&uid=' + encodeURIComponent(_uid);
             document.body.appendChild(iframe);
             setTimeout(() => iframe.remove(), 45000);
           } else {
@@ -1778,8 +2114,13 @@
         document.getElementById('bannerStartBtn').onclick = function () {
           this.disabled = true;
           this.innerHTML = '<span class="gen-spinner"></span> ' + L('btn_starting');
-          input.value = 'Hi';
-          handleSend();
+          // Directly transition to AWAIT_MOBILE state, skipping "Hi" message
+          state = S.AWAIT_MOBILE;
+          setMobileInput();
+          unlockInput();
+          setTimeout(() => {
+            botReply(L('ask_mobile'), 800);
+          }, 500);
         };
         scroll();
       }
@@ -1809,9 +2150,70 @@
         });
       }
 
-      function setNumeric(ph) { input.type = 'tel'; input.inputMode = 'numeric'; input.pattern = '[0-9]*'; input.placeholder = ph || ''; }
-      function setText(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'off'; input.removeAttribute('pattern'); input.placeholder = ph || ''; }
-      function setEpicInput(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'characters'; input.removeAttribute('pattern'); input.placeholder = ph || ''; sendBtn.disabled = true; }
+      function setNumeric(ph) { input.type = 'tel'; input.inputMode = 'numeric'; input.pattern = '[0-9]*'; input.placeholder = ph || ''; input.oninput = null; input.onkeyup = null; }
+      function setText(ph) { input.type = 'text'; input.inputMode = 'text'; input.autocapitalize = 'off'; input.removeAttribute('pattern'); input.placeholder = ph || ''; input.oninput = null; input.onkeyup = null; }
+
+      /* ── EPIC Format Validation (3 Alpha + 7 Numeric) ──
+       * Format: Exactly 3 uppercase alphabetic characters followed by exactly 7 numeric digits
+       * Example: AYR0489518
+       * Regex: /^[A-Z]{3}[0-9]{7}$/
+       */
+      function isValidEpicFormat(epic) {
+        // Strict validation: exactly 3 uppercase letters + exactly 7 digits = 10 chars total
+        const epicRegex = /^[A-Z]{3}[0-9]{7}$/;
+        return epic && epic.length === 10 && epicRegex.test(epic);
+      }
+
+      function setEpicInput(ph) {
+        input.type = 'text';
+        input.inputMode = 'text';
+        input.autocapitalize = 'characters';
+        input.removeAttribute('pattern');
+        input.placeholder = ph || '';
+        input.maxLength = 10; // Block input beyond 10 characters
+        sendBtn.disabled = true; // Button DISABLED by default
+
+        // Clear any previous handlers
+        input.oninput = null;
+        input.onkeyup = null;
+
+        // Add real-time validation listener on every keystroke
+        input.oninput = function () {
+          let val = input.value.toUpperCase();
+          // Only allow A-Z for first 3 chars, then 0-9 for remaining 7 chars
+          let alphaChars = '';
+          let numChars = '';
+
+          for (let i = 0; i < val.length && (alphaChars.length + numChars.length) < 10; i++) {
+            const char = val[i];
+            if (alphaChars.length < 3) {
+              // First 3 chars must be A-Z only
+              if (/[A-Z]/.test(char)) {
+                alphaChars += char;
+              }
+            } else if (numChars.length < 7) {
+              // Last 7 chars must be 0-9 only
+              if (/[0-9]/.test(char)) {
+                numChars += char;
+              }
+            }
+          }
+
+          input.value = alphaChars + numChars;
+
+          // Enable send button ONLY when exactly 10 chars in correct format (3 alpha + 7 numeric)
+          // Partial matches (6, 8, 9 chars) should remain DISABLED
+          sendBtn.disabled = !isValidEpicFormat(input.value);
+        };
+      }
+
+      function setMobileInput() {
+        setNumeric(L('ph_mobile'));
+        input.onkeyup = null;
+        input.oninput = null;
+        sendBtn.disabled = false;
+      }
+
       function showAttach() { attachBtn.classList.add('visible'); }
       function hideAttach() { attachBtn.classList.remove('visible'); }
       function lockInput() { input.disabled = true; sendBtn.disabled = true; }
@@ -2043,8 +2445,8 @@
                 saveUser({ mobile, epic, hasCard: true, memberData: res.member });
                 let h = L('mobile_verified_existing');
                 h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('sb_vanigam_member') + '</h4>';
-                h += '<div class="row"><span class="lbl">' + L('lbl_name') + '</span><span class="val">' + (res.member.name || '') + '</span></div>';
-                h += '<div class="row"><span class="lbl">' + L('lbl_member_id') + '</span><span class="val">' + (res.member.unique_id || '') + '</span></div>';
+                h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (res.member.name || '') + '</span></div>';
+                h += '<div class="row"><span class="lbl">Member ID</span><span class="val">' + (res.member.unique_id || '') + '</span></div>';
                 h += '</div>';
                 if (!res.member.details_completed) {
                   h += '<br><em style="color:#667781;">' + L('details_incomplete_hint') + '</em>';
@@ -2066,7 +2468,12 @@
         /* ── AWAIT EPIC ── */
         } else if (state === S.AWAIT_EPIC) {
           const ep = txt.trim().toUpperCase();
-          if (!ep || ep.length < 3) return;
+          // Validate EPIC format: exactly 3 alpha + 7 numeric (10 chars total)
+          if (!isValidEpicFormat(ep)) {
+            userMsg(ep || txt);
+            await botReply(L('invalid_epic_format'), 600);
+            return;
+          }
           userMsg(ep);
           lockInput();
           try {
@@ -2078,10 +2485,10 @@
               voter = res.voter;
               let h = L('voter_found') + '<div class="voter-details-card">';
               const fields = [
-                [L('lbl_name'), voter.name || ''],
-                [L('lbl_epic'), voter.epic_no || ep],
-                [L('lbl_assembly'), voter.assembly_name || ''],
-                [L('lbl_district'), voter.district || '']
+                ['Name', voter.name || ''],
+                ['EPIC No', voter.epic_no || ep],
+                ['Assembly', voter.assembly_name || ''],
+                ['District', voter.district || '']
               ];
               for (const [lbl, v] of fields) {
                 if (!v || !v.trim()) continue;
@@ -2097,8 +2504,15 @@
               unlockInput();
               await botReply(h, 1000);
             } else {
+              // EPIC not found - offer options to try again or add manually
+              state = S.AWAIT_EPIC;
               unlockInput();
-              await botReply('\u274C ' + (res.message || L('epic_not_found')), 600);
+              let h = L('epic_not_found_manual');
+              h += '<div class="action-buttons" style="margin-top:12px;">';
+              h += '<button class="action-btn confirm" onclick="retryEpic()" style="font-size:0.9rem;"><i class="bi bi-arrow-clockwise"></i> ' + L('btn_try_again') + '</button>';
+              h += '<button class="action-btn cancel" onclick="startManualEntry()" style="font-size:0.9rem;"><i class="bi bi-pencil-square"></i> ' + L('btn_add_manually') + '</button>';
+              h += '</div>';
+              await botReply(h, 700);
             }
           } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C ' + L('validate_fail'), 600); }
 
@@ -2136,7 +2550,6 @@
           pin = p;
           state = S.AWAIT_PIN_CONFIRM;
           setNumeric(L('ph_reenter_pin'));
-          sendBtn.disabled = true;
           await botReply(L('confirm_pin'), 700);
 
         } else if (state === S.AWAIT_PIN_CONFIRM) {
@@ -2145,7 +2558,6 @@
           if (p !== pin) {
             state = S.AWAIT_PIN;
             setNumeric(L('ph_pin'));
-            sendBtn.disabled = true;
             pin = '';
             await botReply(L('pin_mismatch'), 600);
             return;
@@ -2241,11 +2653,60 @@
             await botReply(L('yes_to_confirm'), 500);
           }
 
+        /* ── AWAIT MANUAL NAME ── */
+        } else if (state === S.AWAIT_MANUAL_NAME) {
+          const name = txt.trim();
+          if (!name || name.length < 2) {
+            userMsg(txt);
+            await botReply(L('invalid_name'), 500);
+            return;
+          }
+          userMsg(name);
+          voter = { name: name, assembly_name: '', district: '', manually_entered: true };
+          state = S.AWAIT_MANUAL_ASSEMBLY;
+          setText(L('ph_assembly'));
+          sendBtn.disabled = false;
+          await botReply(L('enter_assembly'), 600);
+
+        /* ── AWAIT MANUAL ASSEMBLY ── */
+        } else if (state === S.AWAIT_MANUAL_ASSEMBLY) {
+          const assembly = txt.trim();
+          if (!assembly || assembly.length < 2) {
+            userMsg(txt);
+            await botReply(L('invalid_assembly'), 500);
+            return;
+          }
+          userMsg(assembly);
+          voter.assembly_name = assembly;
+          // Show confirmation before proceeding
+          state = S.MANUAL_CONFIRM;
+          let h = '<strong>' + L('manual_confirm_title') + '</strong><div class="voter-details-card" style="margin-top:10px;">';
+          h += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + voter.name + '</span></div>';
+          h += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + voter.assembly_name + '</span></div>';
+          h += '<div class="detail-row"><span class="detail-label" style="color:#ff9800;"><i class="bi bi-info-circle"></i></span><span class="detail-value" style="color:#ff9800;font-size:0.85rem;">' + L('manual_confirm_note') + '</span></div>';
+          h += '</div>';
+          h += '<div class="action-buttons" style="margin-top:12px;">';
+          h += '<button class="action-btn confirm" onclick="confirmManualDetails()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_proceed') + '</button>';
+          h += '</div>';
+          await botReply(h, 700);
+
+        /* ── MANUAL CONFIRM ── */
+        } else if (state === S.MANUAL_CONFIRM) {
+          const lo = txt.toLowerCase();
+          if (lo === 'yes' || lo === 'confirm' || lo === 'y' || lo === 'ஆம்' || lo === 'உறுதிப்படுத்து') {
+            userMsg('✓ ' + L('btn_confirm_proceed'));
+            epic = epic || 'MANUAL_' + Date.now();
+            await startPhotoUpload();
+          } else {
+            userMsg(txt);
+            await botReply(L('confirm_to_proceed'), 500);
+          }
+
         /* ── DONE ── */
         } else if (state === S.DONE) {
           userMsg(txt);
           state = S.AWAIT_MOBILE;
-          setNumeric(L('ph_mobile'));
+          setMobileInput();
           hideAttach();
           photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
           await botReply(L('ready_another'), 800);
@@ -2262,6 +2723,33 @@
         state = S.AWAIT_EPIC;
         setEpicInput(L('ph_epic'));
         await botReply(L('reenter_epic'), 500);
+      };
+
+      /* ── Manual Entry (when EPIC not found) ── */
+      window.retryEpic = async function () {
+        userMsg(L('btn_try_again'));
+        state = S.AWAIT_EPIC;
+        setEpicInput(L('ph_epic'));
+        await botReply(L('mobile_verified_epic'), 600);
+      };
+
+      window.startManualEntry = async function () {
+        userMsg(L('btn_add_manually'));
+        state = S.AWAIT_MANUAL_NAME;
+        setText(L('ph_name'));
+        sendBtn.disabled = false;
+        await botReply(L('enter_name'), 600);
+      };
+
+      window.confirmManualDetails = async function () {
+        state = S.MANUAL_CONFIRM;
+        userMsg('✓ ' + L('btn_confirm_proceed'));
+        // Generate a pseudo-EPIC for manual entries
+        epic = 'MANUAL_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        // Mark as manually entered
+        voter.manually_entered = true;
+        voter.epic_no = epic;
+        await startPhotoUpload();
       };
 
       /* ── Start Photo Upload step ── */
@@ -2281,10 +2769,12 @@
       async function askPinSetup() {
         state = S.AWAIT_PIN;
         setNumeric(L('ph_pin'));
-        sendBtn.disabled = true;
+        input.disabled = false;
+        input.value = '';
         let h = L('set_pin');
         h += '<br><br><em style="color:#667781;font-size:0.85rem;">' + L('pin_hint') + '</em>';
         await botReply(h, 800);
+        input.focus();
       }
 
       /* ── Ask for Additional Details ── */
@@ -2419,12 +2909,12 @@
           // Normal card generation mode
           let h = L('confirm_details');
           h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('header_title') + '</h4>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_name') + '</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_epic') + '</span><span class="val">' + epic + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_assembly') + '</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_district') + '</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">' + L('lbl_mobile') + '</span><span class="val">+91 ' + mobile + '</span></div>';
-          if (dob) h += '<div class="row"><span class="lbl">' + L('lbl_dob') + '</span><span class="val">' + dob + '</span></div>';
+          h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">EPIC No</span><span class="val">' + epic + '</span></div>';
+          h += '<div class="row"><span class="lbl">Assembly</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">District</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">Mobile</span><span class="val">+91 ' + mobile + '</span></div>';
+          if (dob) h += '<div class="row"><span class="lbl">Date of Birth</span><span class="val">' + dob + '</span></div>';
           if (bloodGroup) h += '<div class="row"><span class="lbl">' + L('lbl_blood') + '</span><span class="val">' + bloodGroup + '</span></div>';
           if (address) h += '<div class="row"><span class="lbl">' + L('lbl_address') + '</span><span class="val">' + address + '</span></div>';
           if (skippedDetails) h += '<div class="row"><span class="lbl">' + L('lbl_status') + '</span><span class="val" style="color:#ff9800;">' + L('details_pending') + '</span></div>';
@@ -2560,6 +3050,7 @@
             address: address,
             skipped_details: skippedDetails,
             pin: pin,
+            manually_entered: voter && voter.manually_entered ? true : false,
             referrer_unique_id: referrerUniqueId || ''
           };
 
@@ -2592,10 +3083,11 @@
             await botReply(h, 1200);
             photoFile = null;
 
-            // Auto-save card images to Cloudinary in the background
+            // Auto-save card images to Cloudinary in the background (pass uid for reliable API fetch)
+            const _cardUid = m.unique_id || '';
             const iframe = document.createElement('iframe');
             iframe.style.cssText = 'position:absolute;left:-9999px;width:600px;height:1200px;';
-            iframe.src = '/card-view?autosave=1';
+            iframe.src = '/card-view?autosave=1&uid=' + encodeURIComponent(_cardUid);
             document.body.appendChild(iframe);
             setTimeout(() => iframe.remove(), 45000);
 
@@ -2621,14 +3113,144 @@
       }
 
       /* ── Photo Upload / Camera ── */
-      const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+      const MAX_PHOTO_SIZE = 15 * 1024 * 1024;
 
       window.triggerPhotoUpload = function () { if (state === S.AWAIT_PHOTO) photoInput.click(); };
       window.triggerCamera = function () { if (state === S.AWAIT_PHOTO) cameraInput.click(); };
       attachBtn.addEventListener('click', () => { if (state === S.AWAIT_PHOTO) photoInput.click(); });
 
+      /* ── Cropper.js Integration ── */
+      let cropperInstance = null;
+      let cropperOriginalFile = null;
+      const cropOverlay = document.getElementById('cropModalOverlay');
+      const cropImage = document.getElementById('cropImage');
+
+      function openCropModal(file) {
+        cropperOriginalFile = file;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          cropImage.src = ev.target.result;
+          cropOverlay.classList.add('open');
+          // Destroy previous instance if any
+          if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+          // Wait for image to load before initializing Cropper
+          cropImage.onload = function () {
+            cropperInstance = new Cropper(cropImage, {
+              aspectRatio: 137 / 136, // ID card photo ratio (nearly square)
+              viewMode: 1,
+              dragMode: 'move',
+              autoCropArea: 0.85,
+              responsive: true,
+              restore: false,
+              guides: true,
+              center: true,
+              highlight: false,
+              cropBoxMovable: true,
+              cropBoxResizable: true,
+              toggleDragModeOnDblclick: false,
+              background: true,
+            });
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+
+      window.cropRotate = function (deg) { if (cropperInstance) cropperInstance.rotate(deg); };
+      window.cropFlipH = function () {
+        if (!cropperInstance) return;
+        const d = cropperInstance.getData();
+        cropperInstance.scaleX(d.scaleX === -1 ? 1 : -1);
+      };
+      window.cropZoomIn = function () { if (cropperInstance) cropperInstance.zoom(0.1); };
+      window.cropZoomOut = function () { if (cropperInstance) cropperInstance.zoom(-0.1); };
+      window.cropReset = function () { if (cropperInstance) cropperInstance.reset(); };
+
+      window.cropCancel = function () {
+        cropOverlay.classList.remove('open');
+        if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+        cropperOriginalFile = null;
+        // Re-enable upload buttons
+        state = S.AWAIT_PHOTO;
+        showAttach();
+      };
+
+      window.cropConfirm = function () {
+        if (!cropperInstance) return;
+        const canvas = cropperInstance.getCroppedCanvas({
+          width: 400,
+          height: 400,
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high',
+        });
+        cropOverlay.classList.remove('open');
+        cropperInstance.destroy();
+        cropperInstance = null;
+
+        canvas.toBlob(function (blob) {
+          if (!blob) { cropCancel(); return; }
+          const croppedFile = new File([blob], cropperOriginalFile.name, { type: 'image/jpeg', lastModified: Date.now() });
+          cropperOriginalFile = null;
+          processCroppedPhoto(croppedFile, canvas.toDataURL('image/jpeg', 0.92));
+        }, 'image/jpeg', 0.92);
+      };
+
+      async function processCroppedPhoto(file, dataUrl) {
+        photoFile = file;
+        userMsg('<img src="' + dataUrl + '" class="photo-thumb" alt="Photo"><br>' + L('photo_uploaded'));
+        hideAttach();
+
+        // Validate photo on backend BEFORE asking to set PIN
+        lockInput();
+        showTyping();
+        try {
+          const formData = new FormData();
+          formData.append('photo', file);
+          formData.append('epic_no', epic || '');
+          const validateRes = await fetch('/api/vanigam/validate-photo', { method: 'POST', body: formData }).then(r => r.json());
+          hideTyping();
+
+          if (validateRes.success) {
+            await askPinSetup();
+          } else {
+            unlockInput();
+            state = S.AWAIT_PHOTO;
+            let h = validateRes.message ? ('❌ <strong>' + L('photo_validation_failed').split('<br>')[0].replace('❌ ', '') + '</strong><br>' + validateRes.message) : L('photo_validation_failed');
+            h += '<div class="action-buttons" style="margin-top:10px;">';
+            h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
+            h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
+            h += '</div>';
+            botReply(h, 600);
+            photoFile = null;
+          }
+        } catch (e) {
+          hideTyping();
+          unlockInput();
+          state = S.AWAIT_PHOTO;
+          let h = L('photo_upload_failed');
+          h += '<div class="action-buttons" style="margin-top:10px;">';
+          h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_reupload') + '</button>';
+          h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
+          h += '</div>';
+          botReply(h, 600);
+          photoFile = null;
+        }
+      }
+
       function handlePhotoFile(file) {
         if (!file) return;
+
+        // Check file format
+        const validFormats = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validFormats.includes(file.type)) {
+          let h = L('photo_invalid_format');
+          h += '<div class="action-buttons" style="margin-top:10px;">';
+          h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
+          h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
+          h += '</div>';
+          botReply(h, 600);
+          return;
+        }
+
         if (file.size > MAX_PHOTO_SIZE) {
           let h = L('photo_too_large');
           h += '<div class="action-buttons" style="margin-top:10px;">';
@@ -2638,37 +3260,28 @@
           botReply(h, 600);
           return;
         }
-        photoFile = file;
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-          userMsg('<img src="' + ev.target.result + '" class="photo-thumb" alt="Photo"><br>' + L('photo_uploaded'));
-          hideAttach();
-          // Now ask to set PIN
-          await askPinSetup();
-        };
-        reader.readAsDataURL(file);
+
+        // Open crop/rotate modal instead of directly processing
+        openCropModal(file);
       }
 
       photoInput.addEventListener('change', (e) => { handlePhotoFile(e.target.files[0]); photoInput.value = ''; });
       cameraInput.addEventListener('change', (e) => { handlePhotoFile(e.target.files[0]); cameraInput.value = ''; });
 
-      /* ── EPIC auto-formatting + send button lock ── */
+      /* ── PIN input handling ──
+       * PIN states (AWAIT_PIN, AWAIT_PIN_CONFIRM, AWAIT_RETURNING_PIN):
+       * Limit to exactly 4 digits only
+       */
       input.addEventListener('input', function () {
-        // PIN states: limit to 4 digits, lock send until exactly 4
+        // Handle PIN input states
         if (state === S.AWAIT_PIN || state === S.AWAIT_PIN_CONFIRM || state === S.AWAIT_RETURNING_PIN) {
-          this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);
-          sendBtn.disabled = this.value.length !== 4;
+          input.value = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+          // Enable button only when exactly 4 digits are entered
+          sendBtn.disabled = input.value.length !== 4;
           return;
         }
-        if (state !== S.AWAIT_EPIC) return;
-        let val = this.value;
-        let prefix = val.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, '');
-        let rest = val.slice(3).replace(/[^0-9]/g, '');
-        this.value = prefix + rest;
-        if (prefix.length >= 3 && this.inputMode !== 'numeric') { this.inputMode = 'numeric'; this.autocapitalize = 'off'; }
-        else if (prefix.length < 3 && this.inputMode !== 'text') { this.inputMode = 'text'; this.autocapitalize = 'characters'; }
-        // Lock send button until valid EPIC format: 3 letters + 7+ digits
-        sendBtn.disabled = !(prefix.length >= 3 && rest.length >= 7);
+        // EPIC validation is handled entirely by setEpicInput's oninput handler
+        // No additional handling needed here for AWAIT_EPIC state
       });
 
       /* ── Events ── */

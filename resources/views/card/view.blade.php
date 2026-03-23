@@ -315,15 +315,55 @@
 
     <script>
       // Load member data from localStorage
-      function getMember() {
+      function getMemberFromStorage() {
         try {
           const data = JSON.parse(localStorage.getItem('vanigam_member') || 'null');
           return data && data.memberData ? data.memberData : null;
         } catch(e) { return null; }
       }
 
+      // Fetch member data from API by unique_id
+      async function getMemberFromApi(uid) {
+        try {
+          const res = await fetch('/api/vanigam/member/' + encodeURIComponent(uid));
+          const data = await res.json();
+          if (data.success && data.member) return data.member;
+          return null;
+        } catch(e) { return null; }
+      }
+
+      // Cached member for use by other functions
+      let cachedMember = null;
+      function getMember() { return cachedMember; }
+
+      async function loadAndPopulate() {
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get('uid');
+
+        // Try API fetch first if uid is provided, then fall back to localStorage
+        if (uid) {
+          cachedMember = await getMemberFromApi(uid);
+        }
+        if (!cachedMember) {
+          cachedMember = getMemberFromStorage();
+        }
+        // If we fetched from API, also update localStorage so autosave works
+        if (cachedMember && uid) {
+          try {
+            localStorage.setItem('vanigam_member', JSON.stringify({
+              memberData: cachedMember,
+              hasCard: true,
+              mobile: cachedMember.mobile,
+              epic: cachedMember.epic_no
+            }));
+          } catch(e) {}
+        }
+
+        populate();
+      }
+
       function populate() {
-        const m = getMember();
+        const m = cachedMember;
         if (!m) {
           document.getElementById('cardWrap').innerHTML = '<div class="no-data"><i class="bi bi-person-badge"></i><h4>No Card Data Found</h4><p>Please generate a membership card first from the <a href="/">chat page</a>.</p></div>';
           document.getElementById('toolbar').style.display = 'none';
@@ -501,9 +541,8 @@
         }
       }
 
-      // Init
-      populate();
-      autoSaveCardImages();
+      // Init - load member data (from API or localStorage), then auto-save
+      loadAndPopulate().then(() => autoSaveCardImages());
     </script>
   </body>
 </html>

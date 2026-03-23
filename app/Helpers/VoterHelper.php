@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -24,7 +23,7 @@ class VoterHelper
 
             // Check cache first (10 minutes for found, 2 minutes for not found)
             $cacheKey = "voter:epic:{$epicNo}";
-            $cached = Cache::get($cacheKey);
+            $cached = app(\App\Services\CacheService::class)->get($cacheKey);
             
             if ($cached !== null) {
                 return isset($cached['epic_no']) && !empty($cached['epic_no']) ? $cached : null;
@@ -59,9 +58,9 @@ class VoterHelper
                     
                     if ($row) {
                         $result = self::translateVoterRow((array) $row);
-                        
+
                         // Cache for 10 minutes (positive hit)
-                        Cache::put($cacheKey, $result, 600);
+                        app(\App\Services\CacheService::class)->put($cacheKey, $result, 600);
                         
                         Log::info("Voter found: {$epicNo} in table {$row->source_table}");
                         return $result;
@@ -73,7 +72,7 @@ class VoterHelper
             }
 
             // Not found - cache negative result for 2 minutes
-            Cache::put($cacheKey, ['epic_no' => ''], 120);
+            app(\App\Services\CacheService::class)->put($cacheKey, ['epic_no' => ''], 120);
             
             Log::info("Voter not found: {$epicNo}");
             return null;
@@ -194,7 +193,7 @@ class VoterHelper
     public static function getAssemblyTableNames()
     {
         try {
-            return Cache::remember('voter:assembly_tables', 3600, function () {
+            return app(\App\Services\CacheService::class)->remember('voter:assembly_tables', 3600, function () {
                 // Get all tables that match voter pattern (tbl_voters_*)
                 $tables = DB::connection('voters')->select('SHOW TABLES');
                 $voterTables = [];
@@ -361,12 +360,12 @@ class VoterHelper
     {
         try {
             if ($epicNo) {
-                Cache::forget("voter:epic:{$epicNo}");
+                app(\App\Services\CacheService::class)->forget("voter:epic:{$epicNo}");
                 Log::info("Cleared cache for EPIC: {$epicNo}");
             } else {
-                Cache::forget('voter:assembly_tables');
-                Cache::forget('voter:assemblies');
-                Cache::forget('voter:districts');
+                app(\App\Services\CacheService::class)->forget('voter:assembly_tables');
+                app(\App\Services\CacheService::class)->forget('voter:assemblies');
+                app(\App\Services\CacheService::class)->forget('voter:districts');
                 Log::info("Cleared all voter cache");
             }
         } catch (Exception $e) {
@@ -380,7 +379,7 @@ class VoterHelper
     public static function getAssemblies()
     {
         try {
-            return Cache::remember('voter:assemblies', 3600, function () {
+            return app(\App\Services\CacheService::class)->remember('voter:assemblies', 3600, function () {
                 $tables = self::getAssemblyTableNames();
                 $assemblies = [];
                 
@@ -422,7 +421,7 @@ class VoterHelper
     public static function getDistricts()
     {
         try {
-            return Cache::remember('voter:districts', 3600, function () {
+            return app(\App\Services\CacheService::class)->remember('voter:districts', 3600, function () {
                 $tables = self::getAssemblyTableNames();
                 $districts = [];
                 
