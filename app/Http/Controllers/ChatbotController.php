@@ -9,6 +9,7 @@ use App\Models\OtpSession;
 use App\Models\GeneratedVoter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\VanigamController;
 
 class ChatbotController extends Controller
 {
@@ -214,6 +215,13 @@ class ChatbotController extends Controller
             ]);
 
             $pin = $request->input('pin');
+
+            if (VanigamController::isWeakPin($pin)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PIN is too easy to guess. Avoid 1234, 0000, 1111, etc.'
+                ], 400);
+            }
 
             // Store PIN hash in user_pins table
             DB::table('user_pins')->updateOrCreate(

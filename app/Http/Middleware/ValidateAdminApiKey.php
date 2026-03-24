@@ -29,8 +29,16 @@ class ValidateAdminApiKey
             ], 401);
         }
 
-        // Check if key matches
-        if ($providedKey !== $expectedKey) {
+        // Reject if admin API key is not configured
+        if (empty($expectedKey)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin API key not configured.',
+            ], 500);
+        }
+
+        // Timing-safe comparison to prevent side-channel attacks
+        if (!hash_equals($expectedKey, $providedKey)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid X-Admin-Key.',

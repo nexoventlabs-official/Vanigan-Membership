@@ -184,11 +184,21 @@ class MongoService
     }
 
     /**
-     * Generate unique member ID: TNVS-XXXXXX
+     * Generate unique member ID: TNVS-XXXXXXXX
+     * Uses 4 random bytes (8 hex chars) with collision check loop.
      */
     public function generateUniqueId(): string
     {
-        return 'TNVS-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+        $maxAttempts = 10;
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $id = 'TNVS-' . strtoupper(bin2hex(random_bytes(4)));
+            if (!$this->findMemberByUniqueId($id)) {
+                return $id;
+            }
+            Log::warning("MongoService::generateUniqueId collision on attempt {$i}: {$id}");
+        }
+        // Fallback: 6 bytes (12 hex chars) - virtually impossible to collide
+        return 'TNVS-' . strtoupper(bin2hex(random_bytes(6)));
     }
 
     /**
@@ -597,6 +607,26 @@ class MongoService
                 }
             }
 
+            // Batch-fetch all referrals: one query instead of N individual queries
+            $memberUniqueIds = array_filter(array_column($members, 'unique_id'));
+            $referralMap = []; // unique_id => [referred_unique_id, ...]
+            if (!empty($memberUniqueIds)) {
+                try {
+                    $referralCursor = $this->collection->find(
+                        ['referred_by' => ['$in' => array_values($memberUniqueIds)]],
+                        ['projection' => ['unique_id' => 1, 'referred_by' => 1]]
+                    );
+                    foreach ($referralCursor as $refDoc) {
+                        $rd = $this->toArray($refDoc);
+                        if (!empty($rd['referred_by']) && !empty($rd['unique_id'])) {
+                            $referralMap[$rd['referred_by']][] = $rd['unique_id'];
+                        }
+                    }
+                } catch (Exception $e) {
+                    Log::warning("MongoService::getReportMembers batch referral lookup failed: " . $e->getMessage());
+                }
+            }
+
             // Attach referrer name + referred members list to each member
             foreach ($members as &$m) {
                 $m['referrer_name'] = '';
@@ -604,13 +634,11 @@ class MongoService
                     $m['referrer_name'] = $referrerNames[$m['referred_by']];
                 }
 
-                // Get members referred by this person
                 $m['referred_member_ids'] = [];
-                $m['referral_count'] = $m['referral_count'] ?? 0;
-                if (!empty($m['unique_id'])) {
-                    $referred = $this->getMembersReferredBy($m['unique_id']);
-                    $m['referral_count'] = count($referred);
-                    $m['referred_member_ids'] = array_map(fn($r) => $r['unique_id'] ?? '', $referred);
+                $m['referral_count'] = 0;
+                if (!empty($m['unique_id']) && isset($referralMap[$m['unique_id']])) {
+                    $m['referred_member_ids'] = $referralMap[$m['unique_id']];
+                    $m['referral_count'] = count($referralMap[$m['unique_id']]);
                 }
             }
             unset($m);

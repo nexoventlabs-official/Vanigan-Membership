@@ -216,6 +216,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             epic_no: '{{ $member->epic_no ?? "" }}',
+            unique_id: '{{ $unique_id }}',
             dob: (function(){ const v = document.getElementById('dob').value; if (!v) return ''; const p = v.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; })(),
             blood_group: document.getElementById('blood_group').value,
             address: document.getElementById('address').value,

@@ -37,6 +37,7 @@ class AdminPanelController extends Controller
 
         if ($request->username === $adminUsername &&
             password_verify($request->password, $adminPasswordHash)) {
+            $request->session()->regenerate();
             session([
                 'admin_logged_in' => true,
                 'admin_username' => $request->username,
@@ -253,7 +254,7 @@ class AdminPanelController extends Controller
                 'district' => $districtFilter,
                 'assemblies' => [],
                 'districts' => [],
-                'error' => 'Database connection failed: ' . $e->getMessage(),
+                'error' => 'Database connection failed. Please try again later.',
             ]);
         }
     }

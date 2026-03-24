@@ -142,12 +142,12 @@ class VoterService
         // If no WHERE conditions, use pre-calculated totals from assembly table
         if (empty($where)) {
             if ($assembly) {
-                $assemblyRecord = AssemblyConstituency::where('assembly_name', 'ilike', $assembly)->first();
+                $assemblyRecord = AssemblyConstituency::whereRaw('LOWER(assembly_name) = ?', [strtolower($assembly)])->first();
                 return $assemblyRecord?->total_voters ?? 0;
             }
             
             if ($district) {
-                return AssemblyConstituency::where('district_name', 'ilike', $district)
+                return AssemblyConstituency::whereRaw('LOWER(district_name) = ?', [strtolower($district)])
                     ->sum('total_voters');
             }
             
