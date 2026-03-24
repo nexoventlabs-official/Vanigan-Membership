@@ -25,7 +25,7 @@ Mobile-first registration system for Tamil Nadu merchants' organization members.
 ### Backend
 - **Laravel 11** (PHP 8.2+)
 - **9 Controllers** managing different features
-- **9 Services** for business logic
+- **10 Services** for business logic
 - **8 Models** for data management
 - **3 Middleware** for authentication/validation
 
@@ -38,8 +38,19 @@ Mobile-first registration system for Tamil Nadu merchants' organization members.
 
 2. **MongoDB Atlas** (Member data, profiles)
    - Database: `vanigan`
-   - Collections: `members` (primary storage)
+   - Collections:
+     - `members` (primary member storage)
+     - `manual_entries` (manually entered registrations, not found in MySQL)
+     - `loan_requests` (loan applications by members)
    - BSON/JSON conversion handled in `MongoService::recursiveConvert()`
+
+3. **MongoDB Atlas — Tracking** (Incomplete registration tracking)
+   - Database: `vanigan_tracking`
+   - Collection: `incomplete_registrations`
+   - Tracks users who started but didn't complete registration
+   - Stores: mobile, name, EPIC, step progress, referrer info, timestamps
+   - Records removed automatically on successful card generation
+   - Config: `TRACKING_MONGODB_URL` + `TRACKING_MONGODB_DATABASE` in `.env`
 
 ### External Services
 - **Upstash Redis** (Per-environment cache)
@@ -130,6 +141,8 @@ routes/api.php
 routes/web.php
 ├── Public: Chat UI, card views, referral pages
 └── Protected: /admin/* (requires admin.auth middleware)
+    ├── /admin/dashboard, /admin/users, /admin/voters, /admin/reports
+    └── /admin/not-registered (incomplete registrations tracking)
 ```
 
 ### Code-Level Security
@@ -189,6 +202,7 @@ project-5/
 │   │   ├── MongoService.php (MongoDB operations + BSON conversion)
 │   │   ├── TwoFactorOtpService.php (2Factor.in integration)
 │   │   ├── CloudinaryService.php (image uploads)
+│   │   ├── TrackingMongoService.php (incomplete registration tracking)
 │   │   ├── VoterLookupService.php, etc.
 │   ├── Models/ (8 models)
 │   │   ├── OtpSession.php, User.php, VerifiedMobile.php
@@ -203,12 +217,12 @@ project-5/
 ├── config/
 │   ├── app.php, cache.php, database.php, services.php
 │   ├── vanigam.php (reset key + admin API key)
-│   ├── mongodb.php (MongoDB connection config)
+│   ├── mongodb.php (MongoDB + tracking MongoDB connection config)
 │   └── cloudinary.php
 │
 ├── routes/
-│   ├── api.php (17 endpoints, all public or API-key protected)
-│   └── web.php (11 routes, mix of public + admin-protected)
+│   ├── api.php (18 endpoints, all public or API-key protected)
+│   └── web.php (12 routes, mix of public + admin-protected)
 │
 ├── resources/
 │   ├── views/ (Blade templates for chat UI, admin panel)
@@ -283,13 +297,26 @@ headers: {'X-Admin-Key': 'your_admin_api_key_here'}
 - `admin_api_key` from `VANIGAM_ADMIN_API_KEY` env variable
 
 ### 3. MongoService - BSON/JSON Conversion
-**File:** `app/Services/MongoService.php` (80+ lines)
+**File:** `app/Services/MongoService.php` (870+ lines)
 
-Handles MongoDB document conversion:
+Handles MongoDB document conversion and all member/loan/manual_entry operations:
 - BSON dates to PHP timestamps
 - ObjectIds to strings
 - Recursive conversion ensures nested data works
 - Used in all MongoDB write/read operations
+- Collections: `members`, `manual_entries`, `loan_requests`
+
+### 3b. TrackingMongoService - Incomplete Registration Tracking
+**File:** `app/Services/TrackingMongoService.php` (220+ lines)
+
+Tracks users who start but don't complete registration:
+- Connects to separate tracking MongoDB (`vanigan_tracking`)
+- `trackStep()` — upserts user progress with step history
+- `removeByMobile()` — called on successful card generation
+- `getIncompleteRegistrations()` — paginated list with search, step filter, date range
+- `getStepStats()` — aggregated counts per step for dashboard
+- Stores referrer info (name + unique_id) when user came via referral link
+- Gracefully disabled if tracking MongoDB config is missing
 
 ### 4. VoterHelper - MySQL Lookup with Caching
 **File:** `app/Helpers/VoterHelper.php`
@@ -425,7 +452,7 @@ git commit -m "fix: clear description of changes"
 
 ---
 
-## 📊 API Endpoints (17 Total)
+## 📊 API Endpoints (18 Total)
 
 ### Base Path: `/api/vanigam/`
 
@@ -459,6 +486,9 @@ git commit -m "fix: clear description of changes"
 - `POST /loan-request` - Submit loan request
 - `POST /check-loan-status` - Check loan status
 
+#### Tracking
+- `POST /track-step` - Track incomplete registration progress (fire-and-forget, stores referrer info)
+
 #### Health
 - `GET /health` - Health check endpoint
 
@@ -469,7 +499,15 @@ git commit -m "fix: clear description of changes"
 ### MongoDB Collections (`vanigan` database)
 - **members** - Core collection for member data
   - Fields: uniqueId, mobile, name, photo, card details, PIN
-  - Includes: referral info, loan requests, verification status
+  - Includes: referral info, verification status
+- **manual_entries** - Manually entered registrations (EPIC not found in MySQL)
+  - Fields: unique_id, epic_no, mobile, name, assembly, photo_url, manually_entered, verified_by_admin
+- **loan_requests** - Loan applications by members
+  - Fields: unique_id, mobile, loan details, status
+
+### MongoDB Collections (`vanigan_tracking` database)
+- **incomplete_registrations** - Users who started but didn't complete registration
+  - Fields: mobile, name, epic_no, assembly, district, last_step, referrer_unique_id, referrer_name, started_at, last_activity, step_history
 
 ### MySQL Voters Tables (Read-only)
 - **ac001 through ac234** - Assembly constituency tables
@@ -495,8 +533,8 @@ git commit -m "fix: clear description of changes"
 - `config/database.php` - MySQL + voters connection
 - `config/cache.php` - Cache store (redis or file)
 - `config/services.php` - 2Factor API key
-- `config/mongodb.php` - MongoDB connection
-- `config/vanigam.php` - Reset key + Admin API key (NEW)
+- `config/mongodb.php` - MongoDB connection + tracking MongoDB config
+- `config/vanigam.php` - Reset key + Admin API key
 - `config/cloudinary.php` - Cloudinary credentials
 
 ### Redis Configuration - CRITICAL ⚠️
@@ -551,6 +589,15 @@ $middleware->alias([
 - ✅ Photo upload limit consistency (15MB)
 - ✅ Test routes removal (`/test/card`, `/test/pin`)
 - ✅ API middleware protection on reset-members + upload-card-images
+- ✅ Incomplete registration tracking system (separate tracking MongoDB)
+- ✅ TrackingMongoService with step tracking and auto-removal on card generation
+- ✅ Fire-and-forget tracking calls in chatbot JS (non-blocking)
+- ✅ Admin "Not Registered" page with stats, search, step filter
+- ✅ Referrer tracking (name + unique_id) in tracking records
+- ✅ Date filter bar (Today / Weekly / Monthly / Custom date range)
+- ✅ PDF download for Not Registered report (jsPDF + autoTable)
+- ✅ Redis cache DB fix (Upstash only supports DB 0)
+- ✅ Nav links for Not Registered page on all admin pages
 
 ### Critical Pre-Production Tasks
 - [ ] **REMOVE public/redis-test.php** before deploying to production (security risk - debugging tool only)
@@ -605,6 +652,6 @@ $middleware->alias([
 
 ---
 
-**Last Updated:** March 21, 2026
-**Branch:** trial-staging
+**Last Updated:** March 24, 2026
+**Branch:** main
 **Status:** Production-ready with continuous improvements
