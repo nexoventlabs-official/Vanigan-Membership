@@ -52,6 +52,9 @@
   </style>
 </head>
 <body>
+  @if(!empty($member->details_completed) && $member->details_completed)
+  <script>window.location.replace('/member/verify/{{ $unique_id }}');</script>
+  @endif
   <!-- PIN Entry Section -->
   <div class="card" id="pinSection">
     <div class="card-header">
