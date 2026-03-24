@@ -279,7 +279,7 @@ class VanigamController extends Controller
 
         } catch (Exception $e) {
             Log::error('VanigamController::uploadPhoto Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Photo upload failed: ' . $e->getMessage(), 'error_code' => 'INTERNAL_ERROR'], 500);
+            return response()->json(['success' => false, 'message' => 'Photo upload failed. Please try again.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -350,7 +350,7 @@ class VanigamController extends Controller
             Log::error('VanigamController::validatePhotoUpload Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Photo validation failed: ' . $e->getMessage(),
+                'message' => 'Photo validation failed. Please try again.',
                 'error_code' => 'INTERNAL_ERROR'
             ], 500);
         }
@@ -484,7 +484,7 @@ class VanigamController extends Controller
 
         } catch (Exception $e) {
             Log::error('VanigamController::generateCard Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Card generation failed: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Card generation failed. Please try again.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
     }
 
@@ -793,7 +793,7 @@ class VanigamController extends Controller
                 $health['mysql'] = 'ok';
             } catch (\Exception $e) {
                 $health['mysql'] = 'error';
-                $health['mysql_error'] = $e->getMessage();
+                $health['mysql_error'] = 'connection failed';
             }
 
             try {
@@ -801,7 +801,7 @@ class VanigamController extends Controller
                 $health['voters_db'] = 'ok';
             } catch (\Exception $e) {
                 $health['voters_db'] = 'error';
-                $health['voters_db_error'] = $e->getMessage();
+                $health['voters_db_error'] = 'connection failed';
             }
 
             // Check Cache (including Redis connectivity)
@@ -848,7 +848,7 @@ class VanigamController extends Controller
                 }
             } catch (\Exception $e) {
                 $health['cache'] = 'error';
-                $health['cache_error'] = $e->getMessage();
+                $health['cache_error'] = 'connection failed';
                 Log::warning('Health check cache test failed', ['exception' => $e->getMessage()]);
             }
 
@@ -858,7 +858,7 @@ class VanigamController extends Controller
             Log::error('Health check failed', ['exception' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => 'Health check failed.',
                 'error_code' => 'HEALTH_CHECK_FAILED',
             ], 500);
         }
