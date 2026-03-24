@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Members — Vanigan Admin</title>
+  <title>Not Registered — Vanigan Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -26,7 +26,16 @@
     /* Page header */
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
     .page-header h2 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .total-badge { background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .total-badge { background: #fff3e0; color: #e65100; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+    /* Stats cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; }
+    .stat-card .stat-count { font-size: 1.6rem; font-weight: 800; color: #2e7d32; }
+    .stat-card .stat-label { font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600; }
+    .stat-card.orange .stat-count { color: #e65100; }
+    .stat-card.red .stat-count { color: #c62828; }
+    .stat-card.blue .stat-count { color: #1565c0; }
 
     /* Filters */
     .filters { background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
@@ -56,18 +65,15 @@
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     thead th { text-align: left; padding: 12px 14px; color: #888; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f0f2f5; background: #fafafa; }
     tbody td { padding: 12px 14px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
-    tbody tr:hover { background: #f8fdf8; cursor: pointer; }
-    tbody tr a.row-link { display: contents; color: inherit; text-decoration: none; }
-
-    .member-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e8f5e9; }
-    .member-avatar-placeholder { width: 36px; height: 36px; border-radius: 50%; background: #e8f5e9; color: #2e7d32; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
-    .member-name { font-weight: 600; color: #1a1a1a; }
-    .member-id { font-size: 0.72rem; color: #999; font-family: monospace; }
+    tbody tr:hover { background: #fffdf5; }
 
     .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
-    .badge-green { background: #e8f5e9; color: #2e7d32; }
-    .badge-orange { background: #fff3e0; color: #f57c00; }
-    .referral-count { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #2e7d32; }
+    .badge-step { background: #fff3e0; color: #e65100; }
+    .badge-step.step-mobile { background: #fce4ec; color: #c62828; }
+    .badge-step.step-otp { background: #fff3e0; color: #e65100; }
+    .badge-step.step-epic { background: #e3f2fd; color: #1565c0; }
+    .badge-step.step-photo { background: #f3e5f5; color: #7b1fa2; }
+    .badge-step.step-pin { background: #e8f5e9; color: #2e7d32; }
 
     /* Pagination */
     .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 16px; }
@@ -90,6 +96,7 @@
       table { font-size: 0.78rem; }
       thead th, tbody td { padding: 8px 10px; }
       .hide-mobile { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -99,10 +106,10 @@
     <div class="navbar-brand"><i class="bi bi-shield-check"></i> Vanigan Admin</div>
     <div class="navbar-nav">
       <a href="{{ route('admin.dashboard') }}"><i class="bi bi-grid-fill"></i> Dashboard</a>
-      <a href="{{ route('admin.users') }}" class="active"><i class="bi bi-people"></i> Members</a>
+      <a href="{{ route('admin.users') }}"><i class="bi bi-people"></i> Members</a>
       <a href="{{ route('admin.voters') }}"><i class="bi bi-person-vcard"></i> Voters</a>
       <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
-      <a href="{{ route('admin.not_registered') }}"><i class="bi bi-person-x"></i> Not Registered</a>
+      <a href="{{ route('admin.not_registered') }}" class="active"><i class="bi bi-person-x"></i> Not Registered</a>
       <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">@csrf<button type="submit"><i class="bi bi-box-arrow-right"></i> Logout</button></form>
     </div>
   </nav>
@@ -110,79 +117,100 @@
   <div class="container">
     <!-- Page Header -->
     <div class="page-header">
-      <h2><i class="bi bi-people-fill" style="color:#2e7d32;"></i> All Members</h2>
-      <span class="total-badge">{{ number_format($total) }} total</span>
+      <h2><i class="bi bi-person-x-fill" style="color:#e65100;"></i> Not Registered Members</h2>
+      <span class="total-badge">{{ number_format($total) }} incomplete</span>
     </div>
+
+    <!-- Step Stats -->
+    @if(!empty($stats))
+    <div class="stats-grid">
+      @php
+        $stepLabels = [
+          'mobile_entered' => ['Mobile Entered', 'red'],
+          'otp_verified' => ['OTP Verified', 'orange'],
+          'epic_validated' => ['EPIC Validated', 'blue'],
+          'photo_uploaded' => ['Photo Uploaded', ''],
+          'pin_set' => ['PIN Set', ''],
+        ];
+        $totalIncomplete = array_sum($stats);
+      @endphp
+      <div class="stat-card orange">
+        <div class="stat-count">{{ number_format($totalIncomplete) }}</div>
+        <div class="stat-label">Total Incomplete</div>
+      </div>
+      @foreach($stepLabels as $key => $info)
+        @if(isset($stats[$key]))
+        <div class="stat-card {{ $info[1] }}">
+          <div class="stat-count">{{ $stats[$key] }}</div>
+          <div class="stat-label">Stopped at {{ $info[0] }}</div>
+        </div>
+        @endif
+      @endforeach
+    </div>
+    @endif
 
     <!-- Filters -->
     <div class="filters">
-      <form method="GET" action="{{ route('admin.users') }}">
-        <input type="text" name="search" placeholder="Search name, EPIC, mobile, or ID..." value="{{ $search }}">
-        <select name="assembly">
-          <option value="">All Assemblies</option>
-          @foreach($assemblies as $a)
-          <option value="{{ $a }}" {{ $assembly === $a ? 'selected' : '' }}>{{ $a }}</option>
-          @endforeach
-        </select>
-        <select name="district">
-          <option value="">All Districts</option>
-          @foreach($districts as $d)
-          <option value="{{ $d }}" {{ $district === $d ? 'selected' : '' }}>{{ $d }}</option>
-          @endforeach
+      <form method="GET" action="{{ route('admin.not_registered') }}">
+        <input type="text" name="search" placeholder="Search mobile, name, or EPIC..." value="{{ $search }}">
+        <select name="step">
+          <option value="">All Steps</option>
+          <option value="mobile_entered" {{ $step === 'mobile_entered' ? 'selected' : '' }}>Stopped at Mobile</option>
+          <option value="otp_verified" {{ $step === 'otp_verified' ? 'selected' : '' }}>Stopped at OTP</option>
+          <option value="epic_validated" {{ $step === 'epic_validated' ? 'selected' : '' }}>Stopped at EPIC</option>
+          <option value="photo_uploaded" {{ $step === 'photo_uploaded' ? 'selected' : '' }}>Stopped at Photo</option>
+          <option value="pin_set" {{ $step === 'pin_set' ? 'selected' : '' }}>Stopped at PIN</option>
         </select>
         <button type="submit" class="filter-btn"><i class="bi bi-search"></i> Search</button>
-        @if($search || $assembly || $district)
-        <a href="{{ route('admin.users') }}" class="clear-btn"><i class="bi bi-x-circle"></i> Clear</a>
+        @if($search || $step)
+        <a href="{{ route('admin.not_registered') }}" class="clear-btn"><i class="bi bi-x-circle"></i> Clear</a>
         @endif
       </form>
     </div>
 
-    <!-- Members Table -->
+    <!-- Table -->
     <div class="section">
-      @if(count($members) > 0)
+      @if(count($users) > 0)
       <table>
         <thead>
           <tr>
-            <th></th>
-            <th>Member</th>
+            <th>#</th>
+            <th>Mobile</th>
+            <th>Name</th>
             <th class="hide-mobile">EPIC No</th>
-            <th>Assembly</th>
+            <th class="hide-mobile">Assembly</th>
             <th class="hide-mobile">District</th>
-            <th class="hide-mobile">Referrals</th>
-            <th>Status</th>
+            <th>Last Step</th>
+            <th class="hide-mobile">Started At</th>
+            <th class="hide-mobile">Last Activity</th>
           </tr>
         </thead>
         <tbody>
-          @foreach($members as $m)
-          <tr onclick="window.location='{{ route('admin.user.detail', $m['unique_id'] ?? '') }}'">
-            <td>
-              @if(!empty($m['photo_url']))
-              <img src="{{ $m['photo_url'] }}" class="member-avatar" alt="">
-              @else
-              <div class="member-avatar-placeholder">{{ strtoupper(substr($m['name'] ?? '?', 0, 1)) }}</div>
-              @endif
-            </td>
-            <td>
-              <div class="member-name">{{ $m['name'] ?? 'N/A' }}</div>
-              <div class="member-id">{{ $m['unique_id'] ?? '' }}</div>
-            </td>
-            <td class="hide-mobile" style="font-family:monospace;font-size:0.8rem;">{{ $m['epic_no'] ?? '' }}</td>
-            <td>{{ $m['assembly'] ?? '' }}</td>
-            <td class="hide-mobile">{{ $m['district'] ?? '' }}</td>
-            <td class="hide-mobile">
-              @if(($m['referral_count'] ?? 0) > 0)
-              <span class="referral-count"><i class="bi bi-share-fill"></i> {{ $m['referral_count'] }}</span>
-              @else
-              <span style="color:#ccc;">0</span>
-              @endif
-            </td>
-            <td>
-              @if(!empty($m['details_completed']))
-              <span class="badge badge-green"><i class="bi bi-check-circle"></i> Complete</span>
-              @else
-              <span class="badge badge-orange"><i class="bi bi-clock"></i> Pending</span>
-              @endif
-            </td>
+          @foreach($users as $i => $u)
+          @php
+            $stepClass = '';
+            $stepLabel = $u['last_step'] ?? 'unknown';
+            if (str_contains($stepLabel, 'mobile')) $stepClass = 'step-mobile';
+            elseif (str_contains($stepLabel, 'otp')) $stepClass = 'step-otp';
+            elseif (str_contains($stepLabel, 'epic')) $stepClass = 'step-epic';
+            elseif (str_contains($stepLabel, 'photo')) $stepClass = 'step-photo';
+            elseif (str_contains($stepLabel, 'pin')) $stepClass = 'step-pin';
+
+            $stepDisplay = ucwords(str_replace('_', ' ', $stepLabel));
+
+            $startedAt = isset($u['started_at']) ? \Carbon\Carbon::parse($u['started_at'])->setTimezone('Asia/Kolkata')->format('d M Y, h:i A') : '—';
+            $lastActivity = isset($u['last_activity']) ? \Carbon\Carbon::parse($u['last_activity'])->setTimezone('Asia/Kolkata')->format('d M Y, h:i A') : '—';
+          @endphp
+          <tr>
+            <td style="color:#999;">{{ ($page - 1) * 20 + $i + 1 }}</td>
+            <td style="font-family:monospace;font-weight:600;">{{ $u['mobile'] ?? '' }}</td>
+            <td>{{ $u['name'] ?? '—' }}</td>
+            <td class="hide-mobile" style="font-family:monospace;font-size:0.8rem;">{{ $u['epic_no'] ?? '—' }}</td>
+            <td class="hide-mobile">{{ $u['assembly'] ?? '—' }}</td>
+            <td class="hide-mobile">{{ $u['district'] ?? '—' }}</td>
+            <td><span class="badge badge-step {{ $stepClass }}">{{ $stepDisplay }}</span></td>
+            <td class="hide-mobile" style="font-size:0.78rem;color:#666;">{{ $startedAt }}</td>
+            <td class="hide-mobile" style="font-size:0.78rem;color:#666;">{{ $lastActivity }}</td>
           </tr>
           @endforeach
         </tbody>
@@ -192,26 +220,28 @@
       @if($pages > 1)
       <div class="pagination">
         @if($page > 1)
-        <a href="{{ route('admin.users', array_merge(request()->query(), ['page' => $page - 1])) }}"><i class="bi bi-chevron-left"></i></a>
+          <a href="{{ route('admin.not_registered', array_merge(request()->query(), ['page' => $page - 1])) }}">&laquo;</a>
         @endif
 
         @for($p = max(1, $page - 2); $p <= min($pages, $page + 2); $p++)
           @if($p === $page)
-          <span class="current">{{ $p }}</span>
+            <span class="current">{{ $p }}</span>
           @else
-          <a href="{{ route('admin.users', array_merge(request()->query(), ['page' => $p])) }}">{{ $p }}</a>
+            <a href="{{ route('admin.not_registered', array_merge(request()->query(), ['page' => $p])) }}">{{ $p }}</a>
           @endif
         @endfor
 
         @if($page < $pages)
-        <a href="{{ route('admin.users', array_merge(request()->query(), ['page' => $page + 1])) }}"><i class="bi bi-chevron-right"></i></a>
+          <a href="{{ route('admin.not_registered', array_merge(request()->query(), ['page' => $page + 1])) }}">&raquo;</a>
         @endif
       </div>
       @endif
+
       @else
       <div class="empty-state">
-        <i class="bi bi-search"></i>
-        <p>No members found{{ $search ? ' matching "' . e($search) . '"' : '' }}</p>
+        <i class="bi bi-check-circle"></i>
+        <p>No incomplete registrations found.</p>
+        <p style="font-size:0.8rem;margin-top:4px;">All users who started registration have completed it!</p>
       </div>
       @endif
     </div>

@@ -2240,6 +2240,17 @@
         return r.json();
       }
 
+      /* ── Registration Tracking (fire-and-forget, non-blocking) ── */
+      function trackStep(step, extra = {}) {
+        if (!mobile) return;
+        const body = { mobile, step, ...extra };
+        fetch('/api/vanigam/track-step', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }).catch(() => {}); // silently ignore tracking errors
+      }
+
       /* ── OTP Resend ── */
       window.doResendOtp = async function () {
         const btn = document.getElementById('resendOtpBtn');
@@ -2404,6 +2415,7 @@
               const res = await api('/api/vanigam/send-otp', { mobile: m });
               hideTyping();
               if (res.success) {
+                trackStep('mobile_entered');
                 state = S.AWAIT_OTP;
                 setNumeric(L('ph_otp'));
                 unlockInput();
@@ -2462,6 +2474,7 @@
                 await botReply(h, 1000);
               } else {
                 // New member — ask EPIC
+                trackStep('otp_verified');
                 state = S.AWAIT_EPIC;
                 setEpicInput(L('ph_epic'));
                 unlockInput();
@@ -2491,6 +2504,7 @@
             if (res.success) {
               epic = ep;
               voter = res.voter;
+              trackStep('epic_validated', { epic_no: ep, name: voter.name || '', assembly: voter.assembly_name || '', district: voter.district || '' });
               let h = L('voter_found') + '<div class="voter-details-card">';
               const fields = [
                 ['Name', voter.name || ''],
@@ -2575,6 +2589,7 @@
             await botReply(L('pin_mismatch'), 600);
             return;
           }
+          trackStep('pin_set');
           await botReply(L('pin_set_success'), 500);
           await askAdditionalDetails();
 
@@ -3045,6 +3060,7 @@
               return;
             }
             photoUrl = uploadRes.photo_url;
+            trackStep('photo_uploaded');
           }
 
           // Step 2: Generate card

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\MongoService;
+use App\Services\TrackingMongoService;
 use App\Models\AssemblyConstituency;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -11,10 +12,12 @@ use Exception;
 class AdminPanelController extends Controller
 {
     protected MongoService $mongo;
+    protected TrackingMongoService $tracking;
 
-    public function __construct(MongoService $mongo)
+    public function __construct(MongoService $mongo, TrackingMongoService $tracking)
     {
         $this->mongo = $mongo;
+        $this->tracking = $tracking;
     }
 
     public function showLogin()
@@ -331,6 +334,29 @@ class AdminPanelController extends Controller
             'district' => $district,
             'assemblies' => $assemblies,
             'districts' => $districts,
+        ]);
+    }
+
+    public function notRegistered(Request $request)
+    {
+        $page = max(1, (int) $request->input('page', 1));
+        $limit = 20;
+        $search = $request->input('search', '');
+        $step = $request->input('step', '');
+
+        $data = $this->tracking->getIncompleteRegistrations($page, $limit, $search ?: null, $step ?: null);
+        $stats = $this->tracking->getStepStats();
+
+        $pages = (int) ceil(($data['total'] ?? 0) / max($limit, 1));
+
+        return view('admin.not-registered', [
+            'users' => $data['users'],
+            'total' => $data['total'],
+            'page' => $page,
+            'pages' => $pages,
+            'search' => $search,
+            'step' => $step,
+            'stats' => $stats,
         ]);
     }
 

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\TwoFactorOtpService;
 use App\Services\CacheService;
 use App\Services\MongoService;
+use App\Services\TrackingMongoService;
 use App\Helpers\VoterHelper;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
@@ -16,13 +17,15 @@ class VanigamController extends Controller
 {
     protected $otpService;
     protected $mongo;
+    protected $tracking;
     protected $cloudinary;
     protected $cache;
 
-    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo, CacheService $cache)
+    public function __construct(TwoFactorOtpService $otpService, MongoService $mongo, TrackingMongoService $tracking, CacheService $cache)
     {
         $this->otpService = $otpService;
         $this->mongo = $mongo;
+        $this->tracking = $tracking;
         $this->cache = $cache;
         $this->cloudinary = new \Cloudinary\Cloudinary(config('cloudinary.cloud_url'));
     }
@@ -469,6 +472,9 @@ class VanigamController extends Controller
             }
 
             Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}" . ($request->input('manually_entered') ? ' (Manual Entry)' : ''));
+
+            // Remove from tracking DB — user has completed registration
+            $this->tracking->removeByMobile($mobile);
 
             return response()->json([
                 'success' => true,
@@ -1173,6 +1179,37 @@ class VanigamController extends Controller
         } catch (Exception $e) {
             Log::error('VanigamController::checkLoanStatus Error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
+        }
+    }
+
+    /**
+     * POST /api/vanigam/track-step
+     * Track user registration progress in the tracking MongoDB.
+     */
+    public function trackRegistrationStep(Request $request)
+    {
+        try {
+            $request->validate([
+                'mobile' => 'required|digits:10',
+                'step' => 'required|string|max:50',
+            ]);
+
+            $mobile = $request->input('mobile');
+            $step = $request->input('step');
+            $data = array_filter([
+                'name' => $request->input('name', ''),
+                'epic_no' => $request->input('epic_no', ''),
+                'assembly' => $request->input('assembly', ''),
+                'district' => $request->input('district', ''),
+            ]);
+
+            $this->tracking->trackStep($mobile, $step, $data);
+
+            return response()->json(['success' => true]);
+        } catch (Exception $e) {
+            // Tracking failures should not break the user flow
+            Log::warning('TrackStep Error: ' . $e->getMessage());
+            return response()->json(['success' => true]);
         }
     }
 

@@ -89,4 +89,8 @@ Route::prefix('vanigam')->group(function () {
 
     Route::post('/check-loan-status', [VanigamController::class, 'checkLoanStatus'])
         ->middleware('throttle:referral_loan');
+
+    // === Registration Tracking - Lightweight ===
+    Route::post('/track-step', [VanigamController::class, 'trackRegistrationStep'])
+        ->middleware('throttle:referral_loan');
 });
