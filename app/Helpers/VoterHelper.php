@@ -266,6 +266,15 @@ class VoterHelper
         }
         $relationName = trim($relationName);
         
+        // Fix swapped AC_NO / ASSEMBLY_NAME in some MySQL tables:
+        // If AC_NO contains text (assembly name) and ASSEMBLY_NAME contains a number, swap them.
+        $acNo = $row['AC_NO'] ?? '';
+        $assemblyName = $row['ASSEMBLY_NAME'] ?? '';
+        if (!empty($acNo) && !empty($assemblyName) && !is_numeric($acNo) && is_numeric($assemblyName)) {
+            $row['AC_NO'] = $assemblyName;
+            $row['ASSEMBLY_NAME'] = $acNo;
+        }
+
         return [
             'epic_no' => $epicNo,
             'name' => $fullName,

@@ -301,11 +301,32 @@
       const to = '{{ $to }}';
       const total = {{ $total }};
       const totalReferralCount = {{ $total_referral_count }};
+      const assemblyFilter = '{{ $assembly ?? '' }}';
+      const districtFilter = '{{ $district ?? '' }}';
 
       let filterLabel = 'Today';
       if (filter === 'weekly') filterLabel = 'This Week';
       else if (filter === 'monthly') filterLabel = 'This Month';
       else if (filter === 'custom') filterLabel = 'Custom Range';
+
+      // Build filter info for header and filename
+      let filterInfo = '';
+      let fileNameParts = ['TNVS_Report'];
+      if (assemblyFilter) {
+        filterInfo += '<div style="font-size:12px;color:#007a38;font-weight:600;margin-bottom:2px;">Assembly: ' + assemblyFilter + '</div>';
+        fileNameParts.push(assemblyFilter.replace(/[^a-zA-Z0-9]/g, '_'));
+      } else {
+        filterInfo += '<div style="font-size:12px;color:#555;margin-bottom:2px;">Assembly: All Assemblies</div>';
+      }
+      if (districtFilter) {
+        filterInfo += '<div style="font-size:12px;color:#007a38;font-weight:600;margin-bottom:2px;">District: ' + districtFilter + '</div>';
+        fileNameParts.push(districtFilter.replace(/[^a-zA-Z0-9]/g, '_'));
+      } else {
+        filterInfo += '<div style="font-size:12px;color:#555;margin-bottom:2px;">District: All Districts</div>';
+      }
+      fileNameParts.push(filterLabel.replace(/\s/g, '_'));
+      fileNameParts.push(from + '_to_' + to);
+      const fileName = fileNameParts.join('_');
 
       // Clone table rows for PDF (without images to keep it clean)
       let rows = '';
@@ -344,7 +365,7 @@
           + '</tr>';
       });
 
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Report - ${filterLabel}</title>
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${fileName}</title>
         <style>
           body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
           h1 { font-size: 18px; color: #007a38; margin-bottom: 4px; }
@@ -360,6 +381,7 @@
       </head><body>
         <h1>Tamil Nadu Vanigargalin Sangamam — Members Report</h1>
         <div class="subtitle">${filterLabel}: ${from} to ${to}</div>
+        ${filterInfo}
         <div class="stats">
           <div class="stat"><strong>${total}</strong><span>Total Registered</span></div>
           <div class="stat"><strong>${totalReferralCount}</strong><span>Total Referrals</span></div>
