@@ -446,9 +446,16 @@ class VanigamController extends Controller
                 'created_at' => now()->toISOString(),
             ];
 
-            // Hash PIN if provided
+            // Hash PIN if provided (reject weak/common PINs)
             $pin = $request->input('pin');
             if ($pin) {
+                if (self::isWeakPin($pin)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'PIN is too easy to guess. Please choose a stronger PIN (avoid 1234, 0000, 1111, etc.).',
+                        'error_code' => 'WEAK_PIN',
+                    ], 400);
+                }
                 $memberData['pin_hash'] = password_hash($pin, PASSWORD_BCRYPT);
             }
 
@@ -897,8 +904,12 @@ class VanigamController extends Controller
     public function resetMembers(Request $request)
     {
         try {
-            $key = $request->input('confirm_key');
-            if ($key !== config('vanigam.reset_key')) {
+            $key = $request->input('confirm_key', '');
+            $expectedKey = config('vanigam.reset_key');
+            if (empty($expectedKey)) {
+                return response()->json(['success' => false, 'message' => 'Reset key not configured.', 'error_code' => 'RESET_KEY_NOT_SET'], 500);
+            }
+            if (empty($key) || !hash_equals($expectedKey, $key)) {
                 return response()->json(['success' => false, 'message' => 'Invalid confirmation key.', 'error_code' => 'INVALID_RESET_KEY'], 403);
             }
 
@@ -1163,5 +1174,27 @@ class VanigamController extends Controller
             Log::error('VanigamController::checkLoanStatus Error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'An error occurred.', 'error_code' => 'INTERNAL_ERROR'], 500);
         }
+    }
+
+    /**
+     * Check if a 4-digit PIN is weak/common and should be rejected.
+     * Returns true if the PIN is weak.
+     */
+    public static function isWeakPin(string $pin): bool
+    {
+        $blacklist = [
+            '0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999',
+            '1234', '4321', '1212', '2121', '1122', '2211', '0123', '3210',
+            '5678', '8765', '6789', '9876', '0987', '7890',
+            '1010', '2020', '6969', '1357', '2468',
+        ];
+        if (in_array($pin, $blacklist, true)) {
+            return true;
+        }
+        // Reject all-same-digit (already covered above but defensive)
+        if (preg_match('/^(\d)\1{3}$/', $pin)) {
+            return true;
+        }
+        return false;
     }
 }

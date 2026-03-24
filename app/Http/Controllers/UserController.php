@@ -15,6 +15,7 @@ use App\Models\BoothAgentRequest;
 use App\Services\OtpService;
 use App\Services\CacheService;
 use App\Helpers\SecurityHelper;
+use App\Http\Controllers\VanigamController;
 
 class UserController extends Controller
 {
@@ -1074,6 +1075,15 @@ class UserController extends Controller
                     'success' => false,
                     'message' => 'Invalid OTP. Please try again.',
                     'error_type' => 'invalid_otp'
+                ], 400);
+            }
+
+            // Reject weak PINs
+            if (VanigamController::isWeakPin($newPin)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PIN is too easy to guess. Avoid 1234, 0000, 1111, etc.',
+                    'error_type' => 'weak_pin'
                 ], 400);
             }
 

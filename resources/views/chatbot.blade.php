@@ -989,6 +989,7 @@
         set_pin: { en: '<i class="bi bi-shield-lock"></i> Please set a <strong>4-digit PIN</strong> for your membership.', ta: '<i class="bi bi-shield-lock"></i> உங்கள் உறுப்பினருக்கான <strong>4 இலக்க PIN</strong>ஐ உருவாக்குங்கள்.' },
         pin_hint: { en: 'This PIN will be used to verify your identity when accessing your card from another device.', ta: 'தாங்கள் ஒவ்வொரு முறையும் பயன்படுத்தும் போது தங்கள் மொபைல் எண் மற்றும் தாங்கள் உருவாக்கும் கடவுச்சொல் பயன்படுத்தி உள்ளீடு செய்ய முடியும். பிறகு அதை உறுதிப்படுத்துங்கள்.' },
         pin_4digits: { en: 'Please enter exactly <strong>4 digits</strong> for your PIN.', ta: 'உங்கள் PIN க்கு சரியாக <strong>4 இலக்கங்களை</strong> உள்ளிடவும்.' },
+        weak_pin: { en: '<i class="bi bi-exclamation-triangle"></i> That PIN is too easy to guess (e.g. 1234, 0000, 1111). Please choose a <strong>stronger PIN</strong>.', ta: '<i class="bi bi-exclamation-triangle"></i> அந்த PIN மிகவும் எளிதானது (எ.கா. 1234, 0000, 1111). <strong>வலுவான PIN</strong> ஐ தேர்ந்தெடுக்கவும்.' },
         confirm_pin: { en: '<i class="bi bi-shield-check"></i> Please <strong>re-enter your PIN</strong> to confirm:', ta: '<i class="bi bi-shield-check"></i> உறுதிப்படுத்த உங்கள் <strong>PIN ஐ மீண்டும் உள்ளிடவும்</strong>:' },
         ph_reenter_pin: { en: 'Re-enter PIN to confirm...', ta: 'PIN ஐ மீண்டும் உள்ளிடவும்...' },
         pin_mismatch: { en: '<i class="bi bi-x-circle"></i> PINs do not match. Please set your <strong>4-digit PIN</strong> again:', ta: '<i class="bi bi-x-circle"></i> PIN பொருந்தவில்லை. உங்கள் <strong>4 இலக்க PIN</strong>ஐ மீண்டும் அமைக்கவும்:' },
@@ -2214,6 +2215,13 @@
         sendBtn.disabled = false;
       }
 
+      function isWeakPin(p) {
+        const blacklist = ['0000','1111','2222','3333','4444','5555','6666','7777','8888','9999','1234','4321','1212','2121','1122','2211','0123','3210','5678','8765','6789','9876','0987','7890','1010','2020','6969','1357','2468'];
+        if (blacklist.includes(p)) return true;
+        if (/^(\d)\1{3}$/.test(p)) return true;
+        return false;
+      }
+
       function showAttach() { attachBtn.classList.add('visible'); }
       function hideAttach() { attachBtn.classList.remove('visible'); }
       function lockInput() { input.disabled = true; sendBtn.disabled = true; }
@@ -2544,6 +2552,11 @@
           if (p.length !== 4) {
             userMsg(txt);
             await botReply(L('pin_4digits'), 500);
+            return;
+          }
+          if (isWeakPin(p)) {
+            userMsg('\u2022\u2022\u2022\u2022');
+            await botReply(L('weak_pin'), 500);
             return;
           }
           userMsg('\u2022\u2022\u2022\u2022');

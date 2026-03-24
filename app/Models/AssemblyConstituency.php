@@ -42,7 +42,7 @@ class AssemblyConstituency extends Model
     public static function getTableByAssembly(string $assemblyName): ?string
     {
         $assemblies = self::getAllAssemblies();
-        $assembly = $assemblies->firstWhere('assembly_name', 'ilike', $assemblyName);
+        $assembly = $assemblies->first(fn($a) => strcasecmp($a->assembly_name, $assemblyName) === 0);
         return $assembly?->table_name;
     }
 

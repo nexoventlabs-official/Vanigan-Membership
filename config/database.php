@@ -65,8 +65,8 @@ return [
 
         'voters' => [
             'driver' => 'mysql',
-            'database' => env('DB_DATABASE', 'hkqbnymdjz'),
-            'host' => env('DB_HOST', '174.138.49.116'),
+            'database' => env('DB_DATABASE', ''),
+            'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', 3306),
             'username' => env('DB_USERNAME', ''),
             'password' => env('DB_PASSWORD', ''),
