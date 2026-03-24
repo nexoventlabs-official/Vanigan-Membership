@@ -152,6 +152,30 @@
         <input type="date" name="to" class="date-input" value="{{ $filter === 'custom' ? $to : '' }}" max="{{ now()->format('Y-m-d') }}" required>
         <button type="submit" class="apply-btn"><i class="bi bi-funnel"></i> Apply</button>
       </form>
+      <div class="filter-divider"></div>
+      <form action="{{ route('admin.reports') }}" method="GET" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <input type="hidden" name="filter" value="{{ $filter }}">
+        @if($filter === 'custom')
+        <input type="hidden" name="from" value="{{ $from }}">
+        <input type="hidden" name="to" value="{{ $to }}">
+        @endif
+        <select name="assembly" class="date-input" style="min-width:140px;">
+          <option value="">All Assemblies</option>
+          @foreach($assemblies as $a)
+          <option value="{{ $a }}" {{ ($assembly ?? '') === $a ? 'selected' : '' }}>{{ $a }}</option>
+          @endforeach
+        </select>
+        <select name="district" class="date-input" style="min-width:140px;">
+          <option value="">All Districts</option>
+          @foreach($districts as $d)
+          <option value="{{ $d }}" {{ ($district ?? '') === $d ? 'selected' : '' }}>{{ $d }}</option>
+          @endforeach
+        </select>
+        <button type="submit" class="apply-btn"><i class="bi bi-funnel"></i> Filter</button>
+        @if(!empty($assembly) || !empty($district))
+        <a href="{{ route('admin.reports', ['filter' => $filter, 'from' => $filter === 'custom' ? $from : '', 'to' => $filter === 'custom' ? $to : '']) }}" style="font-size:0.78rem;color:#c62828;text-decoration:none;font-weight:600;"><i class="bi bi-x-circle"></i> Clear</a>
+        @endif
+      </form>
     </div>
 
     <!-- Stat Cards -->
@@ -191,6 +215,7 @@
               <th>Assembly</th>
               <th>District</th>
               <th>Mobile</th>
+              <th>Registered At</th>
               <th>Referred By</th>
               <th style="text-align:center;">Referral Count</th>
               <th>Your Members</th>
@@ -214,6 +239,17 @@
               <td style="font-size:0.8rem;">{{ $m['assembly'] ?? '' }}</td>
               <td style="font-size:0.8rem;">{{ $m['district'] ?? '' }}</td>
               <td style="font-size:0.8rem;">{{ $m['mobile'] ?? '' }}</td>
+              <td style="font-size:0.75rem;white-space:nowrap;color:#555;">
+                @php
+                  $regDate = '';
+                  if (!empty($m['created_at'])) {
+                    try { $regDate = \Carbon\Carbon::parse($m['created_at'])->setTimezone('Asia/Kolkata')->format('d M Y, h:i A'); } catch (\Exception $e) { $regDate = $m['created_at']; }
+                  } elseif (!empty($m['_id'])) {
+                    try { $oid = $m['_id']; if (is_string($oid) && strlen($oid) === 24) { $ts = hexdec(substr($oid, 0, 8)); $regDate = \Carbon\Carbon::createFromTimestamp($ts)->setTimezone('Asia/Kolkata')->format('d M Y, h:i A'); } } catch (\Exception $e) {}
+                  }
+                @endphp
+                {{ $regDate ?: '—' }}
+              </td>
               <td>
                 @if(!empty($m['referred_by']))
                   <span class="referrer-tag"><i class="bi bi-person-check"></i> {{ $m['referrer_name'] ?? $m['referred_by'] }}</span>
@@ -282,10 +318,11 @@
         const assembly = cells[4]?.innerText?.trim() || '';
         const district = cells[5]?.innerText?.trim() || '';
         const mobile = cells[6]?.innerText?.trim() || '';
-        const referrer = cells[7]?.innerText?.trim() || '—';
-        const refCount = cells[8]?.innerText?.trim() || '0';
+        const registeredAt = cells[7]?.innerText?.trim() || '—';
+        const referrer = cells[8]?.innerText?.trim() || '—';
+        const refCount = cells[9]?.innerText?.trim() || '0';
         // Get each referred ID on its own line
-        const yourMembersEl = cells[9];
+        const yourMembersEl = cells[10];
         let yourMembersHtml = '—';
         if (yourMembersEl) {
           const links = yourMembersEl.querySelectorAll('a');
@@ -300,6 +337,7 @@
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + assembly + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + district + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + mobile + '</td>'
+          + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + registeredAt + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + referrer + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;text-align:center;">' + refCount + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + yourMembersHtml + '</td>'
@@ -329,7 +367,7 @@
         </div>
         <table>
           <thead><tr>
-            <th>#</th><th>Name</th><th>Unique ID</th><th>Assembly</th><th>District</th><th>Mobile</th><th>Referred By</th><th>Ref Count</th><th>Your Members</th>
+            <th>#</th><th>Name</th><th>Unique ID</th><th>Assembly</th><th>District</th><th>Mobile</th><th>Registered At</th><th>Referred By</th><th>Ref Count</th><th>Your Members</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>

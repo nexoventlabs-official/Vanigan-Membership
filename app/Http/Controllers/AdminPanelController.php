@@ -168,7 +168,11 @@ class AdminPanelController extends Controller
                     $sql = implode(' UNION ALL ', $unions);
                     $rows = DB::connection('voters')->select($sql, $bindings);
                     foreach ($rows as $row) {
-                        $allResults[] = (array) $row;
+                        $v = (array) $row;
+                        if (!empty($v['AC_NO']) && !empty($v['ASSEMBLY_NAME']) && !is_numeric($v['AC_NO']) && is_numeric($v['ASSEMBLY_NAME'])) {
+                            [$v['AC_NO'], $v['ASSEMBLY_NAME']] = [$v['ASSEMBLY_NAME'], $v['AC_NO']];
+                        }
+                        $allResults[] = $v;
                     }
                 }
 
@@ -188,7 +192,13 @@ class AdminPanelController extends Controller
                             "SELECT `EPIC_NO`, `FM_NAME_EN`, `LASTNAME_EN`, `AC_NO`, `ASSEMBLY_NAME`, `DISTRICT_NAME`, `AGE`, `GENDER`, `MOBILE_NO`, `PART_NO`, `SECTION_NO` FROM `{$tables[0]}` ORDER BY `SLNOINPART` ASC LIMIT ? OFFSET ?",
                             [$limit, $offset]
                         );
-                        $voters = array_map(fn($r) => (array) $r, $rows);
+                        $voters = array_map(function($r) {
+                            $v = (array) $r;
+                            if (!empty($v['AC_NO']) && !empty($v['ASSEMBLY_NAME']) && !is_numeric($v['AC_NO']) && is_numeric($v['ASSEMBLY_NAME'])) {
+                                [$v['AC_NO'], $v['ASSEMBLY_NAME']] = [$v['ASSEMBLY_NAME'], $v['AC_NO']];
+                            }
+                            return $v;
+                        }, $rows);
                     }
                 } elseif ($districtFilter) {
                     $total = AssemblyConstituency::where('district_name', 'LIKE', $districtFilter)->sum('total_voters');
@@ -204,7 +214,14 @@ class AdminPanelController extends Controller
                             "SELECT `EPIC_NO`, `FM_NAME_EN`, `LASTNAME_EN`, `AC_NO`, `ASSEMBLY_NAME`, `DISTRICT_NAME`, `AGE`, `GENDER`, `MOBILE_NO`, `PART_NO`, `SECTION_NO` FROM `{$table}` ORDER BY `SLNOINPART` ASC LIMIT ? OFFSET ?",
                             [$remaining, $skip]
                         );
-                        foreach ($rows as $r) { $voters[] = (array) $r; $remaining--; }
+                        foreach ($rows as $r) {
+                                $v = (array) $r;
+                                if (!empty($v['AC_NO']) && !empty($v['ASSEMBLY_NAME']) && !is_numeric($v['AC_NO']) && is_numeric($v['ASSEMBLY_NAME'])) {
+                                    [$v['AC_NO'], $v['ASSEMBLY_NAME']] = [$v['ASSEMBLY_NAME'], $v['AC_NO']];
+                                }
+                                $voters[] = $v;
+                                $remaining--;
+                            }
                         $skip = 0;
                     }
                 } else {
@@ -223,7 +240,14 @@ class AdminPanelController extends Controller
                                 "SELECT `EPIC_NO`, `FM_NAME_EN`, `LASTNAME_EN`, `AC_NO`, `ASSEMBLY_NAME`, `DISTRICT_NAME`, `AGE`, `GENDER`, `MOBILE_NO`, `PART_NO`, `SECTION_NO` FROM `{$table}` ORDER BY `SLNOINPART` ASC LIMIT ? OFFSET ?",
                                 [$remaining, $skip]
                             );
-                            foreach ($rows as $r) { $voters[] = (array) $r; $remaining--; }
+                            foreach ($rows as $r) {
+                                $v = (array) $r;
+                                if (!empty($v['AC_NO']) && !empty($v['ASSEMBLY_NAME']) && !is_numeric($v['AC_NO']) && is_numeric($v['ASSEMBLY_NAME'])) {
+                                    [$v['AC_NO'], $v['ASSEMBLY_NAME']] = [$v['ASSEMBLY_NAME'], $v['AC_NO']];
+                                }
+                                $voters[] = $v;
+                                $remaining--;
+                            }
                             $skip = 0;
                         }
                     }
@@ -286,7 +310,14 @@ class AdminPanelController extends Controller
                 break;
         }
 
-        $reportData = $this->mongo->getReportMembers($from, $to);
+        $assembly = $request->input('assembly', '');
+        $district = $request->input('district', '');
+
+        $reportData = $this->mongo->getReportMembers($from, $to, $assembly ?: null, $district ?: null);
+
+        // Get distinct assembly and district values for filter dropdowns
+        $assemblies = $this->mongo->getDistinctValues('assembly');
+        $districts = $this->mongo->getDistinctValues('district');
 
         return view('admin.reports', [
             'members' => $reportData['members'],
@@ -296,6 +327,10 @@ class AdminPanelController extends Controller
             'filter' => $filter,
             'from' => $from,
             'to' => $to,
+            'assembly' => $assembly,
+            'district' => $district,
+            'assemblies' => $assemblies,
+            'districts' => $districts,
         ]);
     }
 
@@ -329,6 +364,15 @@ class AdminPanelController extends Controller
 
             if (!$voter) {
                 abort(404, 'Voter not found.');
+            }
+
+            // Fix swapped AC_NO / ASSEMBLY_NAME in some MySQL tables:
+            // If AC_NO contains text and ASSEMBLY_NAME contains a number, swap them.
+            $acNo = $voter['AC_NO'] ?? '';
+            $assemblyName = $voter['ASSEMBLY_NAME'] ?? '';
+            if (!empty($acNo) && !empty($assemblyName) && !is_numeric($acNo) && is_numeric($assemblyName)) {
+                $voter['AC_NO'] = $assemblyName;
+                $voter['ASSEMBLY_NAME'] = $acNo;
             }
 
             return view('admin.voter-detail', ['voter' => (object) $voter]);
