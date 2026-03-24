@@ -1343,8 +1343,8 @@
           html += '<div style="position:absolute;top:57%;left:0;right:0;text-align:center;padding:0 8px;">';
           html += '<p style="font-size:0.62rem;font-weight:700;color:#009245;margin:0;">' + (m.name || '') + '</p>';
           html += '<p style="font-size:0.48rem;font-weight:600;margin:2px 0 0;">' + (m.membership || 'Member') + '</p>';
-          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.assembly || '') + '</p>';
-          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.district || '') + '</p>';
+          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.assembly ? m.assembly + ' [LA]' : '') + '</p>';
+          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.district ? m.district + ' [Dist]' : '') + '</p>';
           html += '<p style="font-size:0.42rem;margin:2px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
           html += '</div></div></div>';
 

@@ -61,8 +61,10 @@ class CardGenerationService
 
             $this->drawTextField($card, $voterData['voter_name'] ?? '', self::NAME_COORDS);
             $this->drawTextField($card, $voterData['epic_no'] ?? '', self::VOTER_ID_COORDS);
-            $this->drawTextField($card, $voterData['assembly_name'] ?? '', self::ASSEMBLY_COORDS);
-            $this->drawTextField($card, $voterData['district'] ?? '', self::DISTRICT_COORDS);
+            $assemblyDisplay = !empty($voterData['assembly_name']) ? $voterData['assembly_name'] . ' [LA]' : '';
+            $districtDisplay = !empty($voterData['district']) ? $voterData['district'] . ' [Dist]' : '';
+            $this->drawTextField($card, $assemblyDisplay, self::ASSEMBLY_COORDS);
+            $this->drawTextField($card, $districtDisplay, self::DISTRICT_COORDS);
 
             if ($photoPath && file_exists($photoPath)) {
                 Log::info("Photo file exists, calling pastePhoto");

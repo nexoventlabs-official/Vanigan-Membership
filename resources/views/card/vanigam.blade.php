@@ -344,10 +344,10 @@
               <p class="designation">{{ $member->membership ?? 'Member' }}</p>
             </div>
             <div class="front-line">
-              <p class="detail-line">{{ $member->assembly ?? '' }}</p>
+              <p class="detail-line">{{ !empty($member->assembly) ? $member->assembly . ' [LA]' : '' }}</p>
             </div>
             <div class="front-line">
-              <p class="detail-line">{{ $member->district ?? '' }}</p>
+              <p class="detail-line">{{ !empty($member->district) ? $member->district . ' [Dist]' : '' }}</p>
             </div>
             <div class="front-line">
               <p class="id-number">{{ $member->unique_id ?? '' }}</p>

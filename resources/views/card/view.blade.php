@@ -381,8 +381,8 @@
         }
         document.getElementById('memberName').textContent = m.name || '';
         document.getElementById('memberMembership').textContent = m.membership || 'Member';
-        document.getElementById('memberAssembly').textContent = m.assembly || '';
-        document.getElementById('memberDistrict').textContent = m.district || '';
+        document.getElementById('memberAssembly').textContent = m.assembly ? m.assembly + ' [LA]' : '';
+        document.getElementById('memberDistrict').textContent = m.district ? m.district + ' [Dist]' : '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields
