@@ -2244,6 +2244,7 @@
       function trackStep(step, extra = {}) {
         if (!mobile) return;
         const body = { mobile, step, ...extra };
+        if (referrerUniqueId) body.referrer_unique_id = referrerUniqueId;
         fetch('/api/vanigam/track-step', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

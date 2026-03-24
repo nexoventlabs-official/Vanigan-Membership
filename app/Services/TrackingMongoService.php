@@ -108,7 +108,7 @@ class TrackingMongoService
      * Get all incomplete registrations (users who started but didn't generate card).
      * Supports pagination, search, and sorting.
      */
-    public function getIncompleteRegistrations(int $page = 1, int $limit = 20, ?string $search = null, ?string $step = null): array
+    public function getIncompleteRegistrations(int $page = 1, int $limit = 20, ?string $search = null, ?string $step = null, ?string $from = null, ?string $to = null): array
     {
         if (!$this->enabled) {
             return ['users' => [], 'total' => 0];
@@ -128,6 +128,18 @@ class TrackingMongoService
 
             if ($step) {
                 $filter['last_step'] = $step;
+            }
+
+            // Date filtering on started_at (stored as ISO string)
+            if ($from || $to) {
+                $dateFilter = [];
+                if ($from) {
+                    $dateFilter['$gte'] = $from . 'T00:00:00+05:30';
+                }
+                if ($to) {
+                    $dateFilter['$lte'] = $to . 'T23:59:59+05:30';
+                }
+                $filter['started_at'] = $dateFilter;
             }
 
             $total = $this->collection->countDocuments($filter);

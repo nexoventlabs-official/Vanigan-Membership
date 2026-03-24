@@ -1201,7 +1201,16 @@ class VanigamController extends Controller
                 'epic_no' => $request->input('epic_no', ''),
                 'assembly' => $request->input('assembly', ''),
                 'district' => $request->input('district', ''),
+                'referrer_unique_id' => $request->input('referrer_unique_id', ''),
             ]);
+
+            // If referrer_unique_id is provided, look up the referrer's name
+            if (!empty($data['referrer_unique_id'])) {
+                $referrer = $this->mongo->findMemberByUniqueId($data['referrer_unique_id']);
+                if ($referrer) {
+                    $data['referrer_name'] = $referrer['name'] ?? '';
+                }
+            }
 
             $this->tracking->trackStep($mobile, $step, $data);
 

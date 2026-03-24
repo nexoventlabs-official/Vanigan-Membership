@@ -343,8 +343,34 @@ class AdminPanelController extends Controller
         $limit = 20;
         $search = $request->input('search', '');
         $step = $request->input('step', '');
+        $filter = $request->input('filter', 'all');
 
-        $data = $this->tracking->getIncompleteRegistrations($page, $limit, $search ?: null, $step ?: null);
+        $from = '';
+        $to = '';
+
+        switch ($filter) {
+            case 'today':
+                $from = now()->setTimezone('Asia/Kolkata')->format('Y-m-d');
+                $to = $from;
+                break;
+            case 'weekly':
+                $from = now()->setTimezone('Asia/Kolkata')->subDays(6)->format('Y-m-d');
+                $to = now()->setTimezone('Asia/Kolkata')->format('Y-m-d');
+                break;
+            case 'monthly':
+                $from = now()->setTimezone('Asia/Kolkata')->subDays(29)->format('Y-m-d');
+                $to = now()->setTimezone('Asia/Kolkata')->format('Y-m-d');
+                break;
+            case 'custom':
+                $from = $request->input('from', '');
+                $to = $request->input('to', '');
+                break;
+            default:
+                // 'all' — no date filter
+                break;
+        }
+
+        $data = $this->tracking->getIncompleteRegistrations($page, $limit, $search ?: null, $step ?: null, $from ?: null, $to ?: null);
         $stats = $this->tracking->getStepStats();
 
         $pages = (int) ceil(($data['total'] ?? 0) / max($limit, 1));
@@ -357,6 +383,9 @@ class AdminPanelController extends Controller
             'search' => $search,
             'step' => $step,
             'stats' => $stats,
+            'filter' => $filter,
+            'from' => $from,
+            'to' => $to,
         ]);
     }
 
