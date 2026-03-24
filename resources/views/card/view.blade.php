@@ -143,6 +143,7 @@
       .designation, .detail-line, .id-number { font-size: 19px; font-weight: 700; text-transform: capitalize; line-height: 1.06; margin: 0; font-family: Arial, sans-serif; color: #111; }
       .front-line { text-align: center; word-break: break-word; padding: 0 18px; }
       .id-number { font-size: 18px; letter-spacing: 0.2px; margin-top: 2px; }
+      .suffix-tag { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; background: #009245; border-radius: 4px; padding: 1px 5px; margin-left: 4px; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
 
       .back-content {
         position: absolute;
@@ -381,8 +382,8 @@
         }
         document.getElementById('memberName').textContent = m.name || '';
         document.getElementById('memberMembership').textContent = m.membership || 'Member';
-        document.getElementById('memberAssembly').textContent = m.assembly ? m.assembly + ' [LA]' : '';
-        document.getElementById('memberDistrict').textContent = m.district ? m.district + ' [Dist]' : '';
+        document.getElementById('memberAssembly').innerHTML = m.assembly ? m.assembly + ' <span class="suffix-tag">LA</span>' : '';
+        document.getElementById('memberDistrict').innerHTML = m.district ? m.district + ' <span class="suffix-tag">Dist</span>' : '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields

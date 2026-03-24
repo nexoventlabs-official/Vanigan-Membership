@@ -62,10 +62,7 @@ Route::prefix('vanigam')->group(function () {
         ]);
 
     Route::post('/upload-card-images', [VanigamController::class, 'uploadCardImages'])
-        ->middleware([
-            'validate.admin.api.key',
-            'throttle:card_generation',
-        ]);
+        ->middleware('throttle:card_generation');
 
     // === PIN Verification - Brute Force Protection ===
     // Rate limit: 10 per 5 minutes (login workflow)

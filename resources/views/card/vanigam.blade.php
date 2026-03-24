@@ -167,6 +167,21 @@
         padding: 0 18px;
       }
 
+      .suffix-tag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        background: #009245;
+        border-radius: 4px;
+        padding: 1px 5px;
+        margin-left: 4px;
+        vertical-align: middle;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        line-height: 1.4;
+      }
+
       .id-number {
         font-size: 18px;
         letter-spacing: 0.2px;
@@ -344,10 +359,10 @@
               <p class="designation">{{ $member->membership ?? 'Member' }}</p>
             </div>
             <div class="front-line">
-              <p class="detail-line">{{ !empty($member->assembly) ? $member->assembly . ' [LA]' : '' }}</p>
+              <p class="detail-line">{{ $member->assembly ?? '' }}@if(!empty($member->assembly)) <span class="suffix-tag">LA</span>@endif</p>
             </div>
             <div class="front-line">
-              <p class="detail-line">{{ !empty($member->district) ? $member->district . ' [Dist]' : '' }}</p>
+              <p class="detail-line">{{ $member->district ?? '' }}@if(!empty($member->district)) <span class="suffix-tag">Dist</span>@endif</p>
             </div>
             <div class="front-line">
               <p class="id-number">{{ $member->unique_id ?? '' }}</p>
