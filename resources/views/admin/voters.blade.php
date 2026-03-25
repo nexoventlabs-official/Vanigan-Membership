@@ -88,6 +88,25 @@
   </style>
 </head>
 <body>
+  @php
+    $zoneConfig = config('zone_data');
+    $asmMap = $zoneConfig['assembly_map'] ?? [];
+    $distZone = $zoneConfig['district_zone'] ?? [];
+    // Helper: get correct district & zone from assembly name
+    function getCorrectDistrictZone($assemblyName, $asmMap, $distZone) {
+        $asmUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName ?? '')));
+        $matched = $asmMap[$asmUpper] ?? null;
+        if (!$matched) {
+            $norm = preg_replace('/[\. \-\(\)]/', '', $asmUpper);
+            foreach ($asmMap as $k => $v) {
+                if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matched = $v; break; }
+            }
+        }
+        if ($matched) return ['d' => $matched['d'], 'z' => $matched['z']];
+        $dUpper = strtoupper(trim($assemblyName ?? ''));
+        return ['d' => null, 'z' => $distZone[$dUpper] ?? null];
+    }
+  @endphp
   <nav class="navbar">
     <div class="navbar-brand"><i class="bi bi-shield-check"></i> Vanigan Admin</div>
     <div class="navbar-nav">
@@ -122,7 +141,8 @@
         <select name="district">
           <option value="">All Districts</option>
           @foreach($districts as $d)
-          <option value="{{ $d }}" {{ $district === $d ? 'selected' : '' }}>{{ $d }}</option>
+          @php $corrD = $distZone[strtoupper($d)] ?? null; @endphp
+          <option value="{{ $d }}" {{ $district === $d ? 'selected' : '' }}>{{ $d }}@if($corrD) ({{ $corrD }})@endif</option>
           @endforeach
         </select>
         <button type="submit" class="filter-btn"><i class="bi bi-search"></i> Search</button>
@@ -141,6 +161,7 @@
             <th>Name</th>
             <th>Assembly</th>
             <th class="hide-mobile">District</th>
+            <th class="hide-mobile">Zone</th>
             <th class="hide-mobile">Age</th>
             <th class="hide-mobile">Gender</th>
             <th class="hide-mobile">Part/SL</th>
@@ -155,8 +176,10 @@
                 {{ trim(($v['FM_NAME_EN'] ?? '') . ' ' . str_replace(['-','_'], '', $v['LASTNAME_EN'] ?? '')) ?: 'N/A' }}
               </div>
             </td>
+            @php $dz = getCorrectDistrictZone($v['ASSEMBLY_NAME'] ?? '', $asmMap, $distZone); @endphp
             <td class="voter-assembly">{{ $v['ASSEMBLY_NAME'] ?? '' }}</td>
-            <td class="hide-mobile" style="font-size:0.8rem;">{{ $v['DISTRICT_NAME'] ?? '' }}</td>
+            <td class="hide-mobile" style="font-size:0.8rem;">{{ $dz['d'] ?? $v['DISTRICT_NAME'] ?? '' }}</td>
+            <td class="hide-mobile" style="font-size:0.75rem;color:#1565c0;">{{ $dz['z'] ?? '' }}</td>
             <td class="hide-mobile">{{ $v['AGE'] ?? '' }}</td>
             <td class="hide-mobile">
               @php $gender = strtoupper(substr($v['GENDER'] ?? '', 0, 1)); @endphp

@@ -68,6 +68,21 @@
       $lastName = trim(str_replace(['-','_'], '', $voter->LASTNAME_EN ?? ''));
       $fullName = trim($firstName . ($lastName ? ' ' . $lastName : ''));
       $gender = strtoupper(substr($voter->GENDER ?? '', 0, 1));
+
+      // Correct district & zone from zone_data config
+      $zoneConfig = config('zone_data');
+      $asmMap = $zoneConfig['assembly_map'] ?? [];
+      $distZone = $zoneConfig['district_zone'] ?? [];
+      $asmUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $voter->ASSEMBLY_NAME ?? '')));
+      $matchedAsm = $asmMap[$asmUpper] ?? null;
+      if (!$matchedAsm) {
+          $norm = preg_replace('/[\. \-\(\)]/', '', $asmUpper);
+          foreach ($asmMap as $k => $v) {
+              if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matchedAsm = $v; break; }
+          }
+      }
+      $correctedDistrict = $matchedAsm ? $matchedAsm['d'] : ($voter->DISTRICT_NAME ?? 'N/A');
+      $correctedZone = $matchedAsm ? $matchedAsm['z'] : ($distZone[strtoupper($voter->DISTRICT_NAME ?? '')] ?? '');
     @endphp
 
     <div class="profile-header">
@@ -83,7 +98,7 @@
           @else
           <span class="badge badge-purple">{{ $voter->GENDER ?? '' }}</span>
           @endif
-          <span><i class="bi bi-geo-alt"></i> {{ $voter->ASSEMBLY_NAME ?? '' }}, {{ $voter->DISTRICT_NAME ?? '' }}</span>
+          <span><i class="bi bi-geo-alt"></i> {{ $voter->ASSEMBLY_NAME ?? '' }}, {{ $correctedDistrict }}@if($correctedZone) — {{ $correctedZone }}@endif</span>
         </div>
       </div>
     </div>
@@ -116,7 +131,10 @@
         <div class="section-header"><h3><i class="bi bi-building" style="color:#ef6c00;"></i> Electoral Details</h3></div>
         <div class="detail-item"><span class="detail-label">Assembly No (AC)</span><span class="detail-value">{{ $voter->AC_NO ?? 'N/A' }}</span></div>
         <div class="detail-item"><span class="detail-label">Assembly Name</span><span class="detail-value">{{ $voter->ASSEMBLY_NAME ?? 'N/A' }}</span></div>
-        <div class="detail-item"><span class="detail-label">District</span><span class="detail-value">{{ $voter->DISTRICT_NAME ?? 'N/A' }}</span></div>
+        <div class="detail-item"><span class="detail-label">District</span><span class="detail-value">{{ $correctedDistrict }}</span></div>
+        @if($correctedZone)
+        <div class="detail-item"><span class="detail-label">Zone</span><span class="detail-value" style="color:#1565c0;">{{ $correctedZone }}</span></div>
+        @endif
         <div class="detail-item"><span class="detail-label">Part No</span><span class="detail-value">{{ $voter->PART_NO ?? 'N/A' }}</span></div>
         <div class="detail-item"><span class="detail-label">Section No</span><span class="detail-value">{{ $voter->SECTION_NO ?? 'N/A' }}</span></div>
         <div class="detail-item"><span class="detail-label">Serial No in Part</span><span class="detail-value">{{ $voter->SLNOINPART ?? 'N/A' }}</span></div>
