@@ -6,6 +6,7 @@
   <title>Complete Your Details — Tamil Nadu Vanigargalin Sangamam</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -243,21 +244,13 @@
           successAlert.classList.add('show');
           btn.innerHTML = '<i class="bi bi-check-lg"></i> ' + (lang === 'ta' ? 'சேமிக்கப்பட்டது! அட்டை உருவாக்கப்படுகிறது...' : 'Saved! Generating card...');
           btn.style.background = '#4caf50';
-          // Update localStorage so card-view autosave can use updated data
+          // Capture and upload card images directly
           if (data.member) {
             try {
-              const existing = JSON.parse(localStorage.getItem('vanigam_member') || '{}');
-              existing.memberData = Object.assign(existing.memberData || {}, data.member);
-              existing.hasCard = true;
-              localStorage.setItem('vanigam_member', JSON.stringify(existing));
-            } catch(e) {}
-            // Trigger card image re-generation via iframe (pass uid for API fetch)
-            const iframe = document.createElement('iframe');
-            iframe.style.cssText = 'position:absolute;left:-9999px;width:600px;height:1200px;';
-            iframe.src = '/card-view?autosave=1&uid={{ $unique_id }}';
-            document.body.appendChild(iframe);
+              await captureAndUploadCard(data.member);
+            } catch(e) { console.error('Card capture error:', e); }
           }
-          setTimeout(() => { window.location.href = '/member/verify/{{ $unique_id }}'; }, 5000);
+          setTimeout(() => { window.location.href = '/member/verify/{{ $unique_id }}'; }, 3000);
         } else {
           document.getElementById('errorMsg').textContent = data.message || (lang === 'ta' ? 'விவரங்களைச் சேமிக்கத் தோல்வி.' : 'Failed to save details.');
           errorAlert.classList.add('show');
@@ -274,5 +267,100 @@
   </script>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
   @endif
+<!-- Hidden full-size card for image capture -->
+<div id="cardCaptureWrap" style="position:fixed;left:-9999px;top:0;z-index:-1;background:#fff;">
+  <div id="captureFront" style="width:421px;position:relative;overflow:hidden;font-family:Arial,sans-serif;">
+    <img id="capBgFront" src="https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232516/vanigan/templates/ID_Front.png" style="display:block;width:421px;" crossorigin="anonymous" />
+    <div style="position:absolute;top:182px;left:50%;transform:translateX(-50%);width:137px;">
+      <img id="capPhoto" src="" crossorigin="anonymous" style="display:none;border:5px solid #009245;border-radius:22px;width:137px;height:136px;object-fit:cover;" />
+    </div>
+    <div style="position:absolute;top:328px;left:28px;right:28px;text-align:center;">
+      <p id="capName" style="font-size:23px;font-weight:700;color:#009245;line-height:1.08;margin:0;"></p>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:6px;">
+        <div style="text-align:center;padding:0 18px;"><p id="capMembership" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
+        <div style="text-align:center;padding:0 18px;"><p id="capAssembly" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
+        <div style="text-align:center;padding:0 18px;"><p id="capDistrict" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
+        <div style="text-align:center;padding:0 18px;"><p id="capUniqueId" style="font-size:18px;font-weight:700;letter-spacing:0.2px;margin:0;color:#111;"></p></div>
+      </div>
+    </div>
+  </div>
+  <div id="captureBack" style="width:421px;position:relative;overflow:hidden;font-family:Arial,sans-serif;margin-top:20px;">
+    <img id="capBgBack" src="https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png" style="display:block;width:421px;" crossorigin="anonymous" />
+    <div style="position:absolute;top:234px;left:22px;right:20px;color:#111;">
+      <div style="transform:translateY(-60px);">
+        <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;"><div style="font-size:14px;font-weight:700;text-transform:uppercase;">DATE OF BIRTH</div><div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div><div id="capDob" style="font-size:17px;font-weight:700;line-height:1.12;"></div></div>
+        <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;"><div style="font-size:14px;font-weight:700;text-transform:uppercase;">AGE</div><div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div><div id="capAge" style="font-size:17px;font-weight:700;line-height:1.12;"></div></div>
+        <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;"><div style="font-size:14px;font-weight:700;text-transform:uppercase;">BLOOD GROUP</div><div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div><div id="capBlood" style="font-size:17px;font-weight:700;line-height:1.12;"></div></div>
+        <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:76px;overflow:hidden;"><div style="font-size:14px;font-weight:700;text-transform:uppercase;">ADDRESS</div><div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div><div id="capAddress" style="font-size:17px;font-weight:700;line-height:1.12;word-break:break-word;"></div></div>
+        <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;"><div style="font-size:14px;font-weight:700;text-transform:uppercase;">CONTACT</div><div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div><div style="font-size:17px;font-weight:700;line-height:1.12;"><span id="capContact" style="background:rgba(255,255,255,0.78);display:inline-block;padding:0 4px;"></span></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:40% 60%;align-items:start;margin-top:10px;">
+        <div style="padding-left:20px;"><img id="capQr" src="" width="96" height="88" crossorigin="anonymous" /></div>
+        <div style="text-align:center;padding-right:10px;">
+          <img src="/signature.png" style="width:80px;height:auto;margin-bottom:2px;" crossorigin="anonymous" />
+          <p style="text-align:center;margin:2px 0 0;font-size:14px;font-weight:700;">SENTHIL KUMAR N</p>
+          <p style="font-size:12px;font-weight:bold;line-height:1.1;margin:0;">Founder &amp; State President</p>
+          <p style="font-size:12px;font-weight:bold;line-height:1.1;margin:0;">Tamilnadu Vanigargalin Sangamam</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function captureAndUploadCard(member) {
+  if (!member || !member.unique_id) return;
+  try {
+    const photo = document.getElementById('capPhoto');
+    if (member.photo_url) { photo.src = member.photo_url; photo.style.display = 'block'; }
+    document.getElementById('capName').textContent = member.name || '';
+    document.getElementById('capMembership').textContent = member.membership || 'Member';
+    document.getElementById('capAssembly').innerHTML = member.assembly ? member.assembly + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">LA</span>' : '';
+    document.getElementById('capDistrict').innerHTML = member.district ? member.district + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Dist</span>' : '';
+    document.getElementById('capUniqueId').textContent = member.unique_id || '';
+    document.getElementById('capDob').textContent = member.dob || 'xxxxxx';
+    document.getElementById('capAge').textContent = member.age || 'xxxxxx';
+    document.getElementById('capBlood').textContent = member.blood_group || 'xxxxxx';
+    document.getElementById('capAddress').textContent = member.address || 'xxxxxx';
+    document.getElementById('capContact').textContent = member.contact_number || ('+91 ' + (member.mobile || ''));
+    document.getElementById('capQr').src = '/api/vanigam/qr/' + member.unique_id;
+
+    // Wait for images to load
+    const wrap = document.getElementById('cardCaptureWrap');
+    const imgs = wrap.querySelectorAll('img');
+    await Promise.all(Array.from(imgs).map(img => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise(r => { img.onload = r; img.onerror = r; setTimeout(r, 8000); });
+    }));
+    await new Promise(r => setTimeout(r, 1000));
+
+    const opts = { scale: 3, useCORS: true, allowTaint: false, backgroundColor: null, logging: false };
+    const frontCanvas = await html2canvas(document.getElementById('captureFront'), opts);
+    const backCanvas = await html2canvas(document.getElementById('captureBack'), opts);
+
+    const frontData = frontCanvas.toDataURL('image/png', 1.0);
+    const backData = backCanvas.toDataURL('image/png', 1.0);
+
+    if (frontData.length < 5000 || backData.length < 5000) {
+      console.warn('Card capture: images seem blank, skipping upload');
+      return;
+    }
+
+    const res = await fetch('/api/vanigam/upload-card-images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ unique_id: member.unique_id, front_image: frontData, back_image: backData }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      console.log('Card images captured and uploaded successfully.');
+    } else {
+      console.warn('Card upload failed:', data);
+    }
+  } catch(e) {
+    console.error('captureAndUploadCard error:', e);
+  }
+}
+</script>
 </body>
 </html>
