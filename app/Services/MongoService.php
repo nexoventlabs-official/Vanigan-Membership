@@ -575,9 +575,32 @@ class MongoService
             $cursor = $loanRequestsCollection->find($filter, ['sort' => ['created_at' => -1]]);
 
             $requests = [];
+            $uniqueIds = [];
             foreach ($cursor as $doc) {
                 $r = $this->toArray($doc);
-                if ($r) $requests[] = $r;
+                if ($r) {
+                    $requests[] = $r;
+                    if (!empty($r['unique_id'])) $uniqueIds[] = $r['unique_id'];
+                }
+            }
+
+            // Resolve member photos in bulk
+            if (!empty($uniqueIds)) {
+                $memberCursor = $this->collection->find(
+                    ['unique_id' => ['$in' => $uniqueIds]],
+                    ['projection' => ['unique_id' => 1, 'photo_url' => 1]]
+                );
+                $photoMap = [];
+                foreach ($memberCursor as $m) {
+                    $ma = $this->toArray($m);
+                    if ($ma && !empty($ma['unique_id'])) {
+                        $photoMap[$ma['unique_id']] = $ma['photo_url'] ?? '';
+                    }
+                }
+                foreach ($requests as &$req) {
+                    $req['photo_url'] = $photoMap[$req['unique_id'] ?? ''] ?? '';
+                }
+                unset($req);
             }
 
             return ['requests' => $requests, 'total' => $total];

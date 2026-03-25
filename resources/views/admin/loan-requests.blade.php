@@ -61,6 +61,8 @@
     .badge-red { background: #ffebee; color: #c62828; }
 
     .serial { width: 28px; height: 28px; border-radius: 50%; background: #f0f2f5; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #888; }
+    .member-photo { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #e8f5e9; background: #f0f2f5; }
+    .member-photo-placeholder { width: 36px; height: 36px; border-radius: 50%; background: #f0f2f5; display: inline-flex; align-items: center; justify-content: center; color: #bbb; font-size: 1rem; }
 
     .download-btn { padding: 8px 18px; border-radius: 8px; border: 2px solid #2e7d32; background: #fff; color: #2e7d32; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
     .download-btn:hover { background: #2e7d32; color: #fff; }
@@ -166,6 +168,7 @@
           <thead>
             <tr>
               <th>#</th>
+              <th></th>
               <th>Member Name</th>
               <th>Unique ID</th>
               <th>Mobile</th>
@@ -179,6 +182,13 @@
             @foreach($requests as $i => $r)
             <tr>
               <td><span class="serial">{{ $i + 1 }}</span></td>
+              <td>
+                @if(!empty($r['photo_url']))
+                <img src="{{ $r['photo_url'] }}" class="member-photo" alt="">
+                @else
+                <span class="member-photo-placeholder"><i class="bi bi-person-fill"></i></span>
+                @endif
+              </td>
               <td style="font-weight:600;">
                 @if(!empty($r['unique_id']))
                 <a href="{{ route('admin.user.detail', $r['unique_id']) }}">{{ $r['member_name'] ?? 'N/A' }}</a>
@@ -250,13 +260,13 @@
       const trs = tbody.querySelectorAll('tr');
       trs.forEach((tr, idx) => {
         const cells = tr.querySelectorAll('td');
-        const name = cells[1]?.innerText?.trim() || '';
-        const uid = cells[2]?.innerText?.trim() || '';
-        const mobile = cells[3]?.innerText?.trim() || '';
-        const bizType = cells[4]?.innerText?.trim() || '';
-        const bizName = cells[5]?.innerText?.trim() || '';
-        const status = cells[6]?.innerText?.trim() || '';
-        const reqAt = cells[7]?.innerText?.trim() || '—';
+        const name = cells[2]?.innerText?.trim() || '';
+        const uid = cells[3]?.innerText?.trim() || '';
+        const mobile = cells[4]?.innerText?.trim() || '';
+        const bizType = cells[5]?.innerText?.trim() || '';
+        const bizName = cells[6]?.innerText?.trim() || '';
+        const status = cells[7]?.innerText?.trim() || '';
+        const reqAt = cells[8]?.innerText?.trim() || '—';
         rows += '<tr>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:11px;">' + (idx + 1) + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:11px;">' + name + '</td>'
