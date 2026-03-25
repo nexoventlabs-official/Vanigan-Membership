@@ -162,6 +162,7 @@
       <a href="{{ route('admin.users') }}"><i class="bi bi-people"></i> Members</a>
       <a href="{{ route('admin.voters') }}"><i class="bi bi-person-vcard"></i> Voters</a>
       <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
+      <a href="{{ route('admin.loan_requests') }}"><i class="bi bi-cash-coin"></i> Loan Requests</a>
       <a href="{{ route('admin.not_registered') }}" class="active"><i class="bi bi-person-x"></i> Not Registered</a>
       <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">@csrf<button type="submit"><i class="bi bi-box-arrow-right"></i> Logout</button></form>
     </div>
@@ -399,13 +400,14 @@
           tds[7]?.textContent?.trim() || '',
           tds[8]?.textContent?.trim() || '',
           tds[9]?.textContent?.trim() || '',
+          tds[10]?.textContent?.trim() || '',
         ]);
       });
     }
 
     doc.autoTable({
       startY: 38,
-      head: [['#', 'Mobile', 'Name', 'EPIC No', 'Assembly', 'District', 'Last Step', 'Referred By', 'Started At', 'Last Activity']],
+      head: [['#', 'Mobile', 'Name', 'EPIC No', 'Assembly', 'District', 'Zone', 'Last Step', 'Referred By', 'Started At', 'Last Activity']],
       body: rows,
       styles: { fontSize: 7.5, cellPadding: 2.5 },
       headStyles: { fillColor: [0, 122, 56], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },

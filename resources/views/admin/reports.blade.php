@@ -118,6 +118,7 @@
       <a href="{{ route('admin.users') }}"><i class="bi bi-people"></i> Members</a>
       <a href="{{ route('admin.voters') }}"><i class="bi bi-person-vcard"></i> Voters</a>
       <a href="{{ route('admin.reports') }}" class="active"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
+      <a href="{{ route('admin.loan_requests') }}"><i class="bi bi-cash-coin"></i> Loan Requests</a>
       <a href="{{ route('admin.not_registered') }}"><i class="bi bi-person-x"></i> Not Registered</a>
       <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">@csrf<button type="submit"><i class="bi bi-box-arrow-right"></i> Logout</button></form>
     </div>
@@ -312,6 +313,7 @@
       const totalReferralCount = {{ $total_referral_count }};
       const assemblyFilter = '{{ $assembly ?? '' }}';
       const districtFilter = '{{ $district ?? '' }}';
+      const zoneFilter = '{{ $zone ?? '' }}';
 
       let filterLabel = 'Today';
       if (filter === 'weekly') filterLabel = 'This Week';
@@ -333,6 +335,12 @@
       } else {
         filterInfo += '<div style="font-size:12px;color:#555;margin-bottom:2px;">District: All Districts</div>';
       }
+      if (zoneFilter) {
+        filterInfo += '<div style="font-size:12px;color:#007a38;font-weight:600;margin-bottom:2px;">Zone: ' + zoneFilter + '</div>';
+        fileNameParts.push(zoneFilter.replace(/[^a-zA-Z0-9]/g, '_'));
+      } else {
+        filterInfo += '<div style="font-size:12px;color:#555;margin-bottom:2px;">Zone: All Zones</div>';
+      }
       fileNameParts.push(filterLabel.replace(/\s/g, '_'));
       fileNameParts.push(from + '_to_' + to);
       const fileName = fileNameParts.join('_');
@@ -347,12 +355,13 @@
         const uid = cells[3]?.innerText?.trim() || '';
         const assembly = cells[4]?.innerText?.trim() || '';
         const district = cells[5]?.innerText?.trim() || '';
-        const mobile = cells[6]?.innerText?.trim() || '';
-        const registeredAt = cells[7]?.innerText?.trim() || '—';
-        const referrer = cells[8]?.innerText?.trim() || '—';
-        const refCount = cells[9]?.innerText?.trim() || '0';
+        const zone = cells[6]?.innerText?.trim() || '';
+        const mobile = cells[7]?.innerText?.trim() || '';
+        const registeredAt = cells[8]?.innerText?.trim() || '—';
+        const referrer = cells[9]?.innerText?.trim() || '—';
+        const refCount = cells[10]?.innerText?.trim() || '0';
         // Get each referred ID on its own line
-        const yourMembersEl = cells[10];
+        const yourMembersEl = cells[11];
         let yourMembersHtml = '—';
         if (yourMembersEl) {
           const links = yourMembersEl.querySelectorAll('a');
@@ -366,6 +375,7 @@
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;color:#2e7d32;font-weight:600;">' + uid + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + assembly + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + district + '</td>'
+          + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;color:#1565c0;">' + zone + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + mobile + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + registeredAt + '</td>'
           + '<td style="padding:6px 8px;border:1px solid #ddd;font-size:10px;">' + referrer + '</td>'
@@ -398,7 +408,7 @@
         </div>
         <table>
           <thead><tr>
-            <th>#</th><th>Name</th><th>Unique ID</th><th>Assembly</th><th>District</th><th>Mobile</th><th>Registered At</th><th>Referred By</th><th>Ref Count</th><th>Your Members</th>
+            <th>#</th><th>Name</th><th>Unique ID</th><th>Assembly</th><th>District</th><th>Zone</th><th>Mobile</th><th>Registered At</th><th>Referred By</th><th>Ref Count</th><th>Your Members</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>

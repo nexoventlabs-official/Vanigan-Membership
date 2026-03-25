@@ -46,6 +46,7 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::get('/voters', [AdminPanelController::class, 'voters'])->name('admin.voters');
     Route::get('/voters/{epicNo}', [AdminPanelController::class, 'voterDetail'])->name('admin.voter.detail');
     Route::get('/reports', [AdminPanelController::class, 'reports'])->name('admin.reports');
+    Route::get('/loan-requests', [AdminPanelController::class, 'loanRequests'])->name('admin.loan_requests');
     Route::get('/not-registered', [AdminPanelController::class, 'notRegistered'])->name('admin.not_registered');
     Route::post('/logout', [AdminPanelController::class, 'logout'])->name('admin.logout');
 });

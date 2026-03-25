@@ -554,6 +554,40 @@ class MongoService
     }
 
     /**
+     * Get all loan requests with optional date range filtering.
+     */
+    public function getAllLoanRequests(?string $from = null, ?string $to = null): array
+    {
+        try {
+            $db = $this->client->selectDatabase($this->database);
+            $loanRequestsCollection = $db->selectCollection('loan_requests');
+
+            $filter = [];
+
+            if ($from && $to) {
+                $filter['created_at'] = [
+                    '$gte' => $from . 'T00:00:00',
+                    '$lte' => $to . 'T23:59:59',
+                ];
+            }
+
+            $total = $loanRequestsCollection->countDocuments($filter);
+            $cursor = $loanRequestsCollection->find($filter, ['sort' => ['created_at' => -1]]);
+
+            $requests = [];
+            foreach ($cursor as $doc) {
+                $r = $this->toArray($doc);
+                if ($r) $requests[] = $r;
+            }
+
+            return ['requests' => $requests, 'total' => $total];
+        } catch (Exception $e) {
+            Log::error("MongoService::getAllLoanRequests Exception: " . $e->getMessage());
+            return ['requests' => [], 'total' => 0];
+        }
+    }
+
+    /**
      * Get members for reports filtered by date range.
      * Uses ObjectId timestamps for reliable date filtering.
      * Returns members with referrer info resolved.

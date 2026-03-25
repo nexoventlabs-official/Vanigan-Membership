@@ -415,6 +415,47 @@ class AdminPanelController extends Controller
         ]);
     }
 
+    public function loanRequests(Request $request)
+    {
+        $filter = $request->input('filter', 'today');
+        $fromDate = $request->input('from', '');
+        $toDate = $request->input('to', '');
+
+        switch ($filter) {
+            case 'weekly':
+                $from = now()->startOfWeek()->format('Y-m-d');
+                $to = now()->format('Y-m-d');
+                break;
+            case 'monthly':
+                $from = now()->startOfMonth()->format('Y-m-d');
+                $to = now()->format('Y-m-d');
+                break;
+            case 'custom':
+                $from = $fromDate ?: now()->format('Y-m-d');
+                $to = $toDate ?: now()->format('Y-m-d');
+                break;
+            case 'all':
+                $from = '';
+                $to = '';
+                break;
+            default: // today
+                $filter = 'today';
+                $from = now()->format('Y-m-d');
+                $to = now()->format('Y-m-d');
+                break;
+        }
+
+        $data = $this->mongo->getAllLoanRequests($from ?: null, $to ?: null);
+
+        return view('admin.loan-requests', [
+            'requests' => $data['requests'],
+            'total' => $data['total'],
+            'filter' => $filter,
+            'from' => $from,
+            'to' => $to,
+        ]);
+    }
+
     public function voterDetail(string $epicNo)
     {
         try {

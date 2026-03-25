@@ -79,8 +79,10 @@
   </style>
 </head>
 <body>
-  <!-- PIN Entry Section -->
-  <div class="card" id="pinSection">
+  @php $detailsCompleted = !empty($member->details_completed) && $member->details_completed; @endphp
+
+  <!-- PIN Entry Section (hidden if details completed) -->
+  <div class="card" id="pinSection" style="{{ $detailsCompleted ? 'display:none;' : '' }}">
     <div class="card-header">
       <h2><i class="bi bi-shield-lock"></i> <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span></h2>
       <p><span class="t" data-en="Member Verification" data-ta="உறுப்பினர் சரிபார்ப்பு">Member Verification</span></p>
@@ -107,8 +109,8 @@
     <div class="footer"><span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span> &copy; {{ date('Y') }}</div>
   </div>
 
-  <!-- Card Section (hidden until PIN verified) -->
-  <div class="card" id="cardSection" style="display:none;">
+  <!-- Card Section (shown directly if details completed, otherwise hidden until PIN verified) -->
+  <div class="card" id="cardSection" style="{{ $detailsCompleted ? '' : 'display:none;' }}">
     <div class="card-header">
       <h2><i class="bi bi-shield-check"></i> <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span></h2>
       <p><span class="t" data-en="Member Verification" data-ta="உறுப்பினர் சரிபார்ப்பு">Member Verification</span></p>
@@ -237,19 +239,26 @@
     }
   </script>
   <script>
-    // PIN input handling
+    const detailsCompleted = {{ $detailsCompleted ? 'true' : 'false' }};
+
+    // PIN input handling (only if details not completed)
     const pinBoxes = document.querySelectorAll('.pin-box');
-    pinBoxes.forEach((box, i) => {
-      box.addEventListener('input', function() {
-        this.value = this.value.replace(/[^0-9]/g, '');
-        if (this.value && i < 3) pinBoxes[i + 1].focus();
+    if (!detailsCompleted) {
+      pinBoxes.forEach((box, i) => {
+        box.addEventListener('input', function() {
+          this.value = this.value.replace(/[^0-9]/g, '');
+          if (this.value && i < 3) pinBoxes[i + 1].focus();
+        });
+        box.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !this.value && i > 0) pinBoxes[i - 1].focus();
+          if (e.key === 'Enter') verifyPin();
+        });
       });
-      box.addEventListener('keydown', function(e) {
-        if (e.key === 'Backspace' && !this.value && i > 0) pinBoxes[i - 1].focus();
-        if (e.key === 'Enter') verifyPin();
-      });
-    });
-    pinBoxes[0].focus();
+      pinBoxes[0].focus();
+    } else {
+      // Details completed — card is already visible, init 3D card
+      initCard3d();
+    }
 
     async function verifyPin() {
       const pin = Array.from(pinBoxes).map(b => b.value).join('');
