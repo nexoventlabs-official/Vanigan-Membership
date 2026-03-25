@@ -381,10 +381,25 @@
           photo.style.display = 'block';
         }
         function toTitleCase(s) { return s ? s.toLowerCase().replace(/(?:^|\s)\S/g, function(a){ return a.toUpperCase(); }) : ''; }
+        var VIEW_ZONE_DATA = @php echo json_encode(config('zone_data.assembly_map'), JSON_UNESCAPED_UNICODE); @endphp;
+        function viewLookupDZ(asm) {
+          if (!asm || !VIEW_ZONE_DATA) return { district: '', zone: '' };
+          var key = asm.trim().toUpperCase().replace(/\s+/g, ' ');
+          var matched = VIEW_ZONE_DATA[key] || null;
+          if (!matched) {
+            var norm = key.replace(/[\. \-\(\)]/g, '').replace(/\s+/g, ' ').trim();
+            for (var k in VIEW_ZONE_DATA) {
+              if (VIEW_ZONE_DATA.hasOwnProperty(k) && k.replace(/[\. \-\(\)]/g, '').replace(/\s+/g, ' ').trim() === norm) { matched = VIEW_ZONE_DATA[k]; break; }
+            }
+          }
+          if (matched) return { district: toTitleCase(matched.d), zone: toTitleCase(matched.z) };
+          return { district: '', zone: '' };
+        }
+        var dz = viewLookupDZ(m.assembly);
         document.getElementById('memberName').textContent = m.name || '';
         document.getElementById('memberAssembly').innerHTML = m.assembly ? m.assembly + ' <span class="suffix-tag">Assm</span>' : '';
-        document.getElementById('memberDistrict').innerHTML = m.district ? toTitleCase(m.district) + ' <span class="suffix-tag">Dist</span>' : '';
-        document.getElementById('memberZone').innerHTML = m.zone ? toTitleCase(m.zone) : '';
+        document.getElementById('memberDistrict').innerHTML = (dz.district || toTitleCase(m.district)) ? (dz.district || toTitleCase(m.district)) + ' <span class="suffix-tag">Dist</span>' : '';
+        document.getElementById('memberZone').innerHTML = (dz.zone || toTitleCase(m.zone)) || '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields

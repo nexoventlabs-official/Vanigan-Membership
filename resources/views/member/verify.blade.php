@@ -129,7 +129,7 @@
                   <p style="font-size:0.9rem;font-weight:700;color:#009245;margin:0;line-height:1.1;">{{ $member->name ?? '' }}</p>
                   <p style="font-size:0.65rem;margin:2px 0 0;">{{ $member->assembly ?? '' }}@if(!empty($member->assembly)) <span style="display:inline-block;font-size:0.38rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:1px 4px;margin-left:2px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.3px;line-height:1.4;">Assm</span>@endif</p>
                   <p style="font-size:0.65rem;margin:1px 0 0;">{{ $member->district ?? '' }}@if(!empty($member->district)) <span style="display:inline-block;font-size:0.38rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:1px 4px;margin-left:2px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.3px;line-height:1.4;">Dist</span>@endif</p>
-                  <p style="font-size:0.65rem;margin:1px 0 0;">{{ $member->zone ?? '' }}@if(!empty($member->zone)) <span style="display:inline-block;font-size:0.38rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:1px 4px;margin-left:2px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.3px;line-height:1.4;">Zone</span>@endif</p>
+                  <p style="font-size:0.65rem;margin:1px 0 0;">{{ $member->zone ?? '' }}</p>
                   <p style="font-size:0.6rem;margin:3px 0 0;letter-spacing:0.3px;">{{ $member->unique_id ?? '' }}</p>
                 </div>
               </div>
@@ -189,7 +189,7 @@
         @if(!empty($member->zone))
         <div class="detail-item">
           <span class="detail-label"><span class="t" data-en="Zone" data-ta="மண்டலம்">Zone</span></span>
-          <span class="detail-value">{{ $member->zone }}@if(!empty($member->zone)) <span style="display:inline-block;font-size:0.65rem;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 6px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.4px;">Zone</span>@endif</span>
+          <span class="detail-value">{{ $member->zone }}</span>
         </div>
         @endif
         @if(!empty($member->dob))
