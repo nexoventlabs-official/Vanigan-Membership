@@ -55,6 +55,19 @@
   @if(!empty($member->details_completed) && $member->details_completed)
   <script>window.location.replace('/member/verify/{{ $unique_id }}');</script>
   @endif
+  <script>
+    // Fallback: API check in case Varnish serves stale cached page
+    (function(){
+      var uid = '{{ $unique_id }}';
+      fetch('/api/vanigam/member/' + encodeURIComponent(uid))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(d.success && d.member && d.member.details_completed) {
+            window.location.replace('/member/verify/' + encodeURIComponent(uid));
+          }
+        }).catch(function(){});
+    })();
+  </script>
   <!-- PIN Entry Section -->
   <div class="card" id="pinSection">
     <div class="card-header">

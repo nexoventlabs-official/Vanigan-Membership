@@ -681,10 +681,14 @@ class VanigamController extends Controller
                 return redirect()->route('member.verify', ['uniqueId' => $uniqueId]);
             }
 
-            return view('member.complete', [
-                'member' => (object) $member,
-                'unique_id' => $uniqueId,
-            ]);
+            return response()
+                ->view('member.complete', [
+                    'member' => (object) $member,
+                    'unique_id' => $uniqueId,
+                ])
+                ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
 
         } catch (Exception $e) {
             Log::error('VanigamController::completeDetails Error: ' . $e->getMessage());
