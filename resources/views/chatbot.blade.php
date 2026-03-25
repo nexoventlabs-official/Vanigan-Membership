@@ -1545,6 +1545,15 @@
             h += '<button class="action-btn confirm" onclick="shareReferral(\'' + link + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share') + '</button>';
             h += '</div>';
             h += '<div style="margin-top:8px;font-size:0.8rem;color:#666;"><i class="bi bi-people"></i> ' + L('sb_referrals') + ': <strong>' + res.referral_count + '</strong> / 25</div>';
+            const refLoanApplied = await checkHasAppliedLoan();
+            h += '<div class="action-buttons" style="margin-top:8px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+            h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+            h += '</div>';
+            h += '<div class="action-buttons" style="margin-top:8px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
+            if (!refLoanApplied) h += buildLoanBtn();
+            h += '</div>';
             await botReply(h, 800);
           } else {
             console.error('Referral API error:', res);
@@ -1658,6 +1667,12 @@
           h += '<button class="action-btn confirm" onclick="shareReferral(\'' + refLink + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share_link') + '</button>';
           h += '</div>';
         }
+        const orgLoanApplied = await checkHasAppliedLoan();
+        h += '<div class="action-buttons" style="margin-top:8px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+        if (!orgLoanApplied) h += buildLoanBtn();
+        h += '</div>';
         await botReply(h, 800);
       };
 
@@ -1709,10 +1724,12 @@
               h += '</div>';
             }
             h += '</div>';
-            // Share/Copy buttons at the bottom
-            h += '<div style="margin-top:12px;display:flex;gap:8px;">';
-            h += '<button class="action-btn confirm" onclick="doMenuRefer()" style="flex:1;"><i class="bi bi-share"></i> ' + L('ref_share') + '</button>';
-            h += '<button class="action-btn confirm" onclick="doMenuOrganizer()" style="flex:1;"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+            // Reply buttons
+            const ymLoanApplied = await checkHasAppliedLoan();
+            h += '<div class="action-buttons" style="margin-top:12px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+            h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+            if (!ymLoanApplied) h += buildLoanBtn();
             h += '</div>';
             await botReply(h, 800);
           } else {
@@ -1743,6 +1760,12 @@
               h += '<button class="action-btn confirm" onclick="doMenuRefer()" style="flex:1;"><i class="bi bi-clipboard"></i> ' + L('ref_copy') + '</button>';
               h += '</div>';
             }
+            const ymNoLoanApplied = await checkHasAppliedLoan();
+            h += '<div class="action-buttons" style="margin-top:8px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+            h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+            if (!ymNoLoanApplied) h += buildLoanBtn();
+            h += '</div>';
             await botReply(h, 800);
           }
         } catch(e) { hideTyping(); console.error('Your Members error:', e); await botReply(L('something_wrong'), 600); }
@@ -1802,6 +1825,16 @@
           h += '</td></tr>';
         }
         h += '</table></div>';
+        // Reply buttons
+        const wingsLoanApplied = await checkHasAppliedLoan();
+        h += '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
+        h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:8px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
+        if (!wingsLoanApplied) h += buildLoanBtn();
+        h += '</div>';
         await botReply(h, 800);
       };
 
@@ -1918,6 +1951,14 @@
             h += '<a href="mailto:support@vanigan.org" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-envelope"></i> ' + L('btn_email') + '</a>';
             h += '<a href="tel:+919876543210" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-telephone"></i> ' + L('btn_call') + '</a>';
             h += '</div>';
+            h += '<div class="action-buttons" style="margin-top:8px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
+            h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+            h += '</div>';
+            h += '<div class="action-buttons" style="margin-top:8px;">';
+            h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
+            h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+            h += '</div>';
             await botReply(h, 600);
             return;
           }
@@ -2004,11 +2045,32 @@
         hideTyping();
 
         let h = '<i class="bi bi-check-circle" style="color:#2e7d32;font-size:1.5rem;"></i> <strong style="color:#2e7d32;">' + L('loan_thanks') + '</strong>';
-        h += buildQuickActions();
+        h += '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+        h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:8px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+        h += '</div>';
         await botReply(h, 1000);
         loanBusinessType = '';
         loanBusinessName = '';
       };
+
+      async function checkHasAppliedLoan() {
+        const user = getUser();
+        if (!user || !user.memberData || !user.memberData.unique_id) return false;
+        try {
+          const memberMobile = user.memberData.mobile || user.memberData.contact_number || user.mobile || mobile;
+          const res = await api('/api/vanigam/check-loan-status', { unique_id: user.memberData.unique_id, mobile: memberMobile });
+          return !!(res && res.success && res.has_applied === true);
+        } catch(e) { return false; }
+      }
+
+      function buildLoanBtn() {
+        return '<button class="action-btn confirm" onclick="doRequestLoan()"><i class="bi bi-cash-coin"></i> ' + L('btn_request_loan') + '</button>';
+      }
 
       function buildQuickActions() {
         let h = '<div class="action-buttons" style="margin-top:12px;">';
