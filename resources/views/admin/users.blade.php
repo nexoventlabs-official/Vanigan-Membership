@@ -148,6 +148,7 @@
             <th class="hide-mobile">EPIC No</th>
             <th>Assembly</th>
             <th class="hide-mobile">District</th>
+            <th class="hide-mobile">Zone</th>
             <th class="hide-mobile">Referrals</th>
             <th>Status</th>
           </tr>
@@ -169,6 +170,7 @@
             <td class="hide-mobile" style="font-family:monospace;font-size:0.8rem;">{{ $m['epic_no'] ?? '' }}</td>
             <td>{{ $m['assembly'] ?? '' }}</td>
             <td class="hide-mobile">{{ $m['district'] ?? '' }}</td>
+            <td class="hide-mobile" style="font-size:0.8rem;color:#1565c0;">{{ $m['zone'] ?? '' }}</td>
             <td class="hide-mobile">
               @if(($m['referral_count'] ?? 0) > 0)
               <span class="referral-count"><i class="bi bi-share-fill"></i> {{ $m['referral_count'] }}</span>

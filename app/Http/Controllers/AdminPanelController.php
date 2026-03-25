@@ -337,12 +337,14 @@ class AdminPanelController extends Controller
 
         $assembly = $request->input('assembly', '');
         $district = $request->input('district', '');
+        $zone = $request->input('zone', '');
 
-        $reportData = $this->mongo->getReportMembers($from, $to, $assembly ?: null, $district ?: null);
+        $reportData = $this->mongo->getReportMembers($from, $to, $assembly ?: null, $district ?: null, $zone ?: null);
 
         // Get distinct assembly and district values for filter dropdowns
         $assemblies = $this->mongo->getDistinctValues('assembly');
         $districts = $this->mongo->getDistinctValues('district');
+        $zones = $this->mongo->getDistinctValues('zone');
 
         return view('admin.reports', [
             'members' => $reportData['members'],
@@ -354,8 +356,10 @@ class AdminPanelController extends Controller
             'to' => $to,
             'assembly' => $assembly,
             'district' => $district,
+            'zone' => $zone,
             'assemblies' => $assemblies,
             'districts' => $districts,
+            'zones' => $zones,
         ]);
     }
 

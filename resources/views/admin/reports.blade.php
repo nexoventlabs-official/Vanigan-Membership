@@ -172,8 +172,14 @@
           <option value="{{ $d }}" {{ ($district ?? '') === $d ? 'selected' : '' }}>{{ $d }}</option>
           @endforeach
         </select>
+        <select name="zone" class="date-input" style="min-width:140px;">
+          <option value="">All Zones</option>
+          @foreach($zones ?? [] as $z)
+          <option value="{{ $z }}" {{ ($zone ?? '') === $z ? 'selected' : '' }}>{{ $z }}</option>
+          @endforeach
+        </select>
         <button type="submit" class="apply-btn"><i class="bi bi-funnel"></i> Filter</button>
-        @if(!empty($assembly) || !empty($district))
+        @if(!empty($assembly) || !empty($district) || !empty($zone))
         <a href="{{ route('admin.reports', ['filter' => $filter, 'from' => $filter === 'custom' ? $from : '', 'to' => $filter === 'custom' ? $to : '']) }}" style="font-size:0.78rem;color:#c62828;text-decoration:none;font-weight:600;"><i class="bi bi-x-circle"></i> Clear</a>
         @endif
       </form>
@@ -215,6 +221,7 @@
               <th>Unique ID</th>
               <th>Assembly</th>
               <th>District</th>
+              <th>Zone</th>
               <th>Mobile</th>
               <th>Registered At</th>
               <th>Referred By</th>
@@ -239,6 +246,7 @@
               <td><span style="font-weight:600;color:#2e7d32;font-size:0.78rem;">{{ $m['unique_id'] ?? '' }}</span></td>
               <td style="font-size:0.8rem;">{{ $m['assembly'] ?? '' }}</td>
               <td style="font-size:0.8rem;">{{ $m['district'] ?? '' }}</td>
+              <td style="font-size:0.8rem;color:#1565c0;">{{ $m['zone'] ?? '' }}</td>
               <td style="font-size:0.8rem;">{{ $m['mobile'] ?? '' }}</td>
               <td style="font-size:0.75rem;white-space:nowrap;color:#555;">
                 @php

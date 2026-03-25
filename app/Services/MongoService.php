@@ -558,7 +558,7 @@ class MongoService
      * Uses ObjectId timestamps for reliable date filtering.
      * Returns members with referrer info resolved.
      */
-    public function getReportMembers(string $from, string $to, ?string $assembly = null, ?string $district = null): array
+    public function getReportMembers(string $from, string $to, ?string $assembly = null, ?string $district = null, ?string $zone = null): array
     {
         try {
             $fromTs = strtotime($from . ' 00:00:00');
@@ -580,6 +580,10 @@ class MongoService
 
             if ($district) {
                 $filter['district'] = new \MongoDB\BSON\Regex(preg_quote($district, '/'), 'i');
+            }
+
+            if ($zone) {
+                $filter['zone'] = new \MongoDB\BSON\Regex(preg_quote($zone, '/'), 'i');
             }
 
             $total = $this->collection->countDocuments($filter);
