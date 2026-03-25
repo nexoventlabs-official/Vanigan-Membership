@@ -181,21 +181,44 @@ class ChatbotController extends Controller
             $assemblyName = $voter['assembly_name'] ?? $voter['assembly'] ?? 'N/A';
             $district = $voter['district'] ?? 'N/A';
 
-            // Look up zone from static config (Excel-based, not MySQL)
+            // Look up zone and CORRECT district from static config (Excel-based, not MySQL)
+            // MySQL has correct assembly names but some districts are wrong
             $zoneData = config('zone_data');
             $zone = '';
-            if ($zoneData) {
-                // Try district-based zone lookup
-                $districtUpper = strtoupper(trim($district));
-                if (!empty($zoneData['district_zone'][$districtUpper])) {
-                    $zone = $zoneData['district_zone'][$districtUpper];
+            if ($zoneData && !empty($zoneData['assembly_map'])) {
+                $asmMap = $zoneData['assembly_map'];
+
+                // Normalize: uppercase, collapse whitespace
+                $assemblyUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName)));
+
+                // Direct match
+                $matched = $asmMap[$assemblyUpper] ?? null;
+
+                // If no direct match, try without parentheses/brackets differences
+                if (!$matched) {
+                    // Normalize further: remove dots, hyphens for comparison
+                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $assemblyUpper);
+                    $normalizedInput = preg_replace('/\s+/', ' ', trim($normalizedInput));
+                    foreach ($asmMap as $key => $val) {
+                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $key);
+                        $normalizedKey = preg_replace('/\s+/', ' ', trim($normalizedKey));
+                        if ($normalizedKey === $normalizedInput) {
+                            $matched = $val;
+                            break;
+                        }
+                    }
                 }
-                // Try assembly-based lookup for more accurate district/zone
-                $assemblyUpper = strtoupper(trim($assemblyName));
-                if (!empty($zoneData['assembly_map'][$assemblyUpper])) {
-                    $asmData = $zoneData['assembly_map'][$assemblyUpper];
-                    $district = $asmData['d'];
-                    $zone = $asmData['z'];
+
+                if ($matched) {
+                    // Override district with correct one from Excel sheet
+                    $district = $matched['d'];
+                    $zone = $matched['z'];
+                } elseif (!empty($zoneData['district_zone'])) {
+                    // Fallback: district-based zone lookup only
+                    $districtUpper = strtoupper(trim($district));
+                    if (!empty($zoneData['district_zone'][$districtUpper])) {
+                        $zone = $zoneData['district_zone'][$districtUpper];
+                    }
                 }
             }
 

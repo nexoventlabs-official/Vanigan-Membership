@@ -391,6 +391,30 @@ class VanigamController extends Controller
             $zone = $request->input('zone', '');
             $skippedDetails = $request->input('skipped_details', false);
 
+            // Correct district & zone from static config (MySQL districts can be wrong)
+            $zoneData = config('zone_data');
+            if ($zoneData && !empty($zoneData['assembly_map']) && !empty($assembly)) {
+                $asmMap = $zoneData['assembly_map'];
+                $assemblyUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assembly)));
+                $matched = $asmMap[$assemblyUpper] ?? null;
+                if (!$matched) {
+                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $assemblyUpper);
+                    $normalizedInput = preg_replace('/\s+/', ' ', trim($normalizedInput));
+                    foreach ($asmMap as $key => $val) {
+                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $key);
+                        $normalizedKey = preg_replace('/\s+/', ' ', trim($normalizedKey));
+                        if ($normalizedKey === $normalizedInput) {
+                            $matched = $val;
+                            break;
+                        }
+                    }
+                }
+                if ($matched) {
+                    $district = $matched['d'];
+                    $zone = $matched['z'];
+                }
+            }
+
             // Check if mobile already exists - reuse unique_id if so, generate new if not
             // This prevents unique_id from changing on duplicate calls
             $existingMemberForMobile = $this->mongo->findMemberByMobile($mobile);
