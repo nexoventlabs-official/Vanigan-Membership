@@ -397,7 +397,7 @@ class VanigamController extends Controller
                 'photo_url' => 'required|url',
                 'name' => 'required|string|max:100',
                 'assembly' => 'required|string|max:100',
-                'district' => 'required|string|max:100',
+                'district' => 'nullable|string|max:100',
                 'zone' => 'nullable|string|max:100',
                 'dob' => 'nullable|string|max:20',
                 'blood_group' => 'nullable|string|max:10',
@@ -412,7 +412,7 @@ class VanigamController extends Controller
             $photoUrl = $request->input('photo_url');
             $name = $request->input('name');
             $assembly = $request->input('assembly');
-            $district = $request->input('district');
+            $district = $request->input('district', '');
             $dob = $request->input('dob', '');
             $bloodGroup = $request->input('blood_group', '');
             $address = $request->input('address', '');

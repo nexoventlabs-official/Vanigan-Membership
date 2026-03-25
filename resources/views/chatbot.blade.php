@@ -980,10 +980,12 @@
         },
         btn_try_again: { en: 'Try Again', ta: 'மீண்டும் முயற்சி செய்' },
         btn_add_manually: { en: 'Add Manually', ta: 'கைமுறையாக சேர்' },
-        enter_name: { en: 'Please enter your <strong>full name</strong>:', ta: '<strong>உங்கள் முழு பெயரை</strong> உள்ளிடவும்:' },
+        enter_name: { en: 'Please enter your <strong>full name</strong> (max 50 characters):', ta: '<strong>உங்கள் முழு பெயரை</strong> உள்ளிடவும் (அதிகபட்சம் 50 எழுத்துகள்):' },
         ph_name: { en: 'Enter your full name...', ta: 'உங்கள் முழு பெயரை உள்ளிடவும்...' },
-        enter_assembly: { en: 'Please enter your <strong>assembly/taluk</strong>:', ta: '<strong>உங்கள் சட்டமன்றத் தொகுதி</strong>ஐ உள்ளிடவும்:' },
-        ph_assembly: { en: 'Enter assembly name...', ta: 'சட்டமன்றப் பெயரை உள்ளிடவும்...' },
+        name_too_long: { en: '❌ Name must be 50 characters or less. Please re-enter.', ta: '❌ பெயர் 50 எழுத்துகள் அல்லது அதற்கு குறைவாக இருக்க வேண்டும்.' },
+        enter_assembly: { en: 'Please select your <strong>assembly/taluk</strong>:', ta: '<strong>உங்கள் சட்டமன்றத் தொகுதி</strong>ஐ தேர்ந்தெடுக்கவும்:' },
+        ph_assembly: { en: 'Type to search assembly...', ta: 'சட்டமன்றத்தைத் தேட தட்டச்சு செய்...' },
+        manual_epic_info: { en: 'Your EPIC Number: <strong>{epic}</strong>', ta: 'உங்கள் EPIC எண்: <strong>{epic}</strong>' },
         manual_confirm_title: { en: 'Please confirm your details:', ta: 'உங்கள் விவரங்களை உறுதிப்படுத்தவும்:' },
         manual_confirm_note: { en: 'These details will be saved with manual verification flag', ta: 'இந்த விவரங்கள் கைமுறை சரிபார்ப்பு கொடியுடன் சேமிக்கப்படும்' },
         btn_confirm_proceed: { en: 'Confirm & Proceed', ta: 'உறுதிப்படுத்து & தொடர்' },
@@ -1852,6 +1854,15 @@
         h += '<a href="mailto:support@vanigan.org" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-envelope"></i> ' + L('btn_email') + '</a>';
         h += '<a href="tel:+919876543210" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-telephone"></i> ' + L('btn_call') + '</a>';
         h += '</div>';
+        const helpLoanApplied = await checkHasAppliedLoan();
+        h += '<div class="action-buttons" style="margin-top:8px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
+        h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:8px;">';
+        h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
+        if (!helpLoanApplied) h += buildLoanBtn();
+        h += '</div>';
         await botReply(h, 800);
       };
 
@@ -2610,6 +2621,7 @@
               await botReply(h, 1000);
             } else {
               // EPIC not found - offer options to try again or add manually
+              epic = ep; // Save entered EPIC for manual flow
               state = S.AWAIT_EPIC;
               unlockInput();
               let h = L('epic_not_found_manual');
@@ -2766,53 +2778,21 @@
 
         /* ── AWAIT MANUAL NAME ── */
         } else if (state === S.AWAIT_MANUAL_NAME) {
-          const name = txt.trim();
-          if (!name || name.length < 2) {
-            userMsg(txt);
-            await botReply(L('invalid_name'), 500);
-            return;
-          }
-          userMsg(name);
-          voter = { name: name, assembly_name: '', district: '', manually_entered: true };
-          state = S.AWAIT_MANUAL_ASSEMBLY;
-          setText(L('ph_assembly'));
-          sendBtn.disabled = false;
-          await botReply(L('enter_assembly'), 600);
+          // Name is handled via inline input + submitManualName button
+          userMsg(txt);
+          await botReply(L('enter_name'), 500);
 
         /* ── AWAIT MANUAL ASSEMBLY ── */
         } else if (state === S.AWAIT_MANUAL_ASSEMBLY) {
-          const assembly = txt.trim();
-          if (!assembly || assembly.length < 2) {
-            userMsg(txt);
-            await botReply(L('invalid_assembly'), 500);
-            return;
-          }
-          userMsg(assembly);
-          voter.assembly_name = assembly;
-          // Lookup correct district & zone from JS zone data for manual entry
-          const manualDz = lookupDistrictZone(assembly);
-          if (manualDz.district) voter.district = manualDz.district;
-          if (manualDz.zone) voter.zone = manualDz.zone;
-          // Show confirmation before proceeding
-          state = S.MANUAL_CONFIRM;
-          let h = '<strong>' + L('manual_confirm_title') + '</strong><div class="voter-details-card" style="margin-top:10px;">';
-          h += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + voter.name + '</span></div>';
-          h += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + voter.assembly_name + '</span></div>';
-          if (voter.district) h += '<div class="detail-row"><span class="detail-label">District</span><span class="detail-value">' + voter.district + '</span></div>';
-          if (voter.zone) h += '<div class="detail-row"><span class="detail-label">Zone</span><span class="detail-value">' + voter.zone + '</span></div>';
-          h += '<div class="detail-row"><span class="detail-label" style="color:#ff9800;"><i class="bi bi-info-circle"></i></span><span class="detail-value" style="color:#ff9800;font-size:0.85rem;">' + L('manual_confirm_note') + '</span></div>';
-          h += '</div>';
-          h += '<div class="action-buttons" style="margin-top:12px;">';
-          h += '<button class="action-btn confirm" onclick="confirmManualDetails()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_proceed') + '</button>';
-          h += '</div>';
-          await botReply(h, 700);
+          // Assembly is handled via inline search + submitManualAssembly button
+          userMsg(txt);
+          await botReply(L('enter_assembly'), 500);
 
         /* ── MANUAL CONFIRM ── */
         } else if (state === S.MANUAL_CONFIRM) {
           const lo = txt.toLowerCase();
           if (lo === 'yes' || lo === 'confirm' || lo === 'y' || lo === 'ஆம்' || lo === 'உறுதிப்படுத்து') {
             userMsg('✓ ' + L('btn_confirm_proceed'));
-            epic = epic || 'MANUAL_' + Date.now();
             await startPhotoUpload();
           } else {
             userMsg(txt);
@@ -2853,17 +2833,125 @@
       window.startManualEntry = async function () {
         userMsg(L('btn_add_manually'));
         state = S.AWAIT_MANUAL_NAME;
-        setText(L('ph_name'));
-        sendBtn.disabled = false;
-        await botReply(L('enter_name'), 600);
+        lockInput();
+        let h = '<i class="bi bi-person-badge" style="color:#2e7d32;font-size:1.2rem;"></i> ' + L('manual_epic_info').replace('{epic}', epic);
+        h += '<div style="margin-top:10px;">' + L('enter_name') + '</div>';
+        h += '<div style="margin-top:10px;position:relative;">';
+        h += '<input type="text" id="manualNameInput" maxlength="50" placeholder="' + L('ph_name') + '" style="width:100%;padding:12px 16px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;">';
+        h += '<div id="nameCharCount" style="text-align:right;font-size:0.75rem;color:#888;margin-top:2px;">0 / 50</div>';
+        h += '</div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitManualName()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_submit') + '</button></div>';
+        await botReply(h, 600);
+        setTimeout(() => {
+          const inp = document.getElementById('manualNameInput');
+          if (inp) {
+            inp.focus();
+            inp.addEventListener('input', function() {
+              const cnt = document.getElementById('nameCharCount');
+              if (cnt) { cnt.textContent = inp.value.length + ' / 50'; cnt.style.color = inp.value.length >= 45 ? '#e65100' : '#888'; }
+            });
+          }
+        }, 700);
       };
 
+      window.submitManualName = async function () {
+        const inp = document.getElementById('manualNameInput');
+        if (!inp || !inp.value.trim()) return;
+        const name = inp.value.trim().substring(0, 50);
+        if (name.length < 2) { await botReply(L('invalid_name'), 500); return; }
+        inp.disabled = true;
+        const btn = inp.closest('.bot').querySelector('.action-btn');
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+        userMsg(name);
+        voter = { name: name, assembly_name: '', district: '', manually_entered: true, epic_no: epic };
+        state = S.AWAIT_MANUAL_ASSEMBLY;
+        lockInput();
+        // Build assembly live search
+        let h = L('enter_assembly');
+        h += '<div style="margin-top:10px;position:relative;">';
+        h += '<input type="text" id="assemblySearchInput" autocomplete="off" placeholder="' + L('ph_assembly') + '" style="width:100%;padding:12px 16px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;">';
+        h += '<div id="assemblySuggestions" style="display:none;position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:#fff;border:2px solid #2e7d32;border-top:none;border-radius:0 0 10px 10px;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.15);"></div>';
+        h += '</div>';
+        h += '<div id="assemblyDistrictZone" style="display:none;margin-top:8px;padding:10px 14px;background:#e8f5e9;border-radius:10px;font-size:0.85rem;color:#1b5e20;"></div>';
+        h += '<div style="margin-top:8px;"><button class="action-btn confirm" id="assemblySubmitBtn" onclick="submitManualAssembly()" style="width:100%;opacity:0.5;" disabled><i class="bi bi-check-lg"></i> ' + L('btn_submit') + '</button></div>';
+        await botReply(h, 600);
+        setTimeout(() => { initAssemblySearch(); }, 700);
+      };
+
+      function initAssemblySearch() {
+        const inp = document.getElementById('assemblySearchInput');
+        const sugBox = document.getElementById('assemblySuggestions');
+        const dzBox = document.getElementById('assemblyDistrictZone');
+        const submitBtn = document.getElementById('assemblySubmitBtn');
+        if (!inp || !sugBox) return;
+        // Build assembly list from JS_ZONE_DATA
+        const assemblies = Object.keys(JS_ZONE_DATA).map(k => ({ name: toTitleCase(k), key: k }));
+        let selectedAssembly = '';
+
+        inp.addEventListener('input', function() {
+          const q = inp.value.trim().toLowerCase();
+          selectedAssembly = '';
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
+          if (dzBox) dzBox.style.display = 'none';
+          if (q.length < 1) { sugBox.style.display = 'none'; return; }
+          const matches = assemblies.filter(a => a.name.toLowerCase().includes(q)).slice(0, 15);
+          if (matches.length === 0) { sugBox.style.display = 'none'; return; }
+          let sh = '';
+          matches.forEach(m => {
+            const dz = JS_ZONE_DATA[m.key];
+            sh += '<div class="asm-suggestion" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #e8f5e9;font-size:0.9rem;transition:background 0.15s;" onmouseover="this.style.background=\'#e8f5e9\'" onmouseout="this.style.background=\'#fff\'" onclick="selectAssembly(\'' + m.key.replace(/'/g, "\\'") + '\')">';
+            sh += '<strong style="color:#1b5e20;">' + m.name + '</strong>';
+            if (dz) sh += ' <span style="font-size:0.75rem;color:#666;">- ' + toTitleCase(dz.d) + ', ' + toTitleCase(dz.z) + '</span>';
+            sh += '</div>';
+          });
+          sugBox.innerHTML = sh;
+          sugBox.style.display = 'block';
+        });
+
+        inp.addEventListener('focus', function() {
+          if (inp.value.trim().length >= 1) inp.dispatchEvent(new Event('input'));
+        });
+
+        window.selectAssembly = function(key) {
+          const dz = JS_ZONE_DATA[key];
+          selectedAssembly = key;
+          inp.value = toTitleCase(key);
+          sugBox.style.display = 'none';
+          if (dz && dzBox) {
+            dzBox.innerHTML = '<i class="bi bi-geo-alt-fill" style="color:#2e7d32;"></i> <strong>District:</strong> ' + toTitleCase(dz.d) + ' &nbsp;|&nbsp; <strong>Zone:</strong> ' + toTitleCase(dz.z);
+            dzBox.style.display = 'block';
+          }
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; }
+        };
+
+        window.submitManualAssembly = function() {
+          if (!selectedAssembly) return;
+          const dz = JS_ZONE_DATA[selectedAssembly];
+          inp.disabled = true;
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; }
+          const assemblyName = toTitleCase(selectedAssembly);
+          userMsg(assemblyName);
+          voter.assembly_name = assemblyName;
+          if (dz) { voter.district = toTitleCase(dz.d); voter.zone = toTitleCase(dz.z); }
+          // Show confirmation
+          state = S.MANUAL_CONFIRM;
+          let h = '<strong>' + L('manual_confirm_title') + '</strong><div class="voter-details-card" style="margin-top:10px;">';
+          h += '<div class="detail-row"><span class="detail-label">EPIC No</span><span class="detail-value">' + epic + '</span></div>';
+          h += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + voter.name + '</span></div>';
+          h += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + voter.assembly_name + '</span></div>';
+          if (voter.district) h += '<div class="detail-row"><span class="detail-label">District</span><span class="detail-value">' + voter.district + '</span></div>';
+          if (voter.zone) h += '<div class="detail-row"><span class="detail-label">Zone</span><span class="detail-value">' + voter.zone + '</span></div>';
+          h += '</div>';
+          h += '<div class="action-buttons" style="margin-top:12px;">';
+          h += '<button class="action-btn confirm" onclick="confirmManualDetails()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_proceed') + '</button>';
+          h += '</div>';
+          botReply(h, 700);
+        };
+      }
+
       window.confirmManualDetails = async function () {
-        state = S.MANUAL_CONFIRM;
         userMsg('✓ ' + L('btn_confirm_proceed'));
-        // Generate a pseudo-EPIC for manual entries
-        epic = 'MANUAL_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        // Mark as manually entered
+        // Mark as manually entered — keep original EPIC
         voter.manually_entered = true;
         voter.epic_no = epic;
         await startPhotoUpload();
