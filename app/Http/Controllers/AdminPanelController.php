@@ -142,7 +142,25 @@ class AdminPanelController extends Controller
                 $tableName = AssemblyConstituency::getTableByAssembly($assemblyFilter);
                 $tables = $tableName ? [$tableName] : [];
             } elseif ($districtFilter) {
-                $tables = AssemblyConstituency::getTablesByDistrict($districtFilter);
+                // District filter may come from zone_data config (correct spelling)
+                // which differs from MySQL district names, so resolve via assembly_map
+                $zoneAsmMap = config('zone_data.assembly_map') ?? [];
+                $matchedAssemblies = [];
+                $distUpper = strtoupper(trim($districtFilter));
+                foreach ($zoneAsmMap as $asmKey => $asmInfo) {
+                    if (strtoupper($asmInfo['d']) === $distUpper) {
+                        $matchedAssemblies[] = $asmKey;
+                    }
+                }
+                if (!empty($matchedAssemblies)) {
+                    $tables = [];
+                    foreach ($matchedAssemblies as $asmName) {
+                        $t = AssemblyConstituency::getTableByAssembly($asmName);
+                        if ($t) $tables[] = $t;
+                    }
+                } else {
+                    $tables = AssemblyConstituency::getTablesByDistrict($districtFilter);
+                }
             } else {
                 $tables = AssemblyConstituency::getAllVoterTables();
             }
@@ -204,7 +222,11 @@ class AdminPanelController extends Controller
                         }, $rows);
                     }
                 } elseif ($districtFilter) {
-                    $total = AssemblyConstituency::where('district_name', 'LIKE', $districtFilter)->sum('total_voters');
+                    // Count total: sum voters from matched tables (works for both zone_data and MySQL district names)
+                    $total = 0;
+                    foreach ($tables as $t) {
+                        $total += DB::connection('voters')->selectOne("SELECT COUNT(*) as cnt FROM `{$t}`")->cnt;
+                    }
                     // Paginate across district tables
                     $offset = ($page - 1) * $limit;
                     $remaining = $limit;

@@ -384,7 +384,7 @@
         document.getElementById('memberName').textContent = m.name || '';
         document.getElementById('memberAssembly').innerHTML = m.assembly ? m.assembly + ' <span class="suffix-tag">Assm</span>' : '';
         document.getElementById('memberDistrict').innerHTML = m.district ? toTitleCase(m.district) + ' <span class="suffix-tag">Dist</span>' : '';
-        document.getElementById('memberZone').innerHTML = m.zone ? toTitleCase(m.zone) + ' <span class="suffix-tag">Zone</span>' : '';
+        document.getElementById('memberZone').innerHTML = m.zone ? toTitleCase(m.zone) : '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields

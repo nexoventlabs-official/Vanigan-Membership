@@ -362,7 +362,7 @@
               <p class="detail-line">{{ ucwords(strtolower($member->district ?? '')) }}@if(!empty($member->district)) <span class="suffix-tag">Dist</span>@endif</p>
             </div>
             <div class="front-line">
-              <p class="detail-line">{{ ucwords(strtolower($member->zone ?? '')) }}@if(!empty($member->zone)) <span class="suffix-tag">Zone</span>@endif</p>
+              <p class="detail-line">{{ ucwords(strtolower($member->zone ?? '')) }}</p>
             </div>
             <div class="front-line">
               <p class="id-number">{{ $member->unique_id ?? '' }}</p>

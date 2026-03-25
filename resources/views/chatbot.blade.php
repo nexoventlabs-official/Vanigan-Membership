@@ -857,6 +857,25 @@
   </div>
 
   <script>
+    // Global helpers (needed by captureAndUploadCard in separate script tag)
+    function toTitleCase(str) {
+      if (!str) return '';
+      return str.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    }
+    var JS_ZONE_DATA = @php echo json_encode(config('zone_data.assembly_map'), JSON_UNESCAPED_UNICODE); @endphp;
+    function lookupDistrictZone(assemblyName) {
+      if (!assemblyName || !JS_ZONE_DATA) return { district: '', zone: '' };
+      var key = assemblyName.trim().toUpperCase().replace(/\s+/g, ' ');
+      var matched = JS_ZONE_DATA[key] || null;
+      if (!matched) {
+        var norm = key.replace(/[\. \-\(\)]/g, '').replace(/\s+/g, ' ').trim();
+        for (var k in JS_ZONE_DATA) {
+          if (JS_ZONE_DATA.hasOwnProperty(k) && k.replace(/[\. \-\(\)]/g, '').replace(/\s+/g, ' ').trim() === norm) { matched = JS_ZONE_DATA[k]; break; }
+        }
+      }
+      if (matched) return { district: toTitleCase(matched.d), zone: toTitleCase(matched.z) };
+      return { district: '', zone: '' };
+    }
     (function () {
       /* ────────────────────────────────────────────────────────
          State Machine for Tamil Nadu Vanigargalin Sangamam Chat Flow
@@ -1242,30 +1261,6 @@
         return text;
       }
 
-      // Title Case helper: "MADURAI ZONE" → "Madurai Zone"
-      function toTitleCase(str) {
-        if (!str) return '';
-        return str.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
-      }
-
-      // JS zone data for manual entry district/zone lookup
-      const JS_ZONE_DATA = @php echo json_encode(config('zone_data.assembly_map'), JSON_UNESCAPED_UNICODE); @endphp;
-
-      // Lookup correct district & zone from assembly name (JS-side)
-      function lookupDistrictZone(assemblyName) {
-        if (!assemblyName || !JS_ZONE_DATA) return { district: '', zone: '' };
-        const key = assemblyName.trim().toUpperCase().replace(/\s+/g, ' ');
-        let matched = JS_ZONE_DATA[key] || null;
-        if (!matched) {
-          const norm = key.replace(/[\.\-\(\)]/g, '').replace(/\s+/g, ' ').trim();
-          for (const [k, v] of Object.entries(JS_ZONE_DATA)) {
-            if (k.replace(/[\.\-\(\)]/g, '').replace(/\s+/g, ' ').trim() === norm) { matched = v; break; }
-          }
-        }
-        if (matched) return { district: toTitleCase(matched.d), zone: toTitleCase(matched.z) };
-        return { district: '', zone: '' };
-      }
-
       function setLang(lang) {
         currentLang = lang;
         localStorage.setItem('vanigam_lang', lang);
@@ -1372,7 +1367,7 @@
           html += '<p style="font-size:0.62rem;font-weight:700;color:#009245;margin:0;">' + (m.name || '') + '</p>';
           html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Assm</span>' : '') + '</p>';
           html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + ((sb3dDz.district || toTitleCase(m.district)) ? (sb3dDz.district || toTitleCase(m.district)) + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
-          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + ((sb3dDz.zone || toTitleCase(m.zone)) ? (sb3dDz.zone || toTitleCase(m.zone)) + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Zone</span>' : '') + '</p>';
+          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + ((sb3dDz.zone || toTitleCase(m.zone)) || '') + '</p>';
           html += '<p style="font-size:0.42rem;margin:2px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
           html += '</div></div></div>';
 
@@ -3028,7 +3023,7 @@
         h += '<p style="font-size:1rem;font-weight:700;color:#009245;margin:0;line-height:1.1;">' + (m.name || '') + '</p>';
         h += '<p style="font-size:0.75rem;margin:2px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Assm</span>' : '') + '</p>';
         h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (cpDist ? cpDist + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
-        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (cpZone ? cpZone + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Zone</span>' : '') + '</p>';
+        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (cpZone || '') + '</p>';
         h += '<p style="font-size:0.7rem;margin:3px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
         h += '</div></div></div>';
         // Back Card with download icon
@@ -3428,7 +3423,7 @@
         const capZoneVal = capDz.zone || toTitleCase(member.zone);
         document.getElementById('capAssembly').innerHTML = member.assembly ? member.assembly + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Assm</span>' : '';
         document.getElementById('capDistrict').innerHTML = capDistVal ? capDistVal + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Dist</span>' : '';
-        document.getElementById('capZone').innerHTML = capZoneVal ? capZoneVal + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Zone</span>' : '';
+        document.getElementById('capZone').innerHTML = capZoneVal || '';
         document.getElementById('capUniqueId').textContent = member.unique_id || '';
         document.getElementById('capDob').textContent = member.dob || 'xxxxxx';
         document.getElementById('capAge').textContent = member.age || 'xxxxxx';

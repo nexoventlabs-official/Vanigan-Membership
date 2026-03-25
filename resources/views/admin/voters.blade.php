@@ -140,9 +140,16 @@
         </select>
         <select name="district">
           <option value="">All Districts</option>
-          @foreach($districts as $d)
-          @php $corrD = $distZone[strtoupper($d)] ?? null; @endphp
-          <option value="{{ $d }}" {{ $district === $d ? 'selected' : '' }}>{{ $d }}@if($corrD) ({{ $corrD }})@endif</option>
+          @php
+            // Build dropdown from zone_data config (correct spellings) instead of MySQL district names
+            $dropdownDistricts = [];
+            foreach ($distZone as $dName => $zName) {
+                $dropdownDistricts[$dName] = ucwords(strtolower($dName)) . ' (' . ucwords(strtolower($zName)) . ')';
+            }
+            asort($dropdownDistricts);
+          @endphp
+          @foreach($dropdownDistricts as $dKey => $dLabel)
+          <option value="{{ $dKey }}" {{ strtoupper($district) === $dKey ? 'selected' : '' }}>{{ $dLabel }}</option>
           @endforeach
         </select>
         <button type="submit" class="filter-btn"><i class="bi bi-search"></i> Search</button>
