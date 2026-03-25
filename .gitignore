@@ -19,3 +19,5 @@ yarn-error.log
 /.vscode
 composer.phar
 /storage/logs/*.log
+*.xlsx
+zone_json.txt

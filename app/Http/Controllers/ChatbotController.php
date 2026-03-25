@@ -178,13 +178,35 @@ class ChatbotController extends Controller
                 ], 404);
             }
 
+            $assemblyName = $voter['assembly_name'] ?? $voter['assembly'] ?? 'N/A';
+            $district = $voter['district'] ?? 'N/A';
+
+            // Look up zone from static config (Excel-based, not MySQL)
+            $zoneData = config('zone_data');
+            $zone = '';
+            if ($zoneData) {
+                // Try district-based zone lookup
+                $districtUpper = strtoupper(trim($district));
+                if (!empty($zoneData['district_zone'][$districtUpper])) {
+                    $zone = $zoneData['district_zone'][$districtUpper];
+                }
+                // Try assembly-based lookup for more accurate district/zone
+                $assemblyUpper = strtoupper(trim($assemblyName));
+                if (!empty($zoneData['assembly_map'][$assemblyUpper])) {
+                    $asmData = $zoneData['assembly_map'][$assemblyUpper];
+                    $district = $asmData['d'];
+                    $zone = $asmData['z'];
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'voter' => [
                     'name' => $voter['name'] ?? 'N/A',
                     'epic_no' => $epicNo,
-                    'assembly_name' => $voter['assembly_name'] ?? $voter['assembly'] ?? 'N/A',
-                    'district' => $voter['district'] ?? 'N/A',
+                    'assembly_name' => $assemblyName,
+                    'district' => $district,
+                    'zone' => $zone,
                 ]
             ]);
         } catch (\Exception $e) {

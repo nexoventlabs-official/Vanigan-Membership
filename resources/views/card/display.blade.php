@@ -329,6 +329,12 @@
       <div class="detail-label"><i class="bi bi-geo-alt text-primary"></i> District</div>
       <div class="detail-value">{{ $voter['district'] ?? 'N/A' }}</div>
     </div>
+    @if(!empty($voter['zone']))
+    <div class="detail-row">
+      <div class="detail-label"><i class="bi bi-globe2 text-primary"></i> Zone</div>
+      <div class="detail-value">{{ $voter['zone'] }}</div>
+    </div>
+    @endif
   </div>
 
   <!-- Action Buttons -->

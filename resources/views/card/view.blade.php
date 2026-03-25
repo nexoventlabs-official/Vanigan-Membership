@@ -252,9 +252,9 @@
         <div class="front-stack">
           <div class="front-line"><p class="name" id="memberName"></p></div>
           <div class="front-meta">
-            <div class="front-line"><p class="designation" id="memberMembership"></p></div>
             <div class="front-line"><p class="detail-line" id="memberAssembly"></p></div>
             <div class="front-line"><p class="detail-line" id="memberDistrict"></p></div>
+            <div class="front-line"><p class="detail-line" id="memberZone"></p></div>
             <div class="front-line"><p class="id-number" id="memberUniqueId"></p></div>
           </div>
         </div>
@@ -381,9 +381,9 @@
           photo.style.display = 'block';
         }
         document.getElementById('memberName').textContent = m.name || '';
-        document.getElementById('memberMembership').textContent = m.membership || 'Member';
-        document.getElementById('memberAssembly').innerHTML = m.assembly ? m.assembly + ' <span class="suffix-tag">LA</span>' : '';
+        document.getElementById('memberAssembly').innerHTML = m.assembly ? m.assembly + ' <span class="suffix-tag">Assm</span>' : '';
         document.getElementById('memberDistrict').innerHTML = m.district ? m.district + ' <span class="suffix-tag">Dist</span>' : '';
+        document.getElementById('memberZone').innerHTML = m.zone ? m.zone + ' <span class="suffix-tag">Zone</span>' : '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields

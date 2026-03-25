@@ -356,13 +356,13 @@
           </div>
           <div class="front-meta">
             <div class="front-line">
-              <p class="designation">{{ $member->membership ?? 'Member' }}</p>
-            </div>
-            <div class="front-line">
-              <p class="detail-line">{{ $member->assembly ?? '' }}@if(!empty($member->assembly)) <span class="suffix-tag">LA</span>@endif</p>
+              <p class="detail-line">{{ $member->assembly ?? '' }}@if(!empty($member->assembly)) <span class="suffix-tag">Assm</span>@endif</p>
             </div>
             <div class="front-line">
               <p class="detail-line">{{ $member->district ?? '' }}@if(!empty($member->district)) <span class="suffix-tag">Dist</span>@endif</p>
+            </div>
+            <div class="front-line">
+              <p class="detail-line">{{ $member->zone ?? '' }}@if(!empty($member->zone)) <span class="suffix-tag">Zone</span>@endif</p>
             </div>
             <div class="front-line">
               <p class="id-number">{{ $member->unique_id ?? '' }}</p>

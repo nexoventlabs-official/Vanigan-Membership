@@ -370,6 +370,7 @@ class VanigamController extends Controller
                 'name' => 'required|string|max:100',
                 'assembly' => 'required|string|max:100',
                 'district' => 'required|string|max:100',
+                'zone' => 'nullable|string|max:100',
                 'dob' => 'nullable|string|max:20',
                 'blood_group' => 'nullable|string|max:10',
                 'address' => 'nullable|string|max:300',
@@ -387,6 +388,7 @@ class VanigamController extends Controller
             $dob = $request->input('dob', '');
             $bloodGroup = $request->input('blood_group', '');
             $address = $request->input('address', '');
+            $zone = $request->input('zone', '');
             $skippedDetails = $request->input('skipped_details', false);
 
             // Check if mobile already exists - reuse unique_id if so, generate new if not
@@ -432,9 +434,9 @@ class VanigamController extends Controller
                 'epic_no' => $epicNo,
                 'mobile' => $mobile,
                 'name' => $name,
-                'membership' => 'Member',
                 'assembly' => $assembly,
                 'district' => $district,
+                'zone' => $zone,
                 'photo_url' => $photoUrl,
                 'qr_url' => $qrUrl,
                 'card_url' => $cardUrl,

@@ -2508,7 +2508,8 @@
                 ['Name', voter.name || ''],
                 ['EPIC No', voter.epic_no || ep],
                 ['Assembly', voter.assembly_name || ''],
-                ['District', voter.district || '']
+                ['District', voter.district || ''],
+                ['Zone', voter.zone || '']
               ];
               for (const [lbl, v] of fields) {
                 if (!v || !v.trim()) continue;
@@ -2988,9 +2989,9 @@
         if (m.photo_url) h += '<img src="' + m.photo_url + '" style="position:absolute;top:31.8%;left:50%;transform:translateX(-50%);width:32.5%;border-radius:16px;border:3px solid #009245;aspect-ratio:1;object-fit:cover;">';
         h += '<div style="position:absolute;top:57%;left:0;right:0;text-align:center;padding:0 12px;">';
         h += '<p style="font-size:1rem;font-weight:700;color:#009245;margin:0;line-height:1.1;">' + (m.name || '') + '</p>';
-        h += '<p style="font-size:0.8rem;font-weight:600;margin:3px 0 0;">' + (m.membership || 'Member') + '</p>';
-        h += '<p style="font-size:0.75rem;margin:2px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">LA</span>' : '') + '</p>';
+        h += '<p style="font-size:0.75rem;margin:2px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Assm</span>' : '') + '</p>';
         h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (m.district ? m.district + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
+        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (m.zone ? m.zone + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Zone</span>' : '') + '</p>';
         h += '<p style="font-size:0.7rem;margin:3px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
         h += '</div></div></div>';
         // Back Card with download icon
@@ -3072,6 +3073,7 @@
             name: voter ? voter.name : '',
             assembly: voter ? (voter.assembly_name || '') : '',
             district: voter ? (voter.district || '') : '',
+            zone: voter ? (voter.zone || '') : '',
             dob: dob,
             blood_group: bloodGroup,
             address: address,
@@ -3325,9 +3327,9 @@
       <div style="position:absolute;top:328px;left:28px;right:28px;text-align:center;">
         <p id="capName" style="font-size:23px;font-weight:700;color:#009245;line-height:1.08;margin:0;"></p>
         <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:6px;">
-          <div style="text-align:center;padding:0 18px;"><p id="capMembership" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
           <div style="text-align:center;padding:0 18px;"><p id="capAssembly" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
           <div style="text-align:center;padding:0 18px;"><p id="capDistrict" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
+          <div style="text-align:center;padding:0 18px;"><p id="capZone" style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;"></p></div>
           <div style="text-align:center;padding:0 18px;"><p id="capUniqueId" style="font-size:18px;font-weight:700;letter-spacing:0.2px;margin:0;color:#111;"></p></div>
         </div>
       </div>
@@ -3384,9 +3386,9 @@
         const photo = document.getElementById('capPhoto');
         if (member.photo_url) { photo.src = member.photo_url; photo.style.display = 'block'; }
         document.getElementById('capName').textContent = member.name || '';
-        document.getElementById('capMembership').textContent = member.membership || 'Member';
-        document.getElementById('capAssembly').innerHTML = member.assembly ? member.assembly + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">LA</span>' : '';
+        document.getElementById('capAssembly').innerHTML = member.assembly ? member.assembly + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Assm</span>' : '';
         document.getElementById('capDistrict').innerHTML = member.district ? member.district + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Dist</span>' : '';
+        document.getElementById('capZone').innerHTML = member.zone ? member.zone + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Zone</span>' : '';
         document.getElementById('capUniqueId').textContent = member.unique_id || '';
         document.getElementById('capDob').textContent = member.dob || 'xxxxxx';
         document.getElementById('capAge').textContent = member.age || 'xxxxxx';
