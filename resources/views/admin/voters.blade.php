@@ -102,9 +102,9 @@
                 if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matched = $v; break; }
             }
         }
-        if ($matched) return ['d' => $matched['d'], 'z' => $matched['z']];
+        if ($matched) return ['d' => ucwords(strtolower($matched['d'])), 'z' => ucwords(strtolower($matched['z']))];
         $dUpper = strtoupper(trim($assemblyName ?? ''));
-        return ['d' => null, 'z' => $distZone[$dUpper] ?? null];
+        return ['d' => null, 'z' => isset($distZone[$dUpper]) ? ucwords(strtolower($distZone[$dUpper])) : null];
     }
   @endphp
   <nav class="navbar">

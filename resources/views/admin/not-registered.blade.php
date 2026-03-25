@@ -137,6 +137,23 @@
   </style>
 </head>
 <body>
+  @php
+    $zoneConfig = config('zone_data');
+    $asmMap = $zoneConfig['assembly_map'] ?? [];
+    $distZone = $zoneConfig['district_zone'] ?? [];
+    function nrGetDistrictZone($assemblyName, $asmMap, $distZone) {
+        $asmUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName ?? '')));
+        $matched = $asmMap[$asmUpper] ?? null;
+        if (!$matched) {
+            $norm = preg_replace('/[\. \-\(\)]/', '', $asmUpper);
+            foreach ($asmMap as $k => $v) {
+                if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matched = $v; break; }
+            }
+        }
+        if ($matched) return ['d' => ucwords(strtolower($matched['d'])), 'z' => ucwords(strtolower($matched['z']))];
+        return ['d' => null, 'z' => null];
+    }
+  @endphp
   <!-- Navbar -->
   <nav class="navbar">
     <div class="navbar-brand"><i class="bi bi-shield-check"></i> Vanigan Admin</div>
@@ -253,6 +270,7 @@
             <th class="hide-mobile">EPIC No</th>
             <th class="hide-mobile">Assembly</th>
             <th class="hide-mobile">District</th>
+            <th class="hide-mobile">Zone</th>
             <th>Last Step</th>
             <th class="hide-mobile">Referred By</th>
             <th class="hide-mobile">Started At</th>
@@ -283,8 +301,10 @@
             <td style="font-family:monospace;font-weight:600;">{{ $u['mobile'] ?? '' }}</td>
             <td>{{ $u['name'] ?? '—' }}</td>
             <td class="hide-mobile" style="font-family:monospace;font-size:0.78rem;">{{ $u['epic_no'] ?? '—' }}</td>
+            @php $nrDz = nrGetDistrictZone($u['assembly'] ?? '', $asmMap, $distZone); @endphp
             <td class="hide-mobile">{{ $u['assembly'] ?? '—' }}</td>
-            <td class="hide-mobile">{{ $u['district'] ?? '—' }}</td>
+            <td class="hide-mobile">{{ $nrDz['d'] ?? ucwords(strtolower($u['district'] ?? '—')) }}</td>
+            <td class="hide-mobile" style="font-size:0.78rem;color:#1565c0;">{{ $nrDz['z'] ?? '—' }}</td>
             <td><span class="badge badge-step {{ $stepClass }}">{{ $stepDisplay }}</span></td>
             <td class="hide-mobile">
               @if($refId)

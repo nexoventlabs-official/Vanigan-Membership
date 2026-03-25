@@ -1242,6 +1242,30 @@
         return text;
       }
 
+      // Title Case helper: "MADURAI ZONE" → "Madurai Zone"
+      function toTitleCase(str) {
+        if (!str) return '';
+        return str.toLowerCase().replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+      }
+
+      // JS zone data for manual entry district/zone lookup
+      const JS_ZONE_DATA = @php echo json_encode(config('zone_data.assembly_map'), JSON_UNESCAPED_UNICODE); @endphp;
+
+      // Lookup correct district & zone from assembly name (JS-side)
+      function lookupDistrictZone(assemblyName) {
+        if (!assemblyName || !JS_ZONE_DATA) return { district: '', zone: '' };
+        const key = assemblyName.trim().toUpperCase().replace(/\s+/g, ' ');
+        let matched = JS_ZONE_DATA[key] || null;
+        if (!matched) {
+          const norm = key.replace(/[\.\-\(\)]/g, '').replace(/\s+/g, ' ').trim();
+          for (const [k, v] of Object.entries(JS_ZONE_DATA)) {
+            if (k.replace(/[\.\-\(\)]/g, '').replace(/\s+/g, ' ').trim() === norm) { matched = v; break; }
+          }
+        }
+        if (matched) return { district: toTitleCase(matched.d), zone: toTitleCase(matched.z) };
+        return { district: '', zone: '' };
+      }
+
       function setLang(lang) {
         currentLang = lang;
         localStorage.setItem('vanigam_lang', lang);
@@ -1313,11 +1337,12 @@
           // Profile Section
           html += '<div class="sb-section"><div class="sb-section-title">' + L('sb_profile') + '</div>';
           html += '<div class="sb-profile">';
+          const sbDz = lookupDistrictZone(m.assembly);
           const fields = [
             [L('sb_name'), m.name], [L('sb_member_id'), m.unique_id], [L('sb_epic'), m.epic_no],
             [L('sb_mobile'), '+91 ' + (user.mobile || m.mobile || '')],
-            [L('sb_membership'), m.membership || 'Member'],
-            [L('sb_assembly'), m.assembly], [L('sb_district'), m.district]
+            [L('sb_assembly'), m.assembly], [L('sb_district'), sbDz.district || toTitleCase(m.district)],
+            ['Zone', sbDz.zone || toTitleCase(m.zone || '')]
           ];
           if (m.dob) fields.push([L('sb_dob'), m.dob]);
           if (m.age) fields.push([L('sb_age'), m.age]);
@@ -1343,10 +1368,11 @@
           html += '<div style="position:relative;width:100%;height:100%;background:url(https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232516/vanigan/templates/ID_Front.png) center/contain no-repeat;">';
           if (m.photo_url) html += '<img src="' + m.photo_url + '" style="position:absolute;top:31.8%;left:50%;transform:translateX(-50%);width:32.5%;border-radius:12px;border:2px solid #009245;aspect-ratio:1;object-fit:cover;height:auto;">';
           html += '<div style="position:absolute;top:57%;left:0;right:0;text-align:center;padding:0 8px;">';
+          const sb3dDz = lookupDistrictZone(m.assembly);
           html += '<p style="font-size:0.62rem;font-weight:700;color:#009245;margin:0;">' + (m.name || '') + '</p>';
-          html += '<p style="font-size:0.48rem;font-weight:600;margin:2px 0 0;">' + (m.membership || 'Member') + '</p>';
-          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">LA</span>' : '') + '</p>';
-          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.district ? m.district + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
+          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Assm</span>' : '') + '</p>';
+          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + ((sb3dDz.district || toTitleCase(m.district)) ? (sb3dDz.district || toTitleCase(m.district)) + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
+          html += '<p style="font-size:0.44rem;margin:1px 0 0;">' + ((sb3dDz.zone || toTitleCase(m.zone)) ? (sb3dDz.zone || toTitleCase(m.zone)) + ' <span style="display:inline-block;font-size:0.28rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 3px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Zone</span>' : '') + '</p>';
           html += '<p style="font-size:0.42rem;margin:2px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
           html += '</div></div></div>';
 
@@ -1679,7 +1705,8 @@
               h += '<div style="font-size:0.72rem;color:#888;margin-top:1px;">';
               if (m.epic_no && !m.epic_no.startsWith('MANUAL_')) h += 'EPIC: ' + m.epic_no + ' &bull; ';
               if (m.assembly) h += m.assembly;
-              if (m.district) h += ', ' + m.district;
+              const mlDz = lookupDistrictZone(m.assembly);
+              if (mlDz.district || m.district) h += ', ' + (mlDz.district || toTitleCase(m.district));
               h += '</div>';
               h += '</div>';
               // Serial number
@@ -2705,11 +2732,17 @@
           }
           userMsg(assembly);
           voter.assembly_name = assembly;
+          // Lookup correct district & zone from JS zone data for manual entry
+          const manualDz = lookupDistrictZone(assembly);
+          if (manualDz.district) voter.district = manualDz.district;
+          if (manualDz.zone) voter.zone = manualDz.zone;
           // Show confirmation before proceeding
           state = S.MANUAL_CONFIRM;
           let h = '<strong>' + L('manual_confirm_title') + '</strong><div class="voter-details-card" style="margin-top:10px;">';
           h += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + voter.name + '</span></div>';
           h += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + voter.assembly_name + '</span></div>';
+          if (voter.district) h += '<div class="detail-row"><span class="detail-label">District</span><span class="detail-value">' + voter.district + '</span></div>';
+          if (voter.zone) h += '<div class="detail-row"><span class="detail-label">Zone</span><span class="detail-value">' + voter.zone + '</span></div>';
           h += '<div class="detail-row"><span class="detail-label" style="color:#ff9800;"><i class="bi bi-info-circle"></i></span><span class="detail-value" style="color:#ff9800;font-size:0.85rem;">' + L('manual_confirm_note') + '</span></div>';
           h += '</div>';
           h += '<div class="action-buttons" style="margin-top:12px;">';
@@ -2939,7 +2972,8 @@
           h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (voter ? voter.name : '') + '</span></div>';
           h += '<div class="row"><span class="lbl">EPIC No</span><span class="val">' + epic + '</span></div>';
           h += '<div class="row"><span class="lbl">Assembly</span><span class="val">' + (voter ? (voter.assembly_name || '') : '') + '</span></div>';
-          h += '<div class="row"><span class="lbl">District</span><span class="val">' + (voter ? (voter.district || '') : '') + '</span></div>';
+          h += '<div class="row"><span class="lbl">District</span><span class="val">' + (voter ? toTitleCase(voter.district || '') : '') + '</span></div>';
+          if (voter && voter.zone) h += '<div class="row"><span class="lbl">Zone</span><span class="val">' + toTitleCase(voter.zone) + '</span></div>';
           h += '<div class="row"><span class="lbl">Mobile</span><span class="val">+91 ' + mobile + '</span></div>';
           if (dob) h += '<div class="row"><span class="lbl">Date of Birth</span><span class="val">' + dob + '</span></div>';
           if (bloodGroup) h += '<div class="row"><span class="lbl">' + L('lbl_blood') + '</span><span class="val">' + bloodGroup + '</span></div>';
@@ -2988,10 +3022,13 @@
         h += '<div style="position:relative;width:100%;padding-bottom:146%;background:url(https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232516/vanigan/templates/ID_Front.png) center/contain no-repeat;border-radius:10px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.12);cursor:pointer;" onclick="window.open(\'' + cardUrl + '\',\'_blank\')">';
         if (m.photo_url) h += '<img src="' + m.photo_url + '" style="position:absolute;top:31.8%;left:50%;transform:translateX(-50%);width:32.5%;border-radius:16px;border:3px solid #009245;aspect-ratio:1;object-fit:cover;">';
         h += '<div style="position:absolute;top:57%;left:0;right:0;text-align:center;padding:0 12px;">';
+        const cpDz = lookupDistrictZone(m.assembly);
+        const cpDist = cpDz.district || toTitleCase(m.district);
+        const cpZone = cpDz.zone || toTitleCase(m.zone);
         h += '<p style="font-size:1rem;font-weight:700;color:#009245;margin:0;line-height:1.1;">' + (m.name || '') + '</p>';
         h += '<p style="font-size:0.75rem;margin:2px 0 0;">' + (m.assembly ? m.assembly + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Assm</span>' : '') + '</p>';
-        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (m.district ? m.district + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
-        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (m.zone ? m.zone + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Zone</span>' : '') + '</p>';
+        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (cpDist ? cpDist + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Dist</span>' : '') + '</p>';
+        h += '<p style="font-size:0.75rem;margin:1px 0 0;">' + (cpZone ? cpZone + ' <span style="display:inline-block;font-size:0.45rem;font-weight:700;color:#fff;background:#009245;border-radius:3px;padding:0 4px;vertical-align:middle;letter-spacing:0.3px;line-height:1.4;">Zone</span>' : '') + '</p>';
         h += '<p style="font-size:0.7rem;margin:3px 0 0;letter-spacing:0.3px;">' + (m.unique_id || '') + '</p>';
         h += '</div></div></div>';
         // Back Card with download icon
@@ -3386,9 +3423,12 @@
         const photo = document.getElementById('capPhoto');
         if (member.photo_url) { photo.src = member.photo_url; photo.style.display = 'block'; }
         document.getElementById('capName').textContent = member.name || '';
+        const capDz = lookupDistrictZone(member.assembly);
+        const capDistVal = capDz.district || toTitleCase(member.district);
+        const capZoneVal = capDz.zone || toTitleCase(member.zone);
         document.getElementById('capAssembly').innerHTML = member.assembly ? member.assembly + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Assm</span>' : '';
-        document.getElementById('capDistrict').innerHTML = member.district ? member.district + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Dist</span>' : '';
-        document.getElementById('capZone').innerHTML = member.zone ? member.zone + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Zone</span>' : '';
+        document.getElementById('capDistrict').innerHTML = capDistVal ? capDistVal + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Dist</span>' : '';
+        document.getElementById('capZone').innerHTML = capZoneVal ? capZoneVal + ' <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Zone</span>' : '';
         document.getElementById('capUniqueId').textContent = member.unique_id || '';
         document.getElementById('capDob').textContent = member.dob || 'xxxxxx';
         document.getElementById('capAge').textContent = member.age || 'xxxxxx';

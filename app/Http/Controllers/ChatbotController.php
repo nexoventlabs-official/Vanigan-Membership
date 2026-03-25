@@ -228,8 +228,8 @@ class ChatbotController extends Controller
                     'name' => $voter['name'] ?? 'N/A',
                     'epic_no' => $epicNo,
                     'assembly_name' => $assemblyName,
-                    'district' => $district,
-                    'zone' => $zone,
+                    'district' => ucwords(strtolower($district)),
+                    'zone' => ucwords(strtolower($zone)),
                 ]
             ]);
         } catch (\Exception $e) {

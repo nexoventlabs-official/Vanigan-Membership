@@ -81,8 +81,8 @@
               if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matchedAsm = $v; break; }
           }
       }
-      $correctedDistrict = $matchedAsm ? $matchedAsm['d'] : ($voter->DISTRICT_NAME ?? 'N/A');
-      $correctedZone = $matchedAsm ? $matchedAsm['z'] : ($distZone[strtoupper($voter->DISTRICT_NAME ?? '')] ?? '');
+      $correctedDistrict = $matchedAsm ? ucwords(strtolower($matchedAsm['d'])) : ucwords(strtolower($voter->DISTRICT_NAME ?? 'N/A'));
+      $correctedZone = $matchedAsm ? ucwords(strtolower($matchedAsm['z'])) : (isset($distZone[strtoupper($voter->DISTRICT_NAME ?? '')]) ? ucwords(strtolower($distZone[strtoupper($voter->DISTRICT_NAME ?? '')])) : '');
     @endphp
 
     <div class="profile-header">

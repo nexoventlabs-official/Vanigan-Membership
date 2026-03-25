@@ -218,13 +218,41 @@ class VanigamController extends Controller
                 ], 404);
             }
 
+            // Correct district & zone from static config (MySQL districts can be wrong)
+            $assemblyName = $voterData['assembly_name'] ?? '';
+            $district = $voterData['district'] ?? '';
+            $zone = '';
+            $zoneData = config('zone_data');
+            if ($zoneData && !empty($zoneData['assembly_map']) && !empty($assemblyName)) {
+                $asmMap = $zoneData['assembly_map'];
+                $assemblyUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName)));
+                $matched = $asmMap[$assemblyUpper] ?? null;
+                if (!$matched) {
+                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $assemblyUpper);
+                    $normalizedInput = preg_replace('/\s+/', ' ', trim($normalizedInput));
+                    foreach ($asmMap as $key => $val) {
+                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $key);
+                        $normalizedKey = preg_replace('/\s+/', ' ', trim($normalizedKey));
+                        if ($normalizedKey === $normalizedInput) {
+                            $matched = $val;
+                            break;
+                        }
+                    }
+                }
+                if ($matched) {
+                    $district = $matched['d'];
+                    $zone = $matched['z'];
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'voter' => [
                     'name' => $voterData['name'] ?? '',
                     'epic_no' => $voterData['epic_no'] ?? $epicNo,
-                    'assembly_name' => $voterData['assembly_name'] ?? '',
-                    'district' => $voterData['district'] ?? '',
+                    'assembly_name' => $assemblyName,
+                    'district' => ucwords(strtolower($district)),
+                    'zone' => ucwords(strtolower($zone)),
                 ],
             ]);
 
@@ -410,10 +438,13 @@ class VanigamController extends Controller
                     }
                 }
                 if ($matched) {
-                    $district = $matched['d'];
-                    $zone = $matched['z'];
+                    $district = ucwords(strtolower($matched['d']));
+                    $zone = ucwords(strtolower($matched['z']));
                 }
             }
+            // Ensure Title Case even if not matched from config
+            $district = ucwords(strtolower($district));
+            $zone = $zone ? ucwords(strtolower($zone)) : $zone;
 
             // Check if mobile already exists - reuse unique_id if so, generate new if not
             // This prevents unique_id from changing on duplicate calls

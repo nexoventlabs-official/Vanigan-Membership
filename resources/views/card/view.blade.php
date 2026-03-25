@@ -380,10 +380,11 @@
           photo.src = m.photo_url;
           photo.style.display = 'block';
         }
+        function toTitleCase(s) { return s ? s.toLowerCase().replace(/(?:^|\s)\S/g, function(a){ return a.toUpperCase(); }) : ''; }
         document.getElementById('memberName').textContent = m.name || '';
         document.getElementById('memberAssembly').innerHTML = m.assembly ? m.assembly + ' <span class="suffix-tag">Assm</span>' : '';
-        document.getElementById('memberDistrict').innerHTML = m.district ? m.district + ' <span class="suffix-tag">Dist</span>' : '';
-        document.getElementById('memberZone').innerHTML = m.zone ? m.zone + ' <span class="suffix-tag">Zone</span>' : '';
+        document.getElementById('memberDistrict').innerHTML = m.district ? toTitleCase(m.district) + ' <span class="suffix-tag">Dist</span>' : '';
+        document.getElementById('memberZone').innerHTML = m.zone ? toTitleCase(m.zone) + ' <span class="suffix-tag">Zone</span>' : '';
         document.getElementById('memberUniqueId').textContent = m.unique_id || '';
 
         // Back - show XXXXXXX for empty fields
