@@ -1031,7 +1031,7 @@
         details_incomplete_hint: { en: 'Your additional details are incomplete. Type anything to update them.', ta: 'உங்கள் கூடுதல் விவரங்கள் முழுமையடையவில்லை. புதுப்பிக்க ஏதாவது தட்டச்சு செய்யவும்.' },
 
         // EPIC
-        mobile_verified_epic: { en: '\u2705 Mobile number verified!<br><br>Please enter your <strong>EPIC Number</strong> (Voter ID):', ta: '\u2705 மொபைல் எண் சரிபார்க்கப்பட்டது!<br><br>உங்கள் <strong>EPIC எண்ணை</strong> (வாக்காளர் அடையாள எண்) உள்ளிடவும்:' },
+        mobile_verified_epic: { en: '\u2705 Mobile number registered!<br><br>Please enter your <strong>EPIC Number</strong> (Voter ID):', ta: '\u2705 மொபைல் எண் பதிவு செய்யப்பட்டது!<br><br>உங்கள் <strong>EPIC எண்ணை</strong> (வாக்காளர் அடையாள எண்) உள்ளிடவும்:' },
         ph_epic: { en: 'Enter EPIC Number...', ta: 'EPIC எண்ணை உள்ளிடவும்...' },
         voter_found: { en: '\u2705 <strong>Voter Found!</strong>', ta: '\u2705 <strong>வாக்காளர் கண்டறியப்பட்டார்!</strong>' },
         is_this_correct: { en: 'Is this correct?', ta: 'இது சரியா?' },
@@ -2591,34 +2591,34 @@
             }
 
             if (checkRes.success && checkRes.exists && checkRes.has_pin) {
-              // Returning user with PIN — skip OTP, ask PIN directly
+              // Returning user with PIN — ask PIN directly
               state = S.AWAIT_RETURNING_PIN;
               setNumeric(L('ph_pin'));
               unlockInput();
               sendBtn.disabled = true;
               let welcomeText = L('welcome_back_pin', { name: checkRes.name ? ', <strong>' + checkRes.name + '</strong>' : '' });
               await botReply(welcomeText, 800);
+            } else if (checkRes.success && checkRes.exists) {
+              // Existing member without PIN
+              state = S.DONE;
+              setText(L('ph_type_msg'));
+              hideAttach();
+              unlockInput();
+              epic = checkRes.epic_no || '';
+              saveUser({ mobile, epic, hasCard: true, memberData: checkRes.member || {} });
+              let h = L('mobile_verified_existing');
+              h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('sb_vanigam_member') + '</h4>';
+              h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (checkRes.name || '') + '</span></div>';
+              h += '<div class="row"><span class="lbl">Member ID</span><span class="val">' + (checkRes.unique_id || '') + '</span></div>';
+              h += '</div>';
+              await botReply(h, 1000);
             } else {
-              // New user or no PIN — send OTP
-              showTyping();
-              const res = await api('/api/vanigam/send-otp', { mobile: m });
-              hideTyping();
-              if (res.success) {
-                trackStep('mobile_entered');
-                state = S.AWAIT_OTP;
-                setNumeric(L('ph_otp'));
-                unlockInput();
-                let askText = L('otp_sent', { mobile: m });
-                askText += '<div class="action-buttons" style="margin-top:12px;flex-direction:column;">';
-                askText += '<button class="action-btn confirm" id="resendOtpBtn" onclick="doResendOtp()" disabled style="font-size:0.85rem;padding:8px 16px;opacity:0.6;"><i class="bi bi-arrow-clockwise"></i> ' + L('btn_resend_otp') + ' (30s)</button>';
-                askText += '<button class="action-btn confirm" id="changeMobileBtn" onclick="doChangeMobile()" style="font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> ' + L('btn_change_mobile') + '</button>';
-                askText += '</div>';
-                await botReply(askText, 800);
-                startResendTimer();
-              } else {
-                unlockInput();
-                await botReply('\u274C ' + (res.message || L('otp_send_fail')), 600);
-              }
+              // New user — skip OTP, ask EPIC directly
+              trackStep('mobile_entered');
+              state = S.AWAIT_EPIC;
+              setEpicInput(L('ph_epic'));
+              unlockInput();
+              await botReply(L('mobile_verified_epic'), 800);
             }
           } catch (e) { hideTyping(); unlockInput(); await botReply(L('something_wrong'), 600); }
 
