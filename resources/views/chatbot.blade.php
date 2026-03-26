@@ -359,6 +359,54 @@
     #photoInput, #cameraInput { display: none; }
     .photo-upload-btn, .photo-camera-btn { min-width: 140px; justify-content: center; }
 
+    /* Webcam Capture Modal (PC) */
+    .webcam-modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 10000;
+      align-items: center; justify-content: center; flex-direction: column;
+    }
+    .webcam-modal-overlay.active { display: flex; }
+    .webcam-modal {
+      background: #1a1a1a; border-radius: 20px; overflow: hidden;
+      width: 95%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .webcam-modal-header {
+      padding: 14px 20px; color: #fff; font-weight: 600; font-size: 0.95rem;
+      display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #333;
+    }
+    .webcam-video-wrap {
+      position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; background: #000;
+    }
+    .webcam-video-wrap video {
+      width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+    }
+    .webcam-video-wrap canvas { display: none; }
+    .webcam-guide {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 60%; aspect-ratio: 1; border: 3px dashed rgba(255,255,255,0.4);
+      border-radius: 50%; pointer-events: none;
+    }
+    .webcam-actions {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+      padding: 16px 20px; background: #111;
+    }
+    .webcam-capture-btn {
+      width: 64px; height: 64px; border-radius: 50%; border: 4px solid #fff;
+      background: transparent; cursor: pointer; position: relative; transition: all 0.2s;
+    }
+    .webcam-capture-btn::after {
+      content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px;
+      border-radius: 50%; background: #fff; transition: all 0.15s;
+    }
+    .webcam-capture-btn:hover::after { background: #e0e0e0; }
+    .webcam-capture-btn:active::after { transform: scale(0.9); }
+    .webcam-cancel-btn {
+      padding: 10px 20px; border-radius: 10px; border: none;
+      background: rgba(255,255,255,0.15); color: #fff; font-size: 0.85rem;
+      font-weight: 600; cursor: pointer; font-family: Inter, sans-serif;
+    }
+    .webcam-cancel-btn:hover { background: rgba(255,255,255,0.25); }
+
     /* Photo Crop Modal */
     .crop-modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -852,6 +900,22 @@
       <div class="crop-modal-actions">
         <button class="crop-cancel" onclick="cropCancel()"><i class="bi bi-x-lg"></i> Cancel</button>
         <button class="crop-confirm" onclick="cropConfirm()"><i class="bi bi-check-lg"></i> Use Photo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Webcam Capture Modal (PC) -->
+  <div class="webcam-modal-overlay" id="webcamModalOverlay">
+    <div class="webcam-modal">
+      <div class="webcam-modal-header"><i class="bi bi-camera-video-fill"></i> Take a Photo</div>
+      <div class="webcam-video-wrap">
+        <video id="webcamVideo" autoplay playsinline muted></video>
+        <canvas id="webcamCanvas"></canvas>
+        <div class="webcam-guide"></div>
+      </div>
+      <div class="webcam-actions">
+        <button class="webcam-cancel-btn" onclick="closeWebcam()"><i class="bi bi-x-lg"></i> Cancel</button>
+        <button class="webcam-capture-btn" onclick="captureWebcam()" title="Capture"></button>
       </div>
     </div>
   </div>
@@ -3322,7 +3386,72 @@
       const MAX_PHOTO_SIZE = 15 * 1024 * 1024;
 
       window.triggerPhotoUpload = function () { if (state === S.AWAIT_PHOTO) photoInput.click(); };
-      window.triggerCamera = function () { if (state === S.AWAIT_PHOTO) cameraInput.click(); };
+
+      // Detect mobile: has touch AND small screen (true mobile device)
+      function isMobileDevice() {
+        return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+
+      let webcamStream = null;
+      window.triggerCamera = function () {
+        if (state !== S.AWAIT_PHOTO) return;
+        if (isMobileDevice()) {
+          // Mobile: use native camera capture input
+          cameraInput.click();
+        } else {
+          // PC: open webcam modal
+          openWebcam();
+        }
+      };
+
+      async function openWebcam() {
+        const overlay = document.getElementById('webcamModalOverlay');
+        const video = document.getElementById('webcamVideo');
+        overlay.classList.add('active');
+        try {
+          webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 720 } }, audio: false });
+          video.srcObject = webcamStream;
+        } catch (e) {
+          overlay.classList.remove('active');
+          // Fallback to file input if camera access denied
+          cameraInput.click();
+        }
+      }
+
+      window.closeWebcam = function () {
+        const overlay = document.getElementById('webcamModalOverlay');
+        const video = document.getElementById('webcamVideo');
+        overlay.classList.remove('active');
+        if (webcamStream) {
+          webcamStream.getTracks().forEach(t => t.stop());
+          webcamStream = null;
+        }
+        video.srcObject = null;
+      };
+
+      window.captureWebcam = function () {
+        const video = document.getElementById('webcamVideo');
+        const canvas = document.getElementById('webcamCanvas');
+        // Capture square frame from video center
+        const size = Math.min(video.videoWidth, video.videoHeight);
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // Mirror the image (video is mirrored via CSS)
+        ctx.translate(size, 0);
+        ctx.scale(-1, 1);
+        const sx = (video.videoWidth - size) / 2;
+        const sy = (video.videoHeight - size) / 2;
+        ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+        canvas.toBlob(function (blob) {
+          if (!blob) return;
+          const file = new File([blob], 'webcam_photo.jpg', { type: 'image/jpeg' });
+          closeWebcam();
+          // Feed into the crop modal (same as file input)
+          openCropModal(file);
+        }, 'image/jpeg', 0.92);
+      };
+
       attachBtn.addEventListener('click', () => { if (state === S.AWAIT_PHOTO) photoInput.click(); });
 
       /* ── Cropper.js Integration ── */

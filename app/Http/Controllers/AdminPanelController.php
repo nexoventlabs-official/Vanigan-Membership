@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\MongoService;
 use App\Services\TrackingMongoService;
+use App\Services\CloudinaryService;
 use App\Models\AssemblyConstituency;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class AdminPanelController extends Controller
@@ -123,6 +125,126 @@ class AdminPanelController extends Controller
             'referred_by_member' => $referredByMember ? (object) $referredByMember : null,
             'loan_request' => $loanRequest ? (object) $loanRequest : null,
         ]);
+    }
+
+    /**
+     * POST /admin/users/{uniqueId}/update
+     * Admin edit member details + regenerate card images on Cloudinary.
+     */
+    public function updateMember(Request $request, string $uniqueId)
+    {
+        try {
+            $member = $this->mongo->findMemberByUniqueId($uniqueId);
+            if (!$member) {
+                return back()->with('error', 'Member not found.');
+            }
+
+            $fields = [];
+            $editableKeys = ['name', 'epic_no', 'assembly', 'district', 'zone', 'dob', 'age', 'blood_group', 'address'];
+            foreach ($editableKeys as $key) {
+                if ($request->has($key)) {
+                    $fields[$key] = trim($request->input($key));
+                }
+            }
+
+            // Recalculate district & zone from assembly via zone_data config
+            if (!empty($fields['assembly'])) {
+                $zoneData = config('zone_data.assembly_map') ?? [];
+                $asmUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $fields['assembly'])));
+                $matched = $zoneData[$asmUpper] ?? null;
+                if (!$matched) {
+                    $norm = preg_replace('/[\.\-\(\)]/', '', $asmUpper);
+                    $norm = preg_replace('/\s+/', ' ', trim($norm));
+                    foreach ($zoneData as $k => $v) {
+                        $nk = preg_replace('/[\.\-\(\)]/', '', $k);
+                        $nk = preg_replace('/\s+/', ' ', trim($nk));
+                        if ($nk === $norm) { $matched = $v; break; }
+                    }
+                }
+                if ($matched) {
+                    $fields['district'] = ucwords(strtolower($matched['d']));
+                    $fields['zone'] = ucwords(strtolower($matched['z']));
+                }
+            }
+
+            // Recalculate age from DOB
+            if (!empty($fields['dob'])) {
+                try {
+                    $dobDate = \DateTime::createFromFormat('d/m/Y', $fields['dob'])
+                        ?: \DateTime::createFromFormat('Y-m-d', $fields['dob'])
+                        ?: new \DateTime($fields['dob']);
+                    $fields['age'] = (string) $dobDate->diff(new \DateTime())->y;
+                } catch (\Exception $e) {}
+            }
+
+            // Update in MongoDB
+            $this->mongo->updateMemberFieldsByUniqueId($uniqueId, $fields);
+
+            // Delete old card images from Cloudinary and update URLs so new ones get generated
+            $cloudinary = app(CloudinaryService::class);
+            if (!empty($member['card_front_url'])) {
+                $cloudinary->deleteByUrl($member['card_front_url']);
+            }
+            if (!empty($member['card_back_url'])) {
+                $cloudinary->deleteByUrl($member['card_back_url']);
+            }
+            // Clear card URLs so they get regenerated on next visit
+            $this->mongo->updateMemberFieldsByUniqueId($uniqueId, [
+                'card_front_url' => '',
+                'card_back_url' => '',
+            ]);
+
+            Log::info("Admin updated member: {$uniqueId}");
+
+            return redirect()->route('admin.user.detail', $uniqueId)->with('success', 'Member updated successfully. Card images will be regenerated.');
+        } catch (Exception $e) {
+            Log::error("AdminPanelController::updateMember Error: " . $e->getMessage());
+            return back()->with('error', 'Failed to update member: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * DELETE /admin/users/{uniqueId}/delete
+     * Remove member from MongoDB + Cloudinary (photo, cards, folder) + loan requests.
+     */
+    public function deleteMember(string $uniqueId)
+    {
+        try {
+            $member = $this->mongo->findMemberByUniqueId($uniqueId);
+            if (!$member) {
+                return redirect()->route('admin.users')->with('error', 'Member not found.');
+            }
+
+            $cloudinary = app(CloudinaryService::class);
+
+            // Delete photo from Cloudinary
+            if (!empty($member['photo_url'])) {
+                $cloudinary->deleteByUrl($member['photo_url']);
+            }
+
+            // Delete card images from Cloudinary
+            if (!empty($member['card_front_url'])) {
+                $cloudinary->deleteByUrl($member['card_front_url']);
+            }
+            if (!empty($member['card_back_url'])) {
+                $cloudinary->deleteByUrl($member['card_back_url']);
+            }
+
+            // Delete the card folder from Cloudinary (vanigan/cards/TNVS-XXXXX)
+            $cloudinary->deleteResourcesByPrefix('vanigan/cards/' . $uniqueId);
+
+            // Delete from MongoDB: members, manual_entries, loan_requests
+            $this->mongo->deleteMemberByUniqueId($uniqueId);
+            $this->mongo->deleteManualEntryByUniqueId($uniqueId);
+            $this->mongo->deleteLoanRequestByUniqueId($uniqueId);
+
+            Log::info("Admin deleted member: {$uniqueId} ({$member['name'] ?? 'N/A'})");
+
+            return redirect()->route('admin.users')->with('success', "Member {$uniqueId} ({$member['name']}) deleted successfully.");
+        } catch (Exception $e) {
+            Log::error("AdminPanelController::deleteMember Error: " . $e->getMessage());
+            return redirect()->route('admin.users')->with('error', 'Failed to delete member: ' . $e->getMessage());
+        }
     }
 
     public function voters(Request $request)

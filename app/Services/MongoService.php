@@ -538,6 +538,42 @@ class MongoService
     }
 
     /**
+     * Delete manual entry by unique_id.
+     */
+    public function deleteManualEntryByUniqueId(string $uniqueId): bool
+    {
+        try {
+            $db = $this->client->selectDatabase($this->database);
+            $manualCollection = $db->selectCollection('manual_entries');
+            $result = $manualCollection->deleteOne(['unique_id' => $uniqueId]);
+            return $result->getDeletedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::deleteManualEntryByUniqueId Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update member fields by unique_id (admin edit).
+     */
+    public function updateMemberFieldsByUniqueId(string $uniqueId, array $fields): bool
+    {
+        try {
+            $fields['updated_at'] = now()->toISOString();
+
+            $result = $this->collection->updateOne(
+                ['unique_id' => $uniqueId],
+                ['$set' => $fields]
+            );
+
+            return $result->getMatchedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::updateMemberFieldsByUniqueId Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Delete loan request by unique_id.
      */
     public function deleteLoanRequestByUniqueId(string $uniqueId): bool

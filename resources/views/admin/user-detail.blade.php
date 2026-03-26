@@ -107,6 +107,48 @@
     .member-avatar-sm-placeholder { width: 30px; height: 30px; border-radius: 50%; background: #e8f5e9; color: #2e7d32; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; }
 
     .empty-state { text-align: center; padding: 24px; color: #999; font-size: 0.85rem; }
+
+    /* Action buttons */
+    .action-bar { display: flex; gap: 10px; margin-left: auto; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; }
+    .btn-edit { background: #e3f2fd; color: #1565c0; }
+    .btn-edit:hover { background: #bbdefb; box-shadow: 0 2px 8px rgba(21,101,192,0.2); }
+    .btn-delete { background: #ffebee; color: #c62828; }
+    .btn-delete:hover { background: #ffcdd2; box-shadow: 0 2px 8px rgba(198,40,40,0.2); }
+
+    /* Flash messages */
+    .flash-msg { padding: 14px 20px; border-radius: 12px; font-size: 0.88rem; font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .flash-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .flash-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: #fff; border-radius: 16px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid #f0f2f5; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #fff; border-radius: 16px 16px 0 0; z-index: 1; }
+    .modal-header h3 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .modal-close { border: none; background: #f5f5f5; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; color: #666; transition: background 0.2s; }
+    .modal-close:hover { background: #eee; }
+    .modal-body { padding: 20px 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid #f0f2f5; display: flex; justify-content: flex-end; gap: 10px; position: sticky; bottom: 0; background: #fff; border-radius: 0 0 16px 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #666; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 2px solid #e0e3e6; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; color: #333; background: #fafafa; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #2e7d32; background: #fff; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .btn-save { background: linear-gradient(135deg, #007a38, #00a84e); color: #fff; }
+    .btn-save:hover { box-shadow: 0 4px 12px rgba(0,122,56,0.3); }
+    .btn-cancel { background: #f5f5f5; color: #666; }
+    .btn-cancel:hover { background: #eee; }
+    .btn-delete-confirm { background: #c62828; color: #fff; }
+    .btn-delete-confirm:hover { background: #b71c1c; box-shadow: 0 4px 12px rgba(198,40,40,0.3); }
+
+    /* Delete confirmation modal */
+    .delete-warning { background: #fff3e0; border: 1px solid #ffe082; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .delete-warning p { font-size: 0.88rem; color: #e65100; line-height: 1.6; }
+    .delete-info { background: #f5f5f5; border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; color: #555; }
+    .delete-info strong { color: #333; }
   </style>
 </head>
 <body>
@@ -127,6 +169,13 @@
   <div class="container">
     <a href="{{ route('admin.users') }}" class="back-link"><i class="bi bi-arrow-left"></i> Back to Members</a>
 
+    @if(session('success'))
+    <div class="flash-msg flash-success"><i class="bi bi-check-circle-fill"></i> {{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+    <div class="flash-msg flash-error"><i class="bi bi-exclamation-triangle-fill"></i> {{ session('error') }}</div>
+    @endif
+
     <!-- Profile Header -->
     <div class="profile-header">
       @if(!empty($member->photo_url))
@@ -146,6 +195,10 @@
           <span class="badge badge-orange"><i class="bi bi-clock"></i> Pending</span>
           @endif
         </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-edit" onclick="openEditModal()"><i class="bi bi-pencil-square"></i> Edit</button>
+        <button class="btn btn-delete" onclick="openDeleteModal()"><i class="bi bi-trash3"></i> Delete</button>
       </div>
     </div>
 
@@ -348,7 +401,117 @@
     </div>
   </div>
 
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="bi bi-pencil-square" style="color:#1565c0;"></i> Edit Member Details</h3>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form action="{{ route('admin.user.update', $member->unique_id ?? '') }}" method="POST">
+        @csrf
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="name" value="{{ $member->name ?? '' }}" maxlength="100" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>EPIC No</label>
+              <input type="text" name="epic_no" value="{{ $member->epic_no ?? '' }}" maxlength="20">
+            </div>
+            <div class="form-group">
+              <label>Member ID</label>
+              <input type="text" value="{{ $member->unique_id ?? '' }}" disabled style="background:#f0f0f0;color:#999;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Assembly</label>
+            <input type="text" name="assembly" value="{{ $member->assembly ?? '' }}" maxlength="100">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>District</label>
+              <input type="text" name="district" value="{{ $member->district ?? '' }}" maxlength="100">
+            </div>
+            <div class="form-group">
+              <label>Zone</label>
+              <input type="text" name="zone" value="{{ $member->zone ?? '' }}" maxlength="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="text" name="dob" value="{{ $member->dob ?? '' }}" placeholder="DD/MM/YYYY" maxlength="20">
+            </div>
+            <div class="form-group">
+              <label>Blood Group</label>
+              <select name="blood_group">
+                <option value="">Select</option>
+                @foreach(['A+','A-','B+','B-','O+','O-','AB+','AB-'] as $bg)
+                <option value="{{ $bg }}" {{ ($member->blood_group ?? '') === $bg ? 'selected' : '' }}>{{ $bg }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <textarea name="address" rows="3" maxlength="300">{{ $member->address ?? '' }}</textarea>
+          </div>
+          <div style="background:#e3f2fd;border-radius:10px;padding:12px 16px;font-size:0.82rem;color:#1565c0;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-info-circle-fill"></i> Saving will delete existing card images and they will be regenerated with the updated details.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-save"><i class="bi bi-check-lg"></i> Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h3><i class="bi bi-exclamation-triangle-fill" style="color:#c62828;"></i> Delete Member</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-warning">
+          <p><strong>⚠️ This action cannot be undone.</strong><br>The following data will be permanently deleted:</p>
+        </div>
+        <div class="delete-info">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div><i class="bi bi-person-x" style="color:#c62828;"></i> <strong>{{ $member->name ?? 'N/A' }}</strong> ({{ $member->unique_id ?? '' }})</div>
+            <div><i class="bi bi-database-x" style="color:#c62828;"></i> MongoDB: member record, manual entry (if any)</div>
+            <div><i class="bi bi-cloud-minus" style="color:#c62828;"></i> Cloudinary: uploaded photo, generated ID card images, card folder</div>
+            @if($loan_request)
+            <div><i class="bi bi-cash-coin" style="color:#c62828;"></i> Loan request application</div>
+            @endif
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <form action="{{ route('admin.user.delete', $member->unique_id ?? '') }}" method="POST" style="margin:0;">
+          @csrf
+          <button type="submit" class="btn btn-delete-confirm"><i class="bi bi-trash3"></i> Yes, Delete Permanently</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
+    function openEditModal() { document.getElementById('editModal').classList.add('active'); }
+    function closeEditModal() { document.getElementById('editModal').classList.remove('active'); }
+    function openDeleteModal() { document.getElementById('deleteModal').classList.add('active'); }
+    function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('active'); }
+    // Close on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+      el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); });
+    });
+
     // 3D Card rotation
     let angle = 0;
     function rotate3d(dir) {

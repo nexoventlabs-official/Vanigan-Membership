@@ -109,6 +109,13 @@
   </nav>
 
   <div class="container">
+    @if(session('success'))
+    <div style="padding:14px 20px;border-radius:12px;font-size:0.88rem;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px;background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;"><i class="bi bi-check-circle-fill"></i> {{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+    <div style="padding:14px 20px;border-radius:12px;font-size:0.88rem;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px;background:#ffebee;color:#c62828;border:1px solid #ffcdd2;"><i class="bi bi-exclamation-triangle-fill"></i> {{ session('error') }}</div>
+    @endif
+
     <!-- Page Header -->
     <div class="page-header">
       <h2><i class="bi bi-people-fill" style="color:#2e7d32;"></i> All Members</h2>

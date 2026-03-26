@@ -104,6 +104,37 @@ class CloudinaryService
     }
 
     /**
+     * Extract public_id from a Cloudinary URL and delete it.
+     */
+    public function deleteByUrl($url)
+    {
+        if (!$url) return false;
+        // e.g. https://res.cloudinary.com/xxx/image/upload/v123/vanigan/member_photos/ABC_123.png
+        if (preg_match('#/upload/(?:v\d+/)?(.+)\.\w+$#', $url, $m)) {
+            return $this->deleteFile($m[1]);
+        }
+        return false;
+    }
+
+    /**
+     * Delete all resources in a Cloudinary folder prefix.
+     */
+    public function deleteResourcesByPrefix($prefix)
+    {
+        try {
+            $api = Cloudinary::admin();
+            $result = $api->deleteResourcesByPrefix($prefix);
+            Log::info("Cloudinary deleteResourcesByPrefix '{$prefix}': " . json_encode($result));
+            // Also try to delete the folder itself
+            try { $api->deleteFolder($prefix); } catch (\Exception $e) { /* folder may not exist */ }
+            return true;
+        } catch (Exception $e) {
+            Log::error("Cloudinary deleteResourcesByPrefix failed: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Get Cloudinary usage stats
      */
     public function getUsageStats()
