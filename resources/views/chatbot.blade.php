@@ -2295,11 +2295,12 @@
         await new Promise(r => setTimeout(r, 600));
         hideTyping();
         var h = '<div style="margin-bottom:8px;font-weight:600;font-size:0.95rem;">\uD83C\uDFA5 ' + L('btn_how_to_register') + '</div>';
-        h += '<div style="margin:8px 0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;">';
-        h += '<iframe src="https://drive.google.com/file/d/1sHyiFfoH5A681R3SQnr78htDjNhF0jFO/preview" allow="autoplay" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block;border:none;border-radius:12px;"></iframe>';
+        h += '<div style="margin:0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;position:relative;width:100%;aspect-ratio:9/16;">';
+        h += '<iframe src="https://drive.google.com/file/d/1sHyiFfoH5A681R3SQnr78htDjNhF0jFO/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"></iframe>';
+        h += '<div style="position:absolute;top:0;right:0;width:50px;height:50px;background:#000;z-index:2;"></div>';
         h += '</div>';
-        h += '<div class="action-buttons" style="margin-top:12px;">';
-        h += '<button class="action-btn confirm" onclick="startRegFromVideo()"><i class="bi bi-play-circle-fill"></i> ' + L('btn_register_now') + '</button>';
+        h += '<div style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="startRegFromVideo()" style="width:100%;padding:12px;font-size:0.95rem;"><i class="bi bi-play-circle-fill"></i> ' + L('btn_register_now') + '</button>';
         h += '</div>';
         await botReply(h, 0);
       }

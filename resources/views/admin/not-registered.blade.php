@@ -193,7 +193,6 @@
       @php
         $stepLabels = [
           'mobile_entered' => ['Mobile Entered', 'red'],
-          'otp_verified' => ['OTP Verified', 'orange'],
           'epic_validated' => ['EPIC Validated', 'blue'],
           'photo_uploaded' => ['Photo Uploaded', ''],
           'pin_set' => ['PIN Set', ''],
@@ -247,7 +246,6 @@
         <select name="step">
           <option value="">All Steps</option>
           <option value="mobile_entered" {{ $step === 'mobile_entered' ? 'selected' : '' }}>Stopped at Mobile</option>
-          <option value="otp_verified" {{ $step === 'otp_verified' ? 'selected' : '' }}>Stopped at OTP</option>
           <option value="epic_validated" {{ $step === 'epic_validated' ? 'selected' : '' }}>Stopped at EPIC</option>
           <option value="photo_uploaded" {{ $step === 'photo_uploaded' ? 'selected' : '' }}>Stopped at Photo</option>
           <option value="pin_set" {{ $step === 'pin_set' ? 'selected' : '' }}>Stopped at PIN</option>
