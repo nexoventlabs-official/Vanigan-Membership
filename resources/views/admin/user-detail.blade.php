@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
@@ -380,6 +381,16 @@
               </div>
             </div>
 
+            @if(empty($member->card_front_url) || empty($member->card_back_url))
+            @if(!empty($member->photo_url))
+            <div id="regenBanner" style="margin-top:12px;padding:12px 16px;background:#fff3e0;border:1px solid #ffe082;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:0.82rem;color:#e65100;">
+              <div style="width:18px;height:18px;border:3px solid #e65100;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+              Regenerating card images... Please wait.
+              <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+            </div>
+            @endif
+            @endif
+
             @if(!empty($member->card_front_url) && !empty($member->card_back_url))
             <div style="margin-top:16px;padding-top:16px;border-top:1px solid #f0f2f5;">
               <h4 style="font-size:0.85rem;font-weight:600;color:#555;margin-bottom:10px;">Generated Card Images</h4>
@@ -553,6 +564,124 @@
       }
       document.addEventListener('mouseup', endDrag);
       document.addEventListener('touchend', endDrag);
+    })();
+  </script>
+
+  <!-- Hidden card capture elements for regeneration -->
+  <div id="adminCardCapture" style="position:fixed;left:-9999px;top:0;z-index:-1;background:#fff;">
+    <div id="adminCapFront" style="width:421px;position:relative;overflow:hidden;font-family:Arial,sans-serif;">
+      <img src="https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232516/vanigan/templates/ID_Front.png" style="display:block;width:421px;" crossorigin="anonymous" />
+      <div style="position:absolute;top:182px;left:50%;transform:translateX(-50%);width:137px;">
+        @if(!empty($member->photo_url))
+        <img src="{{ $member->photo_url }}" crossorigin="anonymous" style="border:5px solid #009245;border-radius:22px;width:137px;height:136px;object-fit:cover;" />
+        @endif
+      </div>
+      <div style="position:absolute;top:328px;left:28px;right:28px;text-align:center;">
+        <p style="font-size:23px;font-weight:700;color:#009245;line-height:1.08;margin:0;">{{ $member->name ?? '' }}</p>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:6px;">
+          @if(!empty($member->assembly))
+          <div style="text-align:center;padding:0 18px;"><p style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;">{{ $member->assembly }} <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Assm</span></p></div>
+          @endif
+          @if(!empty($member->district))
+          <div style="text-align:center;padding:0 18px;"><p style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;">{{ $member->district }} <span style="display:inline-block;font-size:10px;font-weight:700;color:#fff;background:#009245;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;line-height:1.4;">Dist</span></p></div>
+          @endif
+          @if(!empty($member->zone))
+          <div style="text-align:center;padding:0 18px;"><p style="font-size:19px;font-weight:700;text-transform:capitalize;line-height:1.06;margin:0;color:#111;">{{ $member->zone }}</p></div>
+          @endif
+          <div style="text-align:center;padding:0 18px;"><p style="font-size:18px;font-weight:700;letter-spacing:0.2px;margin:0;color:#111;">{{ $member->unique_id ?? '' }}</p></div>
+        </div>
+      </div>
+    </div>
+    <div id="adminCapBack" style="width:421px;position:relative;overflow:hidden;font-family:Arial,sans-serif;margin-top:20px;">
+      <img src="https://res.cloudinary.com/dqndhcmu2/image/upload/v1773232519/vanigan/templates/ID_Back.png" style="display:block;width:421px;" crossorigin="anonymous" />
+      <div style="position:absolute;top:234px;left:22px;right:20px;color:#111;">
+        <div style="transform:translateY(-60px);">
+          <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;">
+            <div style="font-size:14px;font-weight:700;text-transform:uppercase;">DATE OF BIRTH</div>
+            <div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div>
+            <div style="font-size:17px;font-weight:700;line-height:1.12;">{{ $member->dob ?? 'xxxxxx' }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;">
+            <div style="font-size:14px;font-weight:700;text-transform:uppercase;">AGE</div>
+            <div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div>
+            <div style="font-size:17px;font-weight:700;line-height:1.12;">{{ $member->age ?? 'xxxxxx' }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;">
+            <div style="font-size:14px;font-weight:700;text-transform:uppercase;">BLOOD GROUP</div>
+            <div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div>
+            <div style="font-size:17px;font-weight:700;line-height:1.12;">{{ $member->blood_group ?? 'xxxxxx' }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:76px;overflow:hidden;">
+            <div style="font-size:14px;font-weight:700;text-transform:uppercase;">ADDRESS</div>
+            <div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div>
+            <div style="font-size:17px;font-weight:700;line-height:1.12;word-break:break-word;">{{ $member->address ?? 'xxxxxx' }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;">
+            <div style="font-size:14px;font-weight:700;text-transform:uppercase;">CONTACT</div>
+            <div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div>
+            <div style="font-size:17px;font-weight:700;line-height:1.12;"><span style="background:rgba(255,255,255,0.78);display:inline-block;padding:0 4px;">{{ !empty($member->contact_number) ? '+91 ' . $member->contact_number : (!empty($member->mobile) ? '+91 ' . $member->mobile : '') }}</span></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:40% 60%;align-items:start;margin-top:10px;">
+          <div style="padding-left:20px;"><img src="/api/vanigam/qr/{{ $member->unique_id ?? '' }}" width="96" height="88" crossorigin="anonymous" /></div>
+          <div style="text-align:center;padding-right:10px;">
+            <img src="/signature.png" style="width:80px;height:auto;margin-bottom:2px;" crossorigin="anonymous" />
+            <p style="text-align:center;margin:2px 0 0;font-size:14px;font-weight:700;">SENTHIL KUMAR N</p>
+            <p style="font-size:12px;font-weight:bold;line-height:1.1;margin:0;">Founder &amp; State President</p>
+            <p style="font-size:12px;font-weight:bold;line-height:1.1;margin:0;">Tamilnadu Vanigargalin Sangamam</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Auto-regenerate card images if card URLs are empty (after admin edit)
+    (function() {
+      var needsRegen = {{ (empty($member->card_front_url) || empty($member->card_back_url)) && !empty($member->photo_url) ? 'true' : 'false' }};
+      if (!needsRegen) return;
+
+      // Wait for images to load
+      window.addEventListener('load', function() {
+        setTimeout(function() { captureAndUploadAdminCard(); }, 1500);
+      });
+
+      async function captureAndUploadAdminCard() {
+        try {
+          var frontEl = document.getElementById('adminCapFront');
+          var backEl = document.getElementById('adminCapBack');
+          if (!frontEl || !backEl) return;
+
+          // Move into view temporarily for html2canvas
+          var wrap = document.getElementById('adminCardCapture');
+          wrap.style.left = '0';
+          wrap.style.opacity = '0.01';
+
+          var frontCanvas = await html2canvas(frontEl, { useCORS: true, allowTaint: false, scale: 2, backgroundColor: '#ffffff' });
+          var backCanvas = await html2canvas(backEl, { useCORS: true, allowTaint: false, scale: 2, backgroundColor: '#ffffff' });
+
+          wrap.style.left = '-9999px';
+
+          var frontData = frontCanvas.toDataURL('image/png');
+          var backData = backCanvas.toDataURL('image/png');
+
+          var res = await fetch('{{ route("admin.user.regenerate_card", $member->unique_id ?? "") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ front_image: frontData, back_image: backData })
+          });
+          var data = await res.json();
+          if (data.success) {
+            console.log('Card regenerated:', data);
+            // Reload to show updated card images
+            window.location.reload();
+          } else {
+            console.error('Card regen failed:', data.message);
+          }
+        } catch (e) {
+          console.error('Card capture error:', e);
+        }
+      }
     })();
   </script>
 </body>

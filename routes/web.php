@@ -45,6 +45,7 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::get('/users/{uniqueId}', [AdminPanelController::class, 'userDetail'])->name('admin.user.detail');
     Route::post('/users/{uniqueId}/update', [AdminPanelController::class, 'updateMember'])->name('admin.user.update');
     Route::post('/users/{uniqueId}/delete', [AdminPanelController::class, 'deleteMember'])->name('admin.user.delete');
+    Route::post('/users/{uniqueId}/regenerate-card', [AdminPanelController::class, 'regenerateCard'])->name('admin.user.regenerate_card');
     Route::get('/voters', [AdminPanelController::class, 'voters'])->name('admin.voters');
     Route::get('/voters/{epicNo}', [AdminPanelController::class, 'voterDetail'])->name('admin.voter.detail');
     Route::get('/reports', [AdminPanelController::class, 'reports'])->name('admin.reports');

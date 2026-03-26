@@ -15,11 +15,13 @@ class AdminPanelController extends Controller
 {
     protected MongoService $mongo;
     protected TrackingMongoService $tracking;
+    protected $cloudinary;
 
     public function __construct(MongoService $mongo, TrackingMongoService $tracking)
     {
         $this->mongo = $mongo;
         $this->tracking = $tracking;
+        $this->cloudinary = new \Cloudinary\Cloudinary(config('cloudinary.cloud_url'));
     }
 
     public function showLogin()
@@ -128,8 +130,20 @@ class AdminPanelController extends Controller
     }
 
     /**
+     * Extract Cloudinary public_id from a full URL.
+     */
+    private function extractPublicId($url)
+    {
+        if (!$url) return null;
+        if (preg_match('#/upload/(?:v\d+/)?(.+)\.\w+$#', $url, $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    /**
      * POST /admin/users/{uniqueId}/update
-     * Admin edit member details + regenerate card images on Cloudinary.
+     * Admin edit member details + delete old card images from Cloudinary.
      */
     public function updateMember(Request $request, string $uniqueId)
     {
@@ -180,15 +194,16 @@ class AdminPanelController extends Controller
             // Update in MongoDB
             $this->mongo->updateMemberFieldsByUniqueId($uniqueId, $fields);
 
-            // Delete old card images from Cloudinary and update URLs so new ones get generated
-            $cloudinary = app(CloudinaryService::class);
-            if (!empty($member['card_front_url'])) {
-                $cloudinary->deleteByUrl($member['card_front_url']);
+            // Delete old card images from Cloudinary using direct SDK
+            try {
+                $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
+                $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
+                Log::info("Deleted old card images for: {$uniqueId}");
+            } catch (\Exception $e) {
+                Log::warning("Failed to delete old cards from Cloudinary: " . $e->getMessage());
             }
-            if (!empty($member['card_back_url'])) {
-                $cloudinary->deleteByUrl($member['card_back_url']);
-            }
-            // Clear card URLs so they get regenerated on next visit
+
+            // Clear card URLs so the detail page knows to regenerate
             $this->mongo->updateMemberFieldsByUniqueId($uniqueId, [
                 'card_front_url' => '',
                 'card_back_url' => '',
@@ -196,7 +211,7 @@ class AdminPanelController extends Controller
 
             Log::info("Admin updated member: {$uniqueId}");
 
-            return redirect()->route('admin.user.detail', $uniqueId)->with('success', 'Member updated successfully. Card images will be regenerated.');
+            return redirect()->route('admin.user.detail', $uniqueId)->with('success', 'Member updated successfully. Card will be regenerated.');
         } catch (Exception $e) {
             Log::error("AdminPanelController::updateMember Error: " . $e->getMessage());
             return back()->with('error', 'Failed to update member: ' . $e->getMessage());
@@ -204,7 +219,50 @@ class AdminPanelController extends Controller
     }
 
     /**
-     * DELETE /admin/users/{uniqueId}/delete
+     * POST /admin/users/{uniqueId}/regenerate-card
+     * Server-side card image regeneration: accepts base64 front/back from admin page JS,
+     * uploads to Cloudinary, updates MongoDB.
+     */
+    public function regenerateCard(Request $request, string $uniqueId)
+    {
+        try {
+            $request->validate([
+                'front_image' => 'required|string',
+                'back_image'  => 'required|string',
+            ]);
+
+            $urls = [];
+            foreach (['front' => $request->input('front_image'), 'back' => $request->input('back_image')] as $side => $dataUrl) {
+                $base64 = preg_replace('/^data:image\/\w+;base64,/', '', $dataUrl);
+                $tempDir = storage_path('app/temp');
+                if (!is_dir($tempDir)) mkdir($tempDir, 0755, true);
+                $tempPath = $tempDir . '/card_' . $uniqueId . '_' . $side . '.png';
+                file_put_contents($tempPath, base64_decode($base64));
+
+                $result = $this->cloudinary->uploadApi()->upload($tempPath, [
+                    'folder'        => 'vanigan/cards/' . $uniqueId,
+                    'public_id'     => $side,
+                    'overwrite'     => true,
+                    'resource_type' => 'image',
+                ]);
+
+                $urls[$side . '_url'] = $result['secure_url'] ?? '';
+                @unlink($tempPath);
+            }
+
+            $this->mongo->updateCardUrls($uniqueId, $urls['front_url'], $urls['back_url']);
+
+            Log::info("Admin regenerated card for: {$uniqueId}");
+
+            return response()->json(['success' => true, 'front_url' => $urls['front_url'], 'back_url' => $urls['back_url']]);
+        } catch (Exception $e) {
+            Log::error("AdminPanelController::regenerateCard Error: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /admin/users/{uniqueId}/delete
      * Remove member from MongoDB + Cloudinary (photo, cards, folder) + loan requests.
      */
     public function deleteMember(string $uniqueId)
@@ -215,23 +273,19 @@ class AdminPanelController extends Controller
                 return redirect()->route('admin.users')->with('error', 'Member not found.');
             }
 
-            $cloudinary = app(CloudinaryService::class);
-
             // Delete photo from Cloudinary
-            if (!empty($member['photo_url'])) {
-                $cloudinary->deleteByUrl($member['photo_url']);
+            $photoPublicId = $this->extractPublicId($member['photo_url'] ?? '');
+            if ($photoPublicId) {
+                try { $this->cloudinary->uploadApi()->destroy($photoPublicId); } catch (\Exception $e) {}
             }
 
             // Delete card images from Cloudinary
-            if (!empty($member['card_front_url'])) {
-                $cloudinary->deleteByUrl($member['card_front_url']);
+            try {
+                $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
+                $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
+            } catch (\Exception $e) {
+                Log::warning("Failed to delete cards: " . $e->getMessage());
             }
-            if (!empty($member['card_back_url'])) {
-                $cloudinary->deleteByUrl($member['card_back_url']);
-            }
-
-            // Delete the card folder from Cloudinary (vanigan/cards/TNVS-XXXXX)
-            $cloudinary->deleteResourcesByPrefix('vanigan/cards/' . $uniqueId);
 
             // Delete from MongoDB: members, manual_entries, loan_requests
             $this->mongo->deleteMemberByUniqueId($uniqueId);
