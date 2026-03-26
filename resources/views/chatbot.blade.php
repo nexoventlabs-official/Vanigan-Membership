@@ -993,6 +993,8 @@
         },
         banner_tap_start: { en: 'Tap Start to begin the registration process.', ta: 'பதிவு செயல்முறையைத் தொடங்க Start ஐ அழுத்தவும்.' },
         btn_start: { en: 'Start', ta: 'தொடங்கு' },
+        btn_how_to_register: { en: 'How to Register', ta: 'பதிவு செய்வது எப்படி' },
+        btn_register_now: { en: 'Register Now', ta: 'இப்போது பதிவு செய்யுங்கள்' },
         btn_starting: { en: 'Starting...', ta: 'தொடங்குகிறது...' },
 
         // Mobile
@@ -2265,12 +2267,14 @@
           L('banner_hello') + '<br><br>' +
           '<em style="color:#667781;font-size:0.85rem;">' + L('banner_tap_start') + '</em>' +
           '<span class="time">' + now() + '</span></div>' +
-          '<div class="banner-action"><button class="btn-reply" id="bannerStartBtn"><i class="bi bi-play-circle-fill me-1"></i> ' + L('btn_start') + '</button></div>' +
+          '<div class="banner-action" style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn-reply" id="bannerStartBtn"><i class="bi bi-play-circle-fill me-1"></i> ' + L('btn_start') + '</button>' +
+          '<button class="btn-reply" id="bannerHowToBtn" style="background:#f0f9f1;color:#009245;border:1.5px solid #009245;"><i class="bi bi-question-circle-fill me-1"></i> ' + L('btn_how_to_register') + '</button></div>' +
           '</div>';
         chatEl.appendChild(div);
         document.getElementById('bannerStartBtn').onclick = function () {
           this.disabled = true;
           this.innerHTML = '<span class="gen-spinner"></span> ' + L('btn_starting');
+          document.getElementById('bannerHowToBtn').disabled = true;
           // Directly transition to AWAIT_MOBILE state, skipping "Hi" message
           state = S.AWAIT_MOBILE;
           setMobileInput();
@@ -2279,7 +2283,35 @@
             botReply(L('ask_mobile'), 800);
           }, 500);
         };
+        document.getElementById('bannerHowToBtn').onclick = function () {
+          this.disabled = true;
+          showHowToRegisterVideo();
+        };
         scroll();
+      }
+
+      async function showHowToRegisterVideo() {
+        showTyping();
+        await new Promise(r => setTimeout(r, 600));
+        hideTyping();
+        var h = '<div style="margin-bottom:8px;font-weight:600;font-size:0.95rem;">\uD83C\uDFA5 ' + L('btn_how_to_register') + '</div>';
+        h += '<div style="margin:8px 0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;">';
+        h += '<iframe src="https://drive.google.com/file/d/1sHyiFfoH5A681R3SQnr78htDjNhF0jFO/preview" allow="autoplay" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block;border:none;border-radius:12px;"></iframe>';
+        h += '</div>';
+        h += '<div class="action-buttons" style="margin-top:12px;">';
+        h += '<button class="action-btn confirm" onclick="startRegFromVideo()"><i class="bi bi-play-circle-fill"></i> ' + L('btn_register_now') + '</button>';
+        h += '</div>';
+        await botReply(h, 0);
+      }
+      function startRegFromVideo() {
+        var btn = event.target.closest('button');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gen-spinner"></span> ' + L('btn_starting'); }
+        var startBtn = document.getElementById('bannerStartBtn');
+        if (startBtn) { startBtn.disabled = true; }
+        state = S.AWAIT_MOBILE;
+        setMobileInput();
+        unlockInput();
+        setTimeout(() => { botReply(L('ask_mobile'), 800); }, 500);
       }
 
       function addDateChip() {

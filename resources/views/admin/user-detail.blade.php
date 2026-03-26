@@ -619,7 +619,7 @@
           <div style="display:grid;grid-template-columns:46% 6% 48%;align-items:start;margin-bottom:10px;height:20px;overflow:hidden;">
             <div style="font-size:14px;font-weight:700;text-transform:uppercase;">CONTACT</div>
             <div style="font-size:26px;line-height:0.7;text-align:center;font-weight:700;">:</div>
-            <div style="font-size:17px;font-weight:700;line-height:1.12;"><span style="background:rgba(255,255,255,0.78);display:inline-block;padding:0 4px;">{{ !empty($member->contact_number) ? '+91 ' . $member->contact_number : (!empty($member->mobile) ? '+91 ' . $member->mobile : '') }}</span></div>
+            <div style="font-size:17px;font-weight:700;line-height:1.12;"><span style="background:rgba(255,255,255,0.78);display:inline-block;padding:0 4px;">{{ !empty($member->contact_number) ? $member->contact_number : (!empty($member->mobile) ? '+91 ' . $member->mobile : '') }}</span></div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:40% 60%;align-items:start;margin-top:10px;">

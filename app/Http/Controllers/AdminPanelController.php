@@ -279,12 +279,17 @@ class AdminPanelController extends Controller
                 try { $this->cloudinary->uploadApi()->destroy($photoPublicId); } catch (\Exception $e) {}
             }
 
-            // Delete card images from Cloudinary
+            // Delete card images and folder from Cloudinary
             try {
                 $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/front');
                 $this->cloudinary->uploadApi()->destroy('vanigan/cards/' . $uniqueId . '/back');
+                // Delete all remaining resources under this folder prefix
+                $this->cloudinary->adminApi()->deleteAssetsByPrefix('vanigan/cards/' . $uniqueId);
+                // Delete the empty folder itself
+                $this->cloudinary->adminApi()->deleteFolder('vanigan/cards/' . $uniqueId);
+                Log::info("Deleted Cloudinary folder: vanigan/cards/{$uniqueId}");
             } catch (\Exception $e) {
-                Log::warning("Failed to delete cards: " . $e->getMessage());
+                Log::warning("Failed to delete cards/folder: " . $e->getMessage());
             }
 
             // Delete from MongoDB: members, manual_entries, loan_requests

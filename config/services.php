@@ -39,6 +39,10 @@ return [
         'api_key' => env('TWO_FACTOR_API_KEY'),
     ],
 
+    'fast2sms' => [
+        'api_key' => env('FAST2SMS_API_KEY'),
+    ],
+
     'mongodb' => [
         'url' => env('MONGO_URL'),
         'database' => env('MONGO_DB_NAME', 'vanigan'),
