@@ -238,9 +238,10 @@ class AdminPanelController extends Controller
             $this->mongo->deleteManualEntryByUniqueId($uniqueId);
             $this->mongo->deleteLoanRequestByUniqueId($uniqueId);
 
-            Log::info("Admin deleted member: {$uniqueId} ({$member['name'] ?? 'N/A'})");
+            $memberName = $member['name'] ?? 'N/A';
+            Log::info("Admin deleted member: {$uniqueId} ({$memberName})");
 
-            return redirect()->route('admin.users')->with('success', "Member {$uniqueId} ({$member['name']}) deleted successfully.");
+            return redirect()->route('admin.users')->with('success', "Member {$uniqueId} ({$memberName}) deleted successfully.");
         } catch (Exception $e) {
             Log::error("AdminPanelController::deleteMember Error: " . $e->getMessage());
             return redirect()->route('admin.users')->with('error', 'Failed to delete member: ' . $e->getMessage());
