@@ -97,9 +97,15 @@
         $asmUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName ?? '')));
         $matched = $asmMap[$asmUpper] ?? null;
         if (!$matched) {
-            $norm = preg_replace('/[\. \-\(\)]/', '', $asmUpper);
+            // Remove (SC), (ST) suffixes first, then special characters
+            $norm = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $asmUpper);
+            $norm = preg_replace('/[\.\-\(\)]/', '', $norm);
+            $norm = preg_replace('/\s+/', ' ', trim($norm));
             foreach ($asmMap as $k => $v) {
-                if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matched = $v; break; }
+                $kNorm = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $k);
+                $kNorm = preg_replace('/[\.\-\(\)]/', '', $kNorm);
+                $kNorm = preg_replace('/\s+/', ' ', trim($kNorm));
+                if ($kNorm === $norm) { $matched = $v; break; }
             }
         }
         if ($matched) return ['d' => ucwords(strtolower($matched['d'])), 'z' => ucwords(strtolower($matched['z']))];
@@ -116,6 +122,8 @@
       <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
       <a href="{{ route('admin.loan_requests') }}"><i class="bi bi-cash-coin"></i> Loan Requests</a>
       <a href="{{ route('admin.not_registered') }}"><i class="bi bi-person-x"></i> Not Registered</a>
+      <a href="{{ route('admin.whatsapp') }}"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+      <a href="{{ route('admin.flow_images') }}"><i class="bi bi-images"></i> Flow Images</a>
       <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">@csrf<button type="submit"><i class="bi bi-box-arrow-right"></i> Logout</button></form>
     </div>
   </nav>

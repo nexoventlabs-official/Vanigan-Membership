@@ -7,6 +7,7 @@ use MongoDB\Collection;
 use MongoDB\Model\BSONDocument;
 use MongoDB\Model\BSONArray;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Exception;
 
 /**
@@ -282,6 +283,23 @@ class MongoService
         }
     }
 
+    /**
+     * Sync referral_count field with actual count of referred members.
+     */
+    public function syncReferralCount(string $uniqueId, int $actualCount): bool
+    {
+        try {
+            $result = $this->collection->updateOne(
+                ['unique_id' => $uniqueId],
+                ['$set' => ['referral_count' => $actualCount, 'updated_at' => now()->toISOString()]]
+            );
+            return $result->getMatchedCount() > 0;
+        } catch (Exception $e) {
+            Log::error("MongoService::syncReferralCount Exception: " . $e->getMessage());
+            return false;
+        }
+    }
+
     /* ── Admin panel helpers ────────────────────────────────── */
 
     /**
@@ -370,12 +388,29 @@ class MongoService
 
     /**
      * Get dashboard statistics via aggregation.
+     * Results are cached for 5 minutes to reduce MongoDB load.
      */
     public function getStats(): array
+    {
+        return Cache::remember('admin_dashboard_stats', 300, function () {
+            return $this->fetchStatsFromDb();
+        });
+    }
+
+    /**
+     * Fetch stats directly from MongoDB (called by getStats via cache).
+     */
+    protected function fetchStatsFromDb(): array
     {
         try {
             $totalMembers = $this->collection->countDocuments();
             $detailsCompleted = $this->collection->countDocuments(['details_completed' => true]);
+            $pendingMembers = $totalMembers - $detailsCompleted;
+
+            // Loan requests count
+            $db = $this->client->selectDatabase($this->database);
+            $loanRequestsCollection = $db->selectCollection('loan_requests');
+            $totalLoanRequests = $loanRequestsCollection->countDocuments();
 
             // Use _id ObjectId for date filtering (created_at may be stored inconsistently)
             $todayOid = new \MongoDB\BSON\ObjectId(dechex(now()->startOfDay()->timestamp) . '0000000000000000');
@@ -438,15 +473,15 @@ class MongoService
             $completionRate = $totalMembers > 0 ? round(($detailsCompleted / $totalMembers) * 100, 1) : 0;
 
             return compact(
-                'totalMembers', 'detailsCompleted', 'completionRate', 'cardsUploaded',
-                'totalReferrals', 'membersToday', 'membersThisWeek', 'membersThisMonth',
+                'totalMembers', 'detailsCompleted', 'pendingMembers', 'completionRate', 'cardsUploaded',
+                'totalReferrals', 'totalLoanRequests', 'membersToday', 'membersThisWeek', 'membersThisMonth',
                 'topReferrers', 'assemblyStats', 'districtStats', 'recentMembers'
             );
         } catch (Exception $e) {
             Log::error("MongoService::getStats Exception: " . $e->getMessage());
             return [
-                'totalMembers' => 0, 'detailsCompleted' => 0, 'completionRate' => 0,
-                'cardsUploaded' => 0, 'totalReferrals' => 0, 'membersToday' => 0,
+                'totalMembers' => 0, 'detailsCompleted' => 0, 'pendingMembers' => 0, 'completionRate' => 0,
+                'cardsUploaded' => 0, 'totalReferrals' => 0, 'totalLoanRequests' => 0, 'membersToday' => 0,
                 'membersThisWeek' => 0, 'membersThisMonth' => 0,
                 'topReferrers' => [], 'assemblyStats' => [], 'districtStats' => [],
                 'recentMembers' => [],
@@ -456,18 +491,21 @@ class MongoService
 
     /**
      * Get distinct values for a field (for filter dropdowns).
+     * Cached for 10 minutes.
      */
     public function getDistinctValues(string $field): array
     {
-        try {
-            $values = $this->collection->distinct($field);
-            $result = array_filter(array_map('strval', $values), fn($v) => !empty($v));
-            sort($result);
-            return $result;
-        } catch (Exception $e) {
-            Log::error("MongoService::getDistinctValues Exception: " . $e->getMessage());
-            return [];
-        }
+        return Cache::remember("distinct_values_{$field}", 600, function () use ($field) {
+            try {
+                $values = $this->collection->distinct($field);
+                $result = array_filter(array_map('strval', $values), fn($v) => !empty($v));
+                sort($result);
+                return $result;
+            } catch (Exception $e) {
+                Log::error("MongoService::getDistinctValues Exception: " . $e->getMessage());
+                return [];
+            }
+        });
     }
 
     /**
@@ -620,21 +658,27 @@ class MongoService
                 }
             }
 
-            // Resolve member photos in bulk
+            // Resolve member photos and names in bulk
             if (!empty($uniqueIds)) {
                 $memberCursor = $this->collection->find(
                     ['unique_id' => ['$in' => $uniqueIds]],
-                    ['projection' => ['unique_id' => 1, 'photo_url' => 1]]
+                    ['projection' => ['unique_id' => 1, 'photo_url' => 1, 'name' => 1]]
                 );
-                $photoMap = [];
+                $memberMap = [];
                 foreach ($memberCursor as $m) {
                     $ma = $this->toArray($m);
                     if ($ma && !empty($ma['unique_id'])) {
-                        $photoMap[$ma['unique_id']] = $ma['photo_url'] ?? '';
+                        $memberMap[$ma['unique_id']] = [
+                            'photo_url' => $ma['photo_url'] ?? '',
+                            'name' => $ma['name'] ?? '',
+                        ];
                     }
                 }
                 foreach ($requests as &$req) {
-                    $req['photo_url'] = $photoMap[$req['unique_id'] ?? ''] ?? '';
+                    $uid = $req['unique_id'] ?? '';
+                    $req['photo_url'] = $memberMap[$uid]['photo_url'] ?? '';
+                    // Set member_name from members collection (fallback to loan request's name field)
+                    $req['member_name'] = $memberMap[$uid]['name'] ?? $req['name'] ?? '';
                 }
                 unset($req);
             }

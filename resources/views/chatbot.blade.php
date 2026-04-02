@@ -831,7 +831,7 @@
     <!-- Header -->
     <div class="chat-header">
       <div class="avatar">
-        <img src="/vaniganlogo.png" alt="Vanigam Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+        <img src="/vaniganlogo.png" alt="Vanigan Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
       </div>
       <div class="info">
         <h4>Tamil Nadu Vanigargalin Sangamam</h4>
@@ -850,7 +850,7 @@
       <div class="sidebar-header">
         <div class="sb-avatar"><i class="bi bi-person-fill"></i></div>
         <div class="sb-info">
-          <h4 id="sbName">Vanigam Member</h4>
+          <h4 id="sbName">Vanigan Member</h4>
           <p id="sbMemberId">Not registered</p>
         </div>
         <button class="close-btn" id="sidebarClose"><i class="bi bi-x-lg"></i></button>
@@ -1164,7 +1164,7 @@
         sb_blood: { en: 'Blood Group', ta: 'இரத்தக் குழு' },
         sb_address: { en: 'Address', ta: 'முகவரி' },
         sb_not_registered: { en: 'Not registered', ta: 'பதிவு செய்யவில்லை' },
-        sb_vanigam_member: { en: 'Vanigam Member', ta: 'வணிகம் உறுப்பினர்' },
+        sb_vanigam_member: { en: 'Vanigan Member', ta: 'வணிகன் உறுப்பினர்' },
         sb_no_card: { en: 'No membership card yet.<br>Complete the registration to see your profile.', ta: 'உறுப்பினர் அட்டை இன்னும் இல்லை.<br>உங்கள் சுயவிவரத்தைக் காண பதிவை நிறைவு செய்யவும்.' },
         sb_referrals: { en: 'Referrals', ta: 'பரிந்துரைகள்' },
         sb_organizer_ready: { en: 'Organizer Ready', ta: 'நிர்வாகி தகுதி பெற்றவர்' },
@@ -1187,8 +1187,8 @@
         sb_your_members_desc: { en: 'View members you referred', ta: 'நீங்கள் பரிந்துரைத்த உறுப்பினர்களைக் காணவும்' },
         your_members_title: { en: 'Your Referred Members', ta: 'உங்கள் பரிந்துரை உறுப்பினர்கள்' },
         your_members_count: { en: '{count} members referred', ta: '{count} உறுப்பினர்கள் பரிந்துரைக்கப்பட்டனர்' },
-        no_referred_members: { en: 'You don\'t have any referred members yet', ta: 'உங்களிடம் இதுவரை பரிந்துரைக்கப்பட்ட உறுப்பினர்கள் இல்லை' },
-        no_referred_hint: { en: 'Share your referral link with friends and family to grow your network!', ta: 'உங்கள் நெட்வொர்க்கை வளர்க்க நண்பர்கள் மற்றும் குடும்பத்தினருடன் உங்கள் பரிந்துரை இணைப்பைப் பகிரவும்!' },
+        no_referred_members: { en: 'You don\'t have any referred members yet', ta: 'உங்களுக்கு இன்னும் பரிந்துரைகள் எதுவும் வரவில்லை' },
+        no_referred_hint: { en: 'Share your referral link with friends and family to grow your network!', ta: 'வளர்வதற்கு உங்கள் பரிந்துரை இணைப்பை நண்பர்கள் மற்றும் குடும்பத்தினருடன் பகிரவும்' },
 
         // Referral
         ref_your_link: { en: 'Your Referral Link', ta: 'உங்கள் பரிந்துரை இணைப்பு' },
@@ -1199,10 +1199,10 @@
         ref_copied_toast: { en: '✅ Referral link copied!', ta: '✅ பரிந்துரை இணைப்பு நகலெடுக்கப்பட்டது!' },
         ref_complete_first: { en: '\u274C Please complete registration first to get your referral link.', ta: '\u274C உங்கள் பரிந்துரை இணைப்பைப் பெற முதலில் பதிவை நிறைவு செய்யவும்.' },
         ref_fail: { en: 'Could not generate referral link', ta: 'பரிந்துரை இணைப்பை உருவாக்க இயலவில்லை' },
-        ref_share_text: { en: 'Join Vanigam and get your free membership card!', ta: 'வணிகர்களின் சங்கமத்தில் இணைந்து உங்கள் இலவச உறுப்பினர் அட்டையைப் பெறுங்கள்!' },
+        ref_share_text: { en: 'Join Vanigan and get your free membership card!', ta: 'வணிகர்களின் சங்கமத்தில் இணைந்து உங்கள் இலவச உறுப்பினர் அட்டையைப் பெறுங்கள்!' },
         ref_share_text_personal: {
-          en: 'I have joined Tamil Nadu Vanigargalin Sangamam for the growth and protection of traders. I request you also to join using this link and get many benefits.',
-          ta: '{name} ஆகிய நான் வணிகர்களின் வளர்ச்சிக்கும் பாதுகாப்பிற்கும் வணிகர்கள் அரசியலில் அங்கீகாரத்தையும் அதிகாரத்தையும் பெற வேண்டி தமிழ்நாடு வணிகர்களின் சங்கமத்தில் இணைந்துள்ளேன். தங்களையும் இந்த link ஐ வைத்து இணைத்துக் கொண்டு பல்வேறு பயன்களைப் பெறக் கேட்டுக் கொள்கிறேன்.'
+          en: 'Join Vanigan and get your free membership card!',
+          ta: 'வணிகனுடன் இணைந்து, உங்கள் இலவச உறுப்பினர் அட்டையைப் பெறுங்கள்!'
         },
 
         // Organizer
@@ -1212,12 +1212,12 @@
         org_need_more: { en: 'You need <strong>{count} more referrals</strong> to become an Organizer.', ta: 'நிர்வாகியாக இணைய <strong>{count} மேலும் பரிந்துரைகள்</strong> தேவை.' },
         org_share_hint: { en: 'Share your referral link to invite more members!', ta: 'மேலும் உறுப்பினர்களை அழைக்க உங்கள் பரிந்துரை இணைப்பைப் பகிரவும்!' },
         org_interest_welcome: {
-          en: 'Those who are interested in joining as an organizer in Tamil Nadu Vanigargalin Sangamam are welcome.',
-          ta: 'தமிழ்நாடு வணிகர்களின் சங்கமத்தில் நிர்வாகியாக இணைய விருப்பம் உள்ளவர்கள் வரவேற்கப்படுகிறார்கள்.'
+          en: 'Ready to lead? Unite 25 traders through your referral link and earn the role of Organizer in Tamil Nadu Vanigargalin Sangamam!',
+          ta: 'தலைமை ஏற்கத் தயாரா? உங்கள் பரிந்துரை லிங்க் மூலம் 25 வணிகர்களை ஒன்றிணைத்து, தமிழ்நாடு வணிகர்களின் சங்கமத்தில் \'ஒருங்கிணைப்பாளர்\' பொறுப்பை பெற்றிடுங்கள்!'
         },
         org_min_25: {
-          en: 'We request you to add at least 25 members using your referral link.',
-          ta: 'தங்களுக்கான link ஐ பயன்படுத்தி குறைந்தபட்சம் 25 உறுப்பினர்களை இணைக்கக் கேட்டுக்கொள்கிறோம்.'
+          en: 'Share your referral link and help at least 25 members join to qualify.',
+          ta: 'உங்கள் பரிந்துரை லிங்க்கை பகிர்ந்து குறைந்தபட்சம் 25 உறுப்பினர்களை இணைக்கவும்.'
         },
         org_complete_first: { en: '\u274C Please complete registration first.', ta: '\u274C முதலில் பதிவை நிறைவு செய்யவும்.' },
 
@@ -1270,8 +1270,8 @@
         // Request Loan
         btn_request_loan: { en: 'Request Loan', ta: 'கடன் கோரிக்கை' },
         loan_intro: {
-          en: 'We have dedicated schemes for Pvt Ltd companies, Partnership Businesses & Import Export businesses, wherein we provide upto 25L interest free loan.<br><br>Do you have any of these businesses: Pvt Ltd companies, Partnership Businesses or Import Export businesses?',
-          ta: 'Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் மற்றும் இறக்குமதி ஏற்றுமதி வணிகங்களுக்கு பிரத்யேக திட்டங்கள் உள்ளன, இதில் 25 லட்சம் வரை வட்டியில்லா கடன் வழங்குகிறோம்.<br><br>உங்களிடம் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் அல்லது இறக்குமதி ஏற்றுமதி வணிகங்கள் உள்ளதா?'
+          en: 'We have dedicated schemes for Pvt Ltd companies, Partnership Businesses & Import Export businesses, wherein we provide upto 25L interest free loan.<br><br><strong>📌 Note:</strong> We provide loans for every business type <u>except Proprietorship</u>.<br><br>Do you have any of these businesses: Pvt Ltd companies, Partnership Businesses or Import Export businesses?',
+          ta: 'Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் மற்றும் இறக்குமதி ஏற்றுமதி வணிகங்களுக்கு பிரத்யேக திட்டங்கள் உள்ளன, இதில் 25 லட்சம் வரை வட்டியில்லா கடன் வழங்குகிறோம்.<br><br><strong>📌 குறிப்பு:</strong> தனியுரிமை (Proprietorship) <u>தவிர</u> அனைத்து வணிக வகைகளுக்கும் கடன் வழங்குகிறோம்.<br><br>உங்களிடம் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் அல்லது இறக்குமதி ஏற்றுமதி வணிகங்கள் உள்ளதா?'
         },
         btn_yes: { en: 'Yes', ta: 'ஆம்' },
         btn_no: { en: 'No', ta: 'இல்லை' },
@@ -1315,6 +1315,13 @@
         lbl_blood: { en: 'Blood Group', ta: 'இரத்தக் குழு' },
         lbl_address: { en: 'Address', ta: 'முகவரி' },
         lbl_status: { en: 'Status', ta: 'நிலை' },
+
+        // WhatsApp Entry
+        wa_welcome_title: { en: 'Welcome via WhatsApp!', ta: 'WhatsApp மூலம் வரவேற்கிறோம்!' },
+        wa_welcome_msg: { en: 'You came through WhatsApp with mobile number <strong>+91 {mobile}</strong>. No need to enter your number again!', ta: 'நீங்கள் WhatsApp மூலம் <strong>+91 {mobile}</strong> என்ற மொபைல் எண்ணுடன் வந்துள்ளீர்கள். மீண்டும் எண் உள்ளிட வேண்டியதில்லை!' },
+        wa_existing_user: { en: 'Welcome back{name}! You are already registered. Please enter your 4-digit PIN to view your card.', ta: 'மீண்டும் வரவேற்கிறோம்{name}! நீங்கள் ஏற்கனவே பதிவு செய்துள்ளீர்கள். உங்கள் அட்டையைப் பார்க்க 4 இலக்க PIN உள்ளிடவும்.' },
+        wa_otp_sent: { en: 'We have sent an OTP to <strong>+91 {mobile}</strong>. Please enter the 6-digit code to verify.', ta: '<strong>+91 {mobile}</strong> க்கு OTP அனுப்பியுள்ளோம். சரிபார்க்க 6 இலக்க குறியீட்டை உள்ளிடவும்.' },
+        enter_pin_hint: { en: 'Enter your secret 4-digit PIN', ta: 'உங்கள் ரகசிய 4 இலக்க PIN-ஐ உள்ளிடவும்' },
       };
 
       function L(key, replacements) {
@@ -1335,9 +1342,9 @@
         // Update static header text
         document.querySelector('.chat-header .info h4').textContent = L('header_title');
         document.querySelector('.chat-header .info .status').textContent = L('header_subtitle');
-        // Clear chat and re-render from current state
+        // Clear chat and re-render from current state (skip API fetch for instant switch)
         chatEl.innerHTML = '';
-        init();
+        init(true);
         // Refresh sidebar
         updateSidebarContent();
       }
@@ -1595,12 +1602,15 @@
           h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
           h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
           h += '</div>';
-          await botReply(h, 600);
+          await botReply(h, 0);
           return;
         }
         try {
           showTyping();
-          const res = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
+          const [res, refLoanApplied] = await Promise.all([
+            api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id }),
+            checkHasAppliedLoan()
+          ]);
           hideTyping();
           if (res.success) {
             const link = res.referral_link;
@@ -1613,7 +1623,6 @@
             h += '<button class="action-btn confirm" onclick="shareReferral(\'' + link + '\')" style="flex:1;"><i class="bi bi-send"></i> ' + L('ref_share') + '</button>';
             h += '</div>';
             h += '<div style="margin-top:8px;font-size:0.8rem;color:#666;"><i class="bi bi-people"></i> ' + L('sb_referrals') + ': <strong>' + res.referral_count + '</strong> / 25</div>';
-            const refLoanApplied = await checkHasAppliedLoan();
             h += '<div class="action-buttons" style="margin-top:8px;">';
             h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
             h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
@@ -1622,12 +1631,12 @@
             h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
             if (!refLoanApplied) h += buildLoanBtn();
             h += '</div>';
-            await botReply(h, 800);
+            await botReply(h, 0);
           } else {
             console.error('Referral API error:', res);
-            await botReply('\u274C ' + L('ref_fail') + ': ' + (res.message || ''), 600);
+            await botReply('\u274C ' + L('ref_fail') + ': ' + (res.message || ''), 0);
           }
-        } catch(e) { hideTyping(); console.error('Referral exception:', e); await botReply(L('something_wrong') + ' ' + e.message, 600); }
+        } catch(e) { hideTyping(); console.error('Referral exception:', e); await botReply(L('something_wrong') + ' ' + e.message, 0); }
       };
 
       window.copyReferral = function (link) {
@@ -1697,11 +1706,12 @@
           h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
           h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
           h += '</div>';
-          await botReply(h, 600);
+          await botReply(h, 0);
           return;
         }
         const rc = user.memberData.referral_count || 0;
         let refLink = '';
+        showTyping();
         try {
           const res = await api('/api/vanigam/get-referral', { unique_id: user.memberData.unique_id });
           if (res.success) refLink = res.referral_link;
@@ -1741,7 +1751,7 @@
         h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
         if (!orgLoanApplied) h += buildLoanBtn();
         h += '</div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doMenuYourMembers = async function () {
@@ -1756,7 +1766,7 @@
           h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
           h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
           h += '</div>';
-          await botReply(h, 600);
+          await botReply(h, 0);
           return;
         }
         try {
@@ -1787,8 +1797,16 @@
               if (mlDz.district || m.district) h += ', ' + (mlDz.district || toTitleCase(m.district));
               h += '</div>';
               h += '</div>';
-              // Serial number
-              h += '<div style="font-size:0.7rem;font-weight:700;color:#aaa;flex-shrink:0;">#' + (i + 1) + '</div>';
+              // Phone and WhatsApp icons
+              const memberMobile = m.mobile || m.contact_number || '';
+              if (memberMobile) {
+                h += '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">';
+                h += '<a href="tel:' + memberMobile + '" style="width:32px;height:32px;border-radius:50%;background:#2e7d32;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:0.9rem;box-shadow:0 2px 6px rgba(46,125,50,0.3);"><i class="bi bi-telephone-fill"></i></a>';
+                h += '<a href="https://wa.me/91' + memberMobile.replace(/^0+/, '') + '" target="_blank" style="width:32px;height:32px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:0.9rem;box-shadow:0 2px 6px rgba(37,211,102,0.3);"><i class="bi bi-whatsapp"></i></a>';
+                h += '</div>';
+              } else {
+                h += '<div style="font-size:0.7rem;font-weight:700;color:#aaa;flex-shrink:0;">#' + (i + 1) + '</div>';
+              }
               h += '</div>';
             }
             h += '</div>';
@@ -1799,7 +1817,7 @@
             h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
             if (!ymLoanApplied) h += buildLoanBtn();
             h += '</div>';
-            await botReply(h, 800);
+            await botReply(h, 0);
           } else {
             // No referred members — show message + share/copy buttons
             let refLink = '';
@@ -1834,9 +1852,9 @@
             h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
             if (!ymNoLoanApplied) h += buildLoanBtn();
             h += '</div>';
-            await botReply(h, 800);
+            await botReply(h, 0);
           }
-        } catch(e) { hideTyping(); console.error('Your Members error:', e); await botReply(L('something_wrong'), 600); }
+        } catch(e) { hideTyping(); console.error('Your Members error:', e); await botReply(L('something_wrong'), 0); }
       };
 
       window.doMenuWings = async function () {
@@ -1894,6 +1912,7 @@
         }
         h += '</table></div>';
         // Reply buttons
+        showTyping();
         const wingsLoanApplied = await checkHasAppliedLoan();
         h += '<div class="action-buttons" style="margin-top:12px;">';
         h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
@@ -1903,7 +1922,7 @@
         h += '<button class="action-btn confirm" onclick="doMenuRefer()"><i class="bi bi-share"></i> ' + L('sb_refer') + '</button>';
         if (!wingsLoanApplied) h += buildLoanBtn();
         h += '</div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doMenuHelp = async function () {
@@ -1920,6 +1939,7 @@
         h += '<a href="mailto:support@vanigan.org" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-envelope"></i> ' + L('btn_email') + '</a>';
         h += '<a href="tel:+919876543210" class="action-btn confirm" style="text-decoration:none;"><i class="bi bi-telephone"></i> ' + L('btn_call') + '</a>';
         h += '</div>';
+        showTyping();
         const helpLoanApplied = await checkHasAppliedLoan();
         h += '<div class="action-buttons" style="margin-top:8px;">';
         h += '<button class="action-btn confirm" onclick="doMenuOrganizer()"><i class="bi bi-briefcase"></i> ' + L('sb_organizer') + '</button>';
@@ -1929,7 +1949,7 @@
         h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
         if (!helpLoanApplied) h += buildLoanBtn();
         h += '</div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doMenuWebsite = async function () {
@@ -1940,7 +1960,7 @@
         h += '<a href="https://vanigan.org/" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.95rem;box-shadow:0 2px 8px rgba(46,125,50,0.3);">';
         h += '<i class="bi bi-globe2" style="font-size:1.1rem;"></i> ' + L('website_btn');
         h += '</a></div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doMenuDownload = async function () {
@@ -1951,11 +1971,12 @@
         h += '<a href="https://play.google.com/store/apps/details?id=io.vanigan.ai" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1a1a1a,#333);color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:700;font-size:0.95rem;box-shadow:0 2px 8px rgba(0,0,0,0.3);">';
         h += '<i class="bi bi-google-play" style="font-size:1.1rem;"></i> ' + L('download_btn');
         h += '</a></div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doMenuLogout = function () {
         closeSidebar();
+        stopReferralPolling();
         clearUser();
         state = S.WELCOME;
         mobile = ''; epic = ''; voter = null; photoFile = null; photoUrl = '';
@@ -1976,7 +1997,7 @@
         state = S.AWAIT_MOBILE;
         unlockInput();
         setMobileInput();
-        await botReply(L('ask_mobile'), 700);
+        await botReply(L('ask_mobile'), 0);
       };
 
       window.doStartRegister = async function () {
@@ -1984,7 +2005,7 @@
         state = S.AWAIT_MOBILE;
         unlockInput();
         setMobileInput();
-        await botReply(L('ask_mobile'), 700);
+        await botReply(L('ask_mobile'), 0);
       };
 
       /* ── Request Loan Flow ── */
@@ -2002,7 +2023,7 @@
           h += '<button class="action-btn confirm" onclick="doStartVerify()"><i class="bi bi-telephone"></i> ' + L('btn_verify_mobile') + '</button>';
           h += '<button class="action-btn confirm" onclick="doStartRegister()"><i class="bi bi-person-plus"></i> ' + L('btn_register') + '</button>';
           h += '</div>';
-          await botReply(h, 600);
+          await botReply(h, 0);
           return;
         }
 
@@ -2036,7 +2057,7 @@
             h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
             h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
             h += '</div>';
-            await botReply(h, 600);
+            await botReply(h, 0);
             return;
           }
         } catch(e) {
@@ -2053,7 +2074,7 @@
         h += '<button class="action-btn confirm" onclick="doLoanYes()"><i class="bi bi-check-lg"></i> ' + L('btn_yes') + '</button>';
         h += '<button class="action-btn cancel" onclick="doLoanNo()"><i class="bi bi-x-lg"></i> ' + L('btn_no') + '</button>';
         h += '</div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doLoanYes = async function () {
@@ -2064,7 +2085,7 @@
         h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Partnership Business\')" style="width:100%;justify-content:center;"><i class="bi bi-people"></i> ' + L('btn_partnership') + '</button>';
         h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Import Export Business\')" style="width:100%;justify-content:center;"><i class="bi bi-globe2"></i> ' + L('btn_import_export') + '</button>';
         h += '</div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doLoanNo = async function () {
@@ -2074,7 +2095,7 @@
         h += '<p>' + L('loan_no_eligible') + '</p>';
         h += '</div>';
         h += buildQuickActions();
-        await botReply(h, 800);
+        await botReply(h, 0);
       };
 
       window.doSelectBusinessType = async function (type) {
@@ -2087,7 +2108,7 @@
         h += '<input type="text" id="businessNameInput" placeholder="Enter business name" style="width:100%;padding:12px 16px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;">';
         h += '</div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="doSubmitBusinessName()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_submit') + '</button></div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
         setTimeout(() => { const inp = document.getElementById('businessNameInput'); if (inp) inp.focus(); }, 900);
       };
 
@@ -2130,18 +2151,24 @@
         h += '<button class="action-btn confirm" onclick="doMenuYourMembers()"><i class="bi bi-people"></i> ' + L('sb_your_members') + '</button>';
         h += '<button class="action-btn confirm" onclick="doMenuWings()"><i class="bi bi-diagram-3"></i> ' + L('sb_wings') + '</button>';
         h += '</div>';
-        await botReply(h, 1000);
+        await botReply(h, 0);
         loanBusinessType = '';
         loanBusinessName = '';
       };
 
+      let _loanCacheResult = null;
+      let _loanCacheTime = 0;
       async function checkHasAppliedLoan() {
+        // Cache loan status for 60 seconds to avoid repeated API calls
+        if (_loanCacheResult !== null && (Date.now() - _loanCacheTime) < 60000) return _loanCacheResult;
         const user = getUser();
         if (!user || !user.memberData || !user.memberData.unique_id) return false;
         try {
           const memberMobile = user.memberData.mobile || user.memberData.contact_number || user.mobile || mobile;
           const res = await api('/api/vanigam/check-loan-status', { unique_id: user.memberData.unique_id, mobile: memberMobile });
-          return !!(res && res.success && res.has_applied === true);
+          _loanCacheResult = !!(res && res.success && res.has_applied === true);
+          _loanCacheTime = Date.now();
+          return _loanCacheResult;
         } catch(e) { return false; }
       }
 
@@ -2173,7 +2200,7 @@
         h += L('select_dob');
         h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;-webkit-appearance:none;appearance:none;height:48px;line-height:1.2;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
-        await botReply(h, 700);
+        await botReply(h, 0);
       };
 
       window.doUpdateDetailsFromCard = async function () {
@@ -2189,7 +2216,7 @@
         h += L('select_dob');
         h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;-webkit-appearance:none;appearance:none;height:48px;line-height:1.2;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
-        await botReply(h, 700);
+        await botReply(h, 0);
       };
 
       window.doSaveUpdatedDetails = async function () {
@@ -2212,17 +2239,17 @@
             saveUser({ mobile, epic, hasCard: true, memberData: res.member });
             let h = L('details_updated');
             h += buildCardPreviewHtml(res.member);
-            await botReply(h, 1200);
+            await botReply(h, 400);
             updateSidebarContent();
             // Capture and upload card images directly (no iframe)
             captureAndUploadCard(res.member);
           } else {
             unlockInput();
-            await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || L('failed_save')), 600);
+            await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || L('failed_save')), 0);
           }
         } catch(e) {
           hideTyping(); unlockInput();
-          await botReply(L('something_wrong'), 600);
+          await botReply(L('something_wrong'), 0);
         }
       };
 
@@ -2237,7 +2264,7 @@
           const img = document.createElement('div');
           img.className = 'bot-avatar-img';
           img.style.cssText = 'width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;';
-          img.innerHTML = '<img src="/vaniganlogo.png" alt="Vanigam" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+          img.innerHTML = '<img src="/vaniganlogo.png" alt="Vanigan" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
           div.appendChild(img);
         }
         const b = document.createElement('div');
@@ -2260,7 +2287,7 @@
         const div = document.createElement('div');
         div.className = 'message bot banner-message';
         div.innerHTML =
-          '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigam" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>' +
+          '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigan" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>' +
           '<div class="bubble">' +
           '<div class="banner-text">' + L('banner_welcome') + '<br><br>' +
           '<div style="margin:10px 0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;"><video src="https://res.cloudinary.com/de3qyhqfg/video/upload/v1773815558/vanigan/welcome_video.mp4" controls playsinline preload="metadata" style="width:100%;display:block;border-radius:12px;"></video></div>' +
@@ -2280,8 +2307,8 @@
           setMobileInput();
           unlockInput();
           setTimeout(() => {
-            botReply(L('ask_mobile'), 800);
-          }, 500);
+            botReply(L('ask_mobile'), 0);
+          }, 0);
         };
         document.getElementById('bannerHowToBtn').onclick = function () {
           this.disabled = true;
@@ -2292,26 +2319,45 @@
 
       async function showHowToRegisterVideo() {
         showTyping();
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 0));
         hideTyping();
-        var h = '<div style="margin-bottom:8px;font-weight:600;font-size:0.95rem;">\uD83C\uDFA5 ' + L('btn_how_to_register') + '</div>';
-        h += '<div style="margin:0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;position:relative;width:100%;padding-bottom:177.78%;">';
-        h += '<iframe src="https://drive.google.com/file/d/1sHyiFfoH5A681R3SQnr78htDjNhF0jFO/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:320%;height:100%;border:none;"></iframe>';
-        h += '</div>';
-        h += '<div style="margin-top:12px;">';
-        h += '<button class="action-btn confirm" onclick="startRegFromVideo()" style="width:100%;padding:12px;font-size:0.95rem;"><i class="bi bi-play-circle-fill"></i> ' + L('btn_register_now') + '</button>';
-        h += '</div>';
-        await botReply(h, 0);
+        // Build message DOM manually (like addBanner) so btn-reply is outside bubble
+        var div = document.createElement('div');
+        div.className = 'message bot banner-message';
+        div.innerHTML =
+          '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigan" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>' +
+          '<div class="bubble">' +
+          '<div style="margin-bottom:8px;font-weight:600;font-size:0.95rem;">\uD83C\uDFA5 ' + L('btn_how_to_register') + '</div>' +
+          '<div style="margin:0;border-radius:12px;overflow:hidden;border:1px solid #c8e6c9;position:relative;width:100%;padding-bottom:177.78%;">' +
+          '<iframe id="howToRegisterIframe" src="https://drive.google.com/file/d/1teKfmWwyzYTZmuP9PHgmyx1LxixkZ_Ej/preview" allow="autoplay" allowfullscreen style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:320%;height:100%;border:none;"></iframe>' +
+          '<button onclick="openVideoFullscreen()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:0.85rem;z-index:2;"><i class="bi bi-arrows-fullscreen"></i></button>' +
+          '</div>' +
+          '<span class="time">' + now() + '</span>' +
+          '<div class="banner-action"><button class="btn-reply" id="regNowBtn"><i class="bi bi-play-circle-fill me-1"></i> ' + L('btn_register_now') + '</button></div>' +
+          '</div>';
+        chatEl.appendChild(div);
+        scroll();
+        document.getElementById('regNowBtn').addEventListener('click', function() {
+          this.disabled = true;
+          this.innerHTML = '<span class="gen-spinner"></span> ' + L('btn_starting');
+          var startBtn = document.getElementById('bannerStartBtn');
+          if (startBtn) { startBtn.disabled = true; }
+          var howToBtn = document.getElementById('bannerHowToBtn');
+          if (howToBtn) { howToBtn.disabled = true; }
+          state = S.AWAIT_MOBILE;
+          setMobileInput();
+          unlockInput();
+          botReply(L('ask_mobile'), 0);
+        });
       }
-      function startRegFromVideo() {
-        var btn = event.target.closest('button');
-        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gen-spinner"></span> ' + L('btn_starting'); }
-        var startBtn = document.getElementById('bannerStartBtn');
-        if (startBtn) { startBtn.disabled = true; }
-        state = S.AWAIT_MOBILE;
-        setMobileInput();
-        unlockInput();
-        setTimeout(() => { botReply(L('ask_mobile'), 800); }, 500);
+
+      function openVideoFullscreen() {
+        var iframe = document.getElementById('howToRegisterIframe');
+        if (iframe) {
+          if (iframe.requestFullscreen) iframe.requestFullscreen();
+          else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+          else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+        }
       }
 
       function addDateChip() {
@@ -2326,7 +2372,7 @@
         if (typingEl) return;
         typingEl = document.createElement('div');
         typingEl.className = 'message bot typing-indicator';
-        typingEl.innerHTML = '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigam" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
+        typingEl.innerHTML = '<div class="bot-avatar-img" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;overflow:hidden;"><img src="/vaniganlogo.png" alt="Vanigan" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
         chatEl.appendChild(typingEl);
         scroll();
       }
@@ -2334,8 +2380,10 @@
 
       function botReply(html, delay) {
         return new Promise(resolve => {
+          hideTyping();
+          if (delay === 0 || delay === undefined) { botMsg(html); resolve(); return; }
           showTyping();
-          setTimeout(() => { hideTyping(); botMsg(html); resolve(); }, delay || 800);
+          setTimeout(() => { hideTyping(); botMsg(html); resolve(); }, delay);
         });
       }
 
@@ -2421,8 +2469,14 @@
         if (isForm) {
           opts.body = body;
         } else {
-          opts.headers = { 'Content-Type': 'application/json' };
-          opts.body = JSON.stringify(body);
+          // Use FormData for better compatibility with Laravel
+          const formData = new FormData();
+          for (const key in body) {
+            if (body[key] !== undefined && body[key] !== null) {
+              formData.append(key, body[key]);
+            }
+          }
+          opts.body = formData;
         }
         const r = await fetch(url, opts);
         return r.json();
@@ -2462,7 +2516,7 @@
         if (cBtn) { cBtn.disabled = true; cBtn.removeAttribute('id'); }
         state = S.AWAIT_MOBILE; mobile = '';
         setNumeric(L('ph_mobile'));
-        botReply(L('ask_mobile'), 500);
+        botReply(L('ask_mobile'), 0);
       };
 
       function startResendTimer() {
@@ -2482,13 +2536,56 @@
       }
 
       /* ── Init ── */
-      async function init() {
+      async function init(skipFetch) {
         // Apply stored language on load
         if (currentLang !== 'en') {
           document.querySelector('.chat-header .info h4').textContent = L('header_title');
           document.querySelector('.chat-header .info .status').textContent = L('header_subtitle');
         }
         addDateChip();
+
+        // Check for WhatsApp pre-filled phone number (wa= query param)
+        let waPhone = null;
+        const urlParams = new URLSearchParams(window.location.search);
+        waPhone = urlParams.get('wa');
+        
+        // Also try to get from hash if not in query string
+        if (!waPhone && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          waPhone = hashParams.get('wa');
+        }
+        
+        if (waPhone) {
+          let normalizedPhone = waPhone.replace(/\D/g, '');
+          if (normalizedPhone.length === 12 && normalizedPhone.startsWith('91')) {
+            normalizedPhone = normalizedPhone.substring(2);
+          }
+          if (/^[6-9]\d{9}$/.test(normalizedPhone)) {
+            localStorage.removeItem('tvs_user');
+
+            // Check if coming from WhatsApp Flow (has pre-filled data)
+            const fromFlow = urlParams.get('from') === 'flow';
+            const flowData = fromFlow ? {
+              epic: urlParams.get('epic') || '',
+              name: urlParams.get('name') || '',
+              assembly: urlParams.get('assembly') || '',
+              district: urlParams.get('district') || '',
+              dob: urlParams.get('dob') || '',
+              blood: urlParams.get('blood') || '',
+              address: urlParams.get('address') || '',
+            } : null;
+
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            if (flowData && flowData.epic) {
+              await handleWhatsAppFlowEntry(normalizedPhone, flowData);
+            } else {
+              await handleWhatsAppEntry(normalizedPhone);
+            }
+            return;
+          }
+        }
+
         const saved = getUser();
         if (saved && saved.mobile && saved.hasCard && saved.memberData) {
           mobile = saved.mobile;
@@ -2497,9 +2594,9 @@
           setText(L('ph_type_msg'));
           hideAttach();
 
-          // Fetch latest member data from MongoDB to stay in sync
+          // Fetch latest member data from MongoDB to stay in sync (skip during lang switch)
           let m = saved.memberData;
-          if (m.unique_id) {
+          if (!skipFetch && m.unique_id) {
             try {
               const freshRes = await fetch('/api/vanigam/member/' + m.unique_id).then(r => r.json());
               if (freshRes.success && freshRes.member) {
@@ -2524,9 +2621,145 @@
           h += '<div style="margin-top:12px;"><em style="color:#667781;font-size:0.85rem;">' + L('type_anything_hint') + '</em></div>';
           botMsg(h);
           updateSidebarContent();
+          // Start real-time referral count polling
+          startReferralPolling();
         } else {
           addBanner();
         }
+      }
+
+      /* ── WhatsApp Entry Handler ── */
+      async function handleWhatsAppEntry(waPhone) {
+        console.log('handleWhatsAppEntry called with:', waPhone);
+        mobile = waPhone;
+        
+        // Show WhatsApp welcome message
+        let h = '<i class="bi bi-whatsapp" style="color:#25D366;font-size:1.2rem;"></i> <strong>' + L('wa_welcome_title') + '</strong>';
+        h += '<div style="margin-top:10px;padding:14px;background:linear-gradient(135deg,#e8f5e9,#dcf8c6);border-radius:12px;border:1px solid #25D366;">';
+        h += '<p style="font-size:0.9rem;color:#333;">' + L('wa_welcome_msg', { mobile: waPhone }) + '</p>';
+        h += '</div>';
+        botMsg(h);
+
+        showTyping();
+        try {
+          // Check if user already exists
+          const res = await api('/api/vanigam/check-member', { mobile: waPhone });
+          hideTyping();
+          
+          if (res.success && res.exists) {
+            // User already registered - ask for PIN
+            state = S.AWAIT_RETURNING_PIN;
+            setNumeric(L('ph_pin'));
+            input.maxLength = 4;
+            sendBtn.disabled = true;
+            input.oninput = function() {
+              sendBtn.disabled = input.value.length !== 4;
+            };
+            unlockInput();
+            
+            let pinH = L('wa_existing_user', { name: res.name || '' });
+            pinH += '<div style="margin-top:8px;font-size:0.85rem;color:#666;">' + L('enter_pin_hint') + '</div>';
+            await botReply(pinH, 400);
+          } else {
+            // New user from WhatsApp - skip OTP, go directly to EPIC
+            trackStep('mobile_entered');
+            state = S.AWAIT_EPIC;
+            setEpicInput(L('ph_epic'));
+            unlockInput();
+            await botReply(L('mobile_verified_epic'), 0);
+          }
+        } catch(e) {
+          hideTyping();
+          await botReply(L('something_wrong'), 0);
+          state = S.AWAIT_MOBILE;
+          setMobileInput();
+        }
+      }
+
+      /* ── WhatsApp Flow Entry Handler (pre-filled from WhatsApp Flow) ── */
+      async function handleWhatsAppFlowEntry(waPhone, flowData) {
+        mobile = waPhone;
+        epic = flowData.epic;
+        voter = { name: flowData.name, assembly_name: flowData.assembly, district: flowData.district };
+
+        // Show welcome
+        botMsg('<i class="bi bi-whatsapp" style="color:#25D366;font-size:1.2rem;"></i> <strong>Welcome from WhatsApp!</strong><div style="margin-top:10px;padding:14px;background:linear-gradient(135deg,#e8f5e9,#dcf8c6);border-radius:12px;border:1px solid #25D366;"><p style="font-size:0.9rem;color:#333;">Your details have been received.</p></div>');
+
+        // Show voter details card
+        let d = '<strong>Your Details</strong><div class="voter-details-card">';
+        d += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + (flowData.name || '') + '</span></div>';
+        d += '<div class="detail-row"><span class="detail-label">EPIC</span><span class="detail-value">' + (flowData.epic || '') + '</span></div>';
+        d += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + (flowData.assembly || '') + '</span></div>';
+        d += '<div class="detail-row"><span class="detail-label">District</span><span class="detail-value">' + (flowData.district || '') + '</span></div>';
+        if (flowData.dob) d += '<div class="detail-row"><span class="detail-label">DOB</span><span class="detail-value">' + flowData.dob + '</span></div>';
+        if (flowData.blood) d += '<div class="detail-row"><span class="detail-label">Blood Group</span><span class="detail-value">' + flowData.blood + '</span></div>';
+        if (flowData.address) d += '<div class="detail-row"><span class="detail-label">Address</span><span class="detail-value">' + flowData.address + '</span></div>';
+        d += '</div>';
+        await botReply(d, 500);
+
+        // Store flow data for card generation
+        window._waFlowData = flowData;
+
+        // Go to photo upload
+        await botReply('📸 <strong>Upload Your Photo</strong><br><br>Please upload a clear passport-size photo for your membership card.', 400);
+        startPhotoUpload();
+      }
+
+      /* ── Real-time Referral Count Polling ── */
+      let _referralPollInterval = null;
+      let _referralPollingActive = false;
+      let _referralPollBusy = false;
+
+      async function pollReferralCount() {
+        if (_referralPollBusy) return;
+        _referralPollBusy = true;
+        try {
+          const user = getUser();
+          if (!user || !user.memberData || !user.memberData.unique_id) return;
+          const r = await fetch('/api/vanigam/get-referral', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ unique_id: user.memberData.unique_id })
+          });
+          if (!r.ok) return;
+          const text = await r.text();
+          let res;
+          try { res = JSON.parse(text); } catch(e) { return; }
+          if (res.success && res.referral_count !== undefined) {
+            const oldCount = user.memberData.referral_count || 0;
+            if (res.referral_count !== oldCount) {
+              const freshUser = getUser();
+              if (freshUser && freshUser.memberData) {
+                freshUser.memberData.referral_count = res.referral_count;
+                localStorage.setItem(LS_KEY, JSON.stringify(freshUser));
+                updateSidebarContent();
+                console.log('Referral count updated:', oldCount, '->', res.referral_count);
+              }
+            }
+          }
+        } catch(e) { /* Silent fail */ }
+        finally { _referralPollBusy = false; }
+      }
+
+      function startReferralPolling() {
+        if (_referralPollingActive) return;
+        _referralPollingActive = true;
+        pollReferralCount();
+        _referralPollInterval = setInterval(pollReferralCount, 15000);
+        document.addEventListener('visibilitychange', onVisibilityChange);
+      }
+
+      function onVisibilityChange() {
+        if (!document.hidden && _referralPollingActive) pollReferralCount();
+      }
+
+      function stopReferralPolling() {
+        _referralPollingActive = false;
+        if (_referralPollInterval) {
+          clearInterval(_referralPollInterval);
+          _referralPollInterval = null;
+        }
+        document.removeEventListener('visibilitychange', onVisibilityChange);
       }
 
       /* ────────────────────────────────────────────────────────
@@ -2542,14 +2775,14 @@
           userMsg(txt);
           state = S.AWAIT_MOBILE;
           setNumeric(L('ph_mobile'));
-          await botReply(L('ask_mobile'), 900);
+          await botReply(L('ask_mobile'), 0);
 
         /* ── AWAIT MOBILE ── */
         } else if (state === S.AWAIT_MOBILE) {
           const m = txt.replace(/\D/g, '');
           if (m.length !== 10 || !/^[6-9]/.test(m)) {
             userMsg(txt);
-            await botReply(L('invalid_mobile'), 600);
+            await botReply(L('invalid_mobile'), 0);
             return;
           }
           userMsg(m);
@@ -2573,7 +2806,7 @@
               h += '<p style="margin-top:6px;font-size:0.85rem;color:#555;">' + L('self_referral_msg') + '</p>';
               h += '<button class="action-btn confirm" onclick="doChangeMobile()" style="margin-top:10px;font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> ' + L('btn_enter_another') + '</button>';
               h += '</div>';
-              await botReply(h, 800);
+              await botReply(h, 0);
               return;
             }
 
@@ -2586,7 +2819,7 @@
               h += '<p style="margin-top:6px;font-size:0.85rem;color:#555;">' + L('already_registered_msg') + '</p>';
               h += '<button class="action-btn confirm" onclick="doChangeMobile()" style="margin-top:10px;font-size:0.85rem;padding:8px 16px;"><i class="bi bi-telephone"></i> ' + L('btn_enter_another') + '</button>';
               h += '</div>';
-              await botReply(h, 800);
+              await botReply(h, 0);
               return;
             }
 
@@ -2597,7 +2830,7 @@
               unlockInput();
               sendBtn.disabled = true;
               let welcomeText = L('welcome_back_pin', { name: checkRes.name ? ', <strong>' + checkRes.name + '</strong>' : '' });
-              await botReply(welcomeText, 800);
+              await botReply(welcomeText, 0);
             } else if (checkRes.success && checkRes.exists) {
               // Existing member without PIN
               state = S.DONE;
@@ -2606,28 +2839,29 @@
               unlockInput();
               epic = checkRes.epic_no || '';
               saveUser({ mobile, epic, hasCard: true, memberData: checkRes.member || {} });
+              startReferralPolling();
               let h = L('mobile_verified_existing');
               h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('sb_vanigam_member') + '</h4>';
               h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (checkRes.name || '') + '</span></div>';
               h += '<div class="row"><span class="lbl">Member ID</span><span class="val">' + (checkRes.unique_id || '') + '</span></div>';
               h += '</div>';
-              await botReply(h, 1000);
+              await botReply(h, 0);
             } else {
               // New user — skip OTP, ask EPIC directly
               trackStep('mobile_entered');
               state = S.AWAIT_EPIC;
               setEpicInput(L('ph_epic'));
               unlockInput();
-              await botReply(L('mobile_verified_epic'), 800);
+              await botReply(L('mobile_verified_epic'), 0);
             }
-          } catch (e) { hideTyping(); unlockInput(); await botReply(L('something_wrong'), 600); }
+          } catch (e) { hideTyping(); unlockInput(); await botReply(L('something_wrong'), 0); }
 
         /* ── AWAIT OTP ── */
         } else if (state === S.AWAIT_OTP) {
           const o = txt.replace(/\D/g, '');
           if (o.length !== 6) {
             userMsg(txt);
-            await botReply(L('invalid_otp'), 600);
+            await botReply(L('invalid_otp'), 0);
             return;
           }
           userMsg(o);
@@ -2652,6 +2886,7 @@
                 unlockInput();
                 epic = res.member.epic_no || '';
                 saveUser({ mobile, epic, hasCard: true, memberData: res.member });
+                startReferralPolling();
                 let h = L('mobile_verified_existing');
                 h += '<div class="member-summary"><h4>\uD83C\uDFAA ' + L('sb_vanigam_member') + '</h4>';
                 h += '<div class="row"><span class="lbl">Name</span><span class="val">' + (res.member.name || '') + '</span></div>';
@@ -2660,20 +2895,20 @@
                 if (!res.member.details_completed) {
                   h += '<br><em style="color:#667781;">' + L('details_incomplete_hint') + '</em>';
                 }
-                await botReply(h, 1000);
+                await botReply(h, 0);
               } else {
                 // New member — ask EPIC
                 trackStep('otp_verified');
                 state = S.AWAIT_EPIC;
                 setEpicInput(L('ph_epic'));
                 unlockInput();
-                await botReply(L('mobile_verified_epic'), 800);
+                await botReply(L('mobile_verified_epic'), 0);
               }
             } else {
               unlockInput();
-              await botReply('\u274C ' + (res.message || L('invalid_otp_retry')), 600);
+              await botReply('\u274C ' + (res.message || L('invalid_otp_retry')), 0);
             }
-          } catch (e) { hideTyping(); unlockInput(); await botReply(L('verification_failed'), 600); }
+          } catch (e) { hideTyping(); unlockInput(); await botReply(L('verification_failed'), 0); }
 
         /* ── AWAIT EPIC ── */
         } else if (state === S.AWAIT_EPIC) {
@@ -2681,7 +2916,7 @@
           // Validate EPIC format: exactly 3 alpha + 7 numeric (10 chars total)
           if (!isValidEpicFormat(ep)) {
             userMsg(ep || txt);
-            await botReply(L('invalid_epic_format'), 600);
+            await botReply(L('invalid_epic_format'), 0);
             return;
           }
           userMsg(ep);
@@ -2714,7 +2949,7 @@
               h += '</div>';
               state = S.VOTER_CONFIRM;
               unlockInput();
-              await botReply(h, 1000);
+              await botReply(h, 0);
             } else {
               // EPIC not found - offer options to try again or add manually
               epic = ep; // Save entered EPIC for manual flow
@@ -2725,9 +2960,9 @@
               h += '<button class="action-btn confirm" onclick="retryEpic()" style="font-size:0.9rem;"><i class="bi bi-arrow-clockwise"></i> ' + L('btn_try_again') + '</button>';
               h += '<button class="action-btn cancel" onclick="startManualEntry()" style="font-size:0.9rem;"><i class="bi bi-pencil-square"></i> ' + L('btn_add_manually') + '</button>';
               h += '</div>';
-              await botReply(h, 700);
+              await botReply(h, 0);
             }
-          } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C ' + L('validate_fail'), 600); }
+          } catch (e) { hideTyping(); unlockInput(); await botReply('\u274C ' + L('validate_fail'), 0); }
 
         /* ── VOTER CONFIRM ── */
         } else if (state === S.VOTER_CONFIRM) {
@@ -2739,36 +2974,36 @@
             userMsg(txt);
             state = S.AWAIT_EPIC;
             setEpicInput(L('ph_epic'));
-            await botReply(L('reenter_epic'), 500);
+            await botReply(L('reenter_epic'), 0);
           } else {
             userMsg(txt);
-            await botReply(L('yes_or_no'), 400);
+            await botReply(L('yes_or_no'), 0);
           }
 
         /* ── AWAIT PHOTO ── */
         } else if (state === S.AWAIT_PHOTO) {
           // User typed instead of uploading photo
           userMsg(txt);
-          await botReply(L('please_upload_photo'), 500);
+          await botReply(L('please_upload_photo'), 0);
 
         /* ── AWAIT PIN ── */
         } else if (state === S.AWAIT_PIN) {
           const p = txt.replace(/\D/g, '');
           if (p.length !== 4) {
             userMsg(txt);
-            await botReply(L('pin_4digits'), 500);
+            await botReply(L('pin_4digits'), 0);
             return;
           }
           if (isWeakPin(p)) {
             userMsg('\u2022\u2022\u2022\u2022');
-            await botReply(L('weak_pin'), 500);
+            await botReply(L('weak_pin'), 0);
             return;
           }
           userMsg('\u2022\u2022\u2022\u2022');
           pin = p;
           state = S.AWAIT_PIN_CONFIRM;
           setNumeric(L('ph_reenter_pin'));
-          await botReply(L('confirm_pin'), 700);
+          await botReply(L('confirm_pin'), 0);
 
         } else if (state === S.AWAIT_PIN_CONFIRM) {
           const p = txt.replace(/\D/g, '');
@@ -2777,19 +3012,39 @@
             state = S.AWAIT_PIN;
             setNumeric(L('ph_pin'));
             pin = '';
-            await botReply(L('pin_mismatch'), 600);
+            await botReply(L('pin_mismatch'), 0);
             return;
           }
           trackStep('pin_set');
-          await botReply(L('pin_set_success'), 500);
-          await askAdditionalDetails();
+          await botReply(L('pin_set_success'), 0);
+
+          // If coming from WhatsApp Flow, skip additional details (already collected)
+          if (window._waFlowData) {
+            const fd = window._waFlowData;
+            let summary = '<strong>Your Registration Summary</strong>';
+            summary += '<div class="voter-details-card">';
+            summary += '<div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">' + (fd.name || '') + '</span></div>';
+            summary += '<div class="detail-row"><span class="detail-label">EPIC</span><span class="detail-value">' + (fd.epic || '') + '</span></div>';
+            summary += '<div class="detail-row"><span class="detail-label">Assembly</span><span class="detail-value">' + (fd.assembly || '') + '</span></div>';
+            summary += '<div class="detail-row"><span class="detail-label">District</span><span class="detail-value">' + (fd.district || '') + '</span></div>';
+            if (fd.dob) summary += '<div class="detail-row"><span class="detail-label">DOB</span><span class="detail-value">' + fd.dob + '</span></div>';
+            if (fd.blood) summary += '<div class="detail-row"><span class="detail-label">Blood Group</span><span class="detail-value">' + fd.blood + '</span></div>';
+            if (fd.address) summary += '<div class="detail-row"><span class="detail-label">Address</span><span class="detail-value">' + fd.address + '</span></div>';
+            summary += '</div>';
+            summary += '<div class="action-buttons" style="margin-top:12px;">';
+            summary += '<button class="action-btn confirm" onclick="doConfirmGenerate()"><i class="bi bi-check-circle"></i> Generate Card</button>';
+            summary += '</div>';
+            await botReply(summary, 400);
+          } else {
+            await askAdditionalDetails();
+          }
 
         /* ── AWAIT RETURNING PIN ── */
         } else if (state === S.AWAIT_RETURNING_PIN) {
           const p = txt.replace(/\D/g, '');
           if (p.length !== 4) {
             userMsg(txt);
-            await botReply(L('enter_4digit_pin'), 500);
+            await botReply(L('enter_4digit_pin'), 0);
             return;
           }
           userMsg('\u2022\u2022\u2022\u2022');
@@ -2803,6 +3058,7 @@
               const m = res.member;
               epic = m.epic_no || '';
               saveUser({ mobile, epic, hasCard: true, memberData: m });
+              startReferralPolling();
               let h = L('welcome_back_card');
               h += buildCardPreviewHtml(m);
               if (!m.details_completed) {
@@ -2814,14 +3070,14 @@
                 h += '</button>';
                 h += '</div></div>';
               }
-              await botReply(h, 1200);
+              await botReply(h, 400);
             } else {
               unlockInput();
-              await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || L('invalid_pin')) + ' ' + L('verification_failed').replace('\u274C ', ''), 600);
+              await botReply('<i class="bi bi-x-circle"></i> ' + (res.message || L('invalid_pin')) + ' ' + L('verification_failed').replace('\u274C ', ''), 0);
             }
           } catch(e) {
             hideTyping(); unlockInput();
-            await botReply(L('verification_failed'), 600);
+            await botReply(L('verification_failed'), 0);
           }
 
         /* ── ASK ADDITIONAL ── */
@@ -2831,28 +3087,28 @@
           const lo = txt.toLowerCase();
           if (lo === 'add' || lo === 'yes') { await startAdditionalDetails(); }
           else if (lo === 'skip') { await skipAdditionalDetails(); }
-          else { await botReply(L('tap_add_or_skip'), 400); }
+          else { await botReply(L('tap_add_or_skip'), 0); }
 
         /* ── AWAIT DOB ── */
         } else if (state === S.AWAIT_DOB) {
           // Handled by calendar picker button (submitDob)
           if (!txt) return;
           userMsg(txt);
-          await botReply(L('use_calendar'), 400);
+          await botReply(L('use_calendar'), 0);
 
         /* ── AWAIT BLOOD ── */
         } else if (state === S.AWAIT_BLOOD) {
           // Handled by blood group buttons (submitBloodGroup)
           if (!txt) return;
           userMsg(txt);
-          await botReply(L('use_blood_buttons'), 400);
+          await botReply(L('use_blood_buttons'), 0);
 
         /* ── AWAIT ADDRESS ── */
         } else if (state === S.AWAIT_ADDRESS) {
           // Handled by address textarea (submitAddress)
           if (!txt) return;
           userMsg(txt);
-          await botReply(L('use_address_box'), 400);
+          await botReply(L('use_address_box'), 0);
 
         /* ── CONFIRM ALL ── */
         } else if (state === S.CONFIRM_ALL) {
@@ -2866,23 +3122,23 @@
             setEpicInput(L('ph_epic'));
             hideAttach();
             photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
-            await botReply(L('cancelled_start_over'), 700);
+            await botReply(L('cancelled_start_over'), 0);
           } else {
             userMsg(txt);
-            await botReply(L('yes_to_confirm'), 500);
+            await botReply(L('yes_to_confirm'), 0);
           }
 
         /* ── AWAIT MANUAL NAME ── */
         } else if (state === S.AWAIT_MANUAL_NAME) {
           // Name is handled via inline input + submitManualName button
           userMsg(txt);
-          await botReply(L('enter_name'), 500);
+          await botReply(L('enter_name'), 0);
 
         /* ── AWAIT MANUAL ASSEMBLY ── */
         } else if (state === S.AWAIT_MANUAL_ASSEMBLY) {
           // Assembly is handled via inline search + submitManualAssembly button
           userMsg(txt);
-          await botReply(L('enter_assembly'), 500);
+          await botReply(L('enter_assembly'), 0);
 
         /* ── MANUAL CONFIRM ── */
         } else if (state === S.MANUAL_CONFIRM) {
@@ -2892,7 +3148,7 @@
             await startPhotoUpload();
           } else {
             userMsg(txt);
-            await botReply(L('confirm_to_proceed'), 500);
+            await botReply(L('confirm_to_proceed'), 0);
           }
 
         /* ── DONE ── */
@@ -2902,7 +3158,7 @@
           setMobileInput();
           hideAttach();
           photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
-          await botReply(L('ready_another'), 800);
+          await botReply(L('ready_another'), 0);
         }
       }
 
@@ -2915,7 +3171,7 @@
         userMsg('<i class="bi bi-x-lg"></i> ' + L('btn_no_reenter'));
         state = S.AWAIT_EPIC;
         setEpicInput(L('ph_epic'));
-        await botReply(L('reenter_epic'), 500);
+        await botReply(L('reenter_epic'), 0);
       };
 
       /* ── Manual Entry (when EPIC not found) ── */
@@ -2923,7 +3179,7 @@
         userMsg(L('btn_try_again'));
         state = S.AWAIT_EPIC;
         setEpicInput(L('ph_epic'));
-        await botReply(L('mobile_verified_epic'), 600);
+        await botReply(L('mobile_verified_epic'), 0);
       };
 
       window.startManualEntry = async function () {
@@ -2937,7 +3193,7 @@
         h += '<div id="nameCharCount" style="text-align:right;font-size:0.75rem;color:#888;margin-top:2px;">0 / 50</div>';
         h += '</div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitManualName()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_submit') + '</button></div>';
-        await botReply(h, 600);
+        await botReply(h, 0);
         setTimeout(() => {
           const inp = document.getElementById('manualNameInput');
           if (inp) {
@@ -2954,7 +3210,7 @@
         const inp = document.getElementById('manualNameInput');
         if (!inp || !inp.value.trim()) return;
         const name = inp.value.trim().substring(0, 50);
-        if (name.length < 2) { await botReply(L('invalid_name'), 500); return; }
+        if (name.length < 2) { await botReply(L('invalid_name'), 0); return; }
         inp.disabled = true;
         const btn = inp.closest('.bot').querySelector('.action-btn');
         if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
@@ -2970,7 +3226,7 @@
         h += '</div>';
         h += '<div id="assemblyDistrictZone" style="display:none;margin-top:8px;padding:10px 14px;background:#e8f5e9;border-radius:10px;font-size:0.85rem;color:#1b5e20;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" id="assemblySubmitBtn" onclick="submitManualAssembly()" style="width:100%;opacity:0.5;" disabled><i class="bi bi-check-lg"></i> ' + L('btn_submit') + '</button></div>';
-        await botReply(h, 600);
+        await botReply(h, 0);
         setTimeout(() => { initAssemblySearch(); }, 700);
       };
 
@@ -3041,7 +3297,7 @@
           h += '<div class="action-buttons" style="margin-top:12px;">';
           h += '<button class="action-btn confirm" onclick="confirmManualDetails()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_proceed') + '</button>';
           h += '</div>';
-          botReply(h, 700);
+          botReply(h, 0);
         };
       }
 
@@ -3063,7 +3319,7 @@
         h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
         h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
         h += '</div>';
-        await botReply(h, 800);
+        await botReply(h, 0);
       }
 
       /* ── PIN Setup ── */
@@ -3074,7 +3330,7 @@
         input.value = '';
         let h = L('set_pin');
         h += '<br><br><em style="color:#667781;font-size:0.85rem;">' + L('pin_hint') + '</em>';
-        await botReply(h, 800);
+        await botReply(h, 0);
         input.focus();
       }
 
@@ -3088,7 +3344,7 @@
         h += '<button class="action-btn confirm" onclick="startAdditionalDetails()"><i class="bi bi-plus-circle"></i> ' + L('btn_add_details') + '</button>';
         h += '<button class="action-btn skip" onclick="skipAdditionalDetails()"><i class="bi bi-skip-forward"></i> ' + L('btn_skip') + '</button>';
         h += '</div>';
-        await botReply(h, 900);
+        await botReply(h, 0);
       }
 
       window.startAdditionalDetails = async function () {
@@ -3098,14 +3354,14 @@
         let h = L('select_dob');
         h += '<div style="margin-top:10px;"><input type="date" id="dobPicker" max="' + new Date().toISOString().split('T')[0] + '" style="width:100%;padding:10px 14px;border:2px solid #2e7d32;border-radius:10px;font-size:1rem;font-family:Inter,sans-serif;outline:none;color:#333;background:#f8fff8;-webkit-appearance:none;appearance:none;height:48px;line-height:1.2;"></div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitDob()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_dob') + '</button></div>';
-        await botReply(h, 700);
+        await botReply(h, 0);
       };
 
       /* ── Submit DOB from calendar picker ── */
       window.submitDob = async function () {
         const picker = document.getElementById('dobPicker');
         if (!picker || !picker.value) {
-          await botReply(L('select_date'), 400);
+          await botReply(L('select_date'), 0);
           return;
         }
         const parts = picker.value.split('-');
@@ -3128,7 +3384,7 @@
           h += '<button class="action-btn confirm" onclick="submitBloodGroup(\'' + g + '\')" style="padding:10px 0;font-size:0.95rem;border-radius:10px;">' + g + '</button>';
         });
         h += '</div>';
-        await botReply(h, 700);
+        await botReply(h, 0);
       }
 
       /* ── Submit Blood Group ── */
@@ -3149,7 +3405,7 @@
         h += '<div id="addrCount" style="text-align:right;font-size:0.75rem;color:#888;margin-top:2px;">0 / 70</div>';
         h += '</div>';
         h += '<div style="margin-top:8px;"><button class="action-btn confirm" onclick="submitAddress()" style="width:100%;"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_address') + '</button></div>';
-        await botReply(h, 700);
+        await botReply(h, 0);
         setTimeout(() => { const ta = document.getElementById('addressInput'); if (ta) ta.focus(); }, 900);
       }
 
@@ -3168,7 +3424,7 @@
       window.submitAddress = async function () {
         const ta = document.getElementById('addressInput');
         if (!ta || !ta.value.trim()) {
-          await botReply(L('enter_address_err'), 400);
+          await botReply(L('enter_address_err'), 0);
           return;
         }
         address = ta.value.trim().substring(0, 70);
@@ -3205,7 +3461,7 @@
           h += '<button class="action-btn confirm" onclick="doSaveUpdatedDetails()"><i class="bi bi-check-lg"></i> ' + L('btn_save_details') + '</button>';
           h += '<button class="action-btn cancel" onclick="doCancelUpdate()"><i class="bi bi-x-lg"></i> ' + L('btn_cancel') + '</button>';
           h += '</div>';
-          await botReply(h, 1000);
+          await botReply(h, 0);
         } else {
           // Normal card generation mode
           let h = L('confirm_details');
@@ -3226,7 +3482,7 @@
           h += '<button class="action-btn confirm" onclick="doConfirmGenerate()"><i class="bi bi-check-lg"></i> ' + L('btn_confirm_generate') + '</button>';
           h += '<button class="action-btn cancel" onclick="doCancelAll()"><i class="bi bi-x-lg"></i> ' + L('btn_cancel') + '</button>';
           h += '</div>';
-          await botReply(h, 1000);
+          await botReply(h, 0);
         }
       }
 
@@ -3238,7 +3494,7 @@
         userMsg('\u274C ' + L('btn_cancel'));
         state = S.DONE;
         isUpdatingDetails = false;
-        await botReply(L('update_cancelled'), 600);
+        await botReply(L('update_cancelled'), 0);
       };
       window.doCancelAll = async function () {
         userMsg('\u274C ' + L('btn_cancel'));
@@ -3246,7 +3502,7 @@
         setEpicInput(L('ph_epic'));
         hideAttach();
         photoFile = null; photoUrl = ''; dob = ''; bloodGroup = ''; address = ''; skippedDetails = false;
-        await botReply(L('cancelled_start_over'), 700);
+        await botReply(L('cancelled_start_over'), 0);
       };
 
       /* ── Reusable Card Preview HTML ── */
@@ -3317,7 +3573,7 @@
         try {
           // Step 1: Upload photo if we have a file but no URL yet
           if (photoFile && !photoUrl) {
-            await botReply(L('uploading_photo'), 400);
+            await botReply(L('uploading_photo'), 0);
             showTyping();
             const fd = new FormData();
             fd.append('photo', photoFile);
@@ -3333,7 +3589,7 @@
               h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_reupload') + '</button>';
               h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
               h += '</div>';
-              await botReply(h, 600);
+              await botReply(h, 0);
               return;
             }
             photoUrl = uploadRes.photo_url;
@@ -3341,7 +3597,7 @@
           }
 
           // Step 2: Generate card
-          await botReply(L('generating_card'), 400);
+          await botReply(L('generating_card'), 0);
           showTyping();
 
           const cardData = {
@@ -3352,10 +3608,10 @@
             assembly: voter ? (voter.assembly_name || '') : '',
             district: voter ? (voter.district || '') : '',
             zone: voter ? (voter.zone || '') : '',
-            dob: dob,
-            blood_group: bloodGroup,
-            address: address,
-            skipped_details: skippedDetails,
+            dob: window._waFlowData ? (window._waFlowData.dob || dob) : dob,
+            blood_group: window._waFlowData ? (window._waFlowData.blood || bloodGroup) : bloodGroup,
+            address: window._waFlowData ? (window._waFlowData.address || address) : address,
+            skipped_details: window._waFlowData ? false : skippedDetails,
             pin: pin,
             manually_entered: voter && voter.manually_entered ? true : false,
             referrer_unique_id: referrerUniqueId || ''
@@ -3371,6 +3627,7 @@
             unlockInput();
 
             saveUser({ mobile, epic, hasCard: true, memberData: res.member });
+            startReferralPolling();
 
             const m = res.member;
 
@@ -3387,7 +3644,7 @@
               h += '</div></div>';
             }
 
-            await botReply(h, 1200);
+            await botReply(h, 400);
             photoFile = null;
 
             // Capture and upload card images directly (no iframe)
@@ -3404,13 +3661,13 @@
           } else {
             state = S.CONFIRM_ALL;
             unlockInput();
-            await botReply('\u274C ' + (res.message || L('card_gen_fail')), 700);
+            await botReply('\u274C ' + (res.message || L('card_gen_fail')), 0);
           }
         } catch (e) {
           hideTyping();
           state = S.CONFIRM_ALL;
           unlockInput();
-          await botReply(L('something_wrong'), 600);
+          await botReply(L('something_wrong'), 0);
         }
       }
 
@@ -3586,7 +3843,7 @@
             h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
             h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
             h += '</div>';
-            botReply(h, 600);
+            botReply(h, 0);
             photoFile = null;
           }
         } catch (e) {
@@ -3598,7 +3855,7 @@
           h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_reupload') + '</button>';
           h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
           h += '</div>';
-          botReply(h, 600);
+          botReply(h, 0);
           photoFile = null;
         }
       }
@@ -3614,7 +3871,7 @@
           h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
           h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
           h += '</div>';
-          botReply(h, 600);
+          botReply(h, 0);
           return;
         }
 
@@ -3624,7 +3881,7 @@
           h += '<button class="action-btn confirm photo-upload-btn" onclick="triggerPhotoUpload()"><i class="bi bi-image"></i> ' + L('btn_upload_photo') + '</button>';
           h += '<button class="action-btn confirm photo-camera-btn" onclick="triggerCamera()"><i class="bi bi-camera-fill"></i> ' + L('btn_camera') + '</button>';
           h += '</div>';
-          botReply(h, 600);
+          botReply(h, 0);
           return;
         }
 

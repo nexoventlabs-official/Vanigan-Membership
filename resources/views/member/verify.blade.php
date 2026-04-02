@@ -224,6 +224,12 @@
         </div>
       </div>
     </div>
+    <!-- Download Card Button -->
+    <div style="padding: 0 24px 8px; display: flex; gap: 10px;">
+      <button id="downloadCardBtn" onclick="downloadCard()" style="flex:1;padding:12px;background:linear-gradient(135deg,#009345,#007a38);color:#fff;border:none;border-radius:12px;font-size:0.92rem;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform 0.1s;">
+        <i class="bi bi-download"></i> <span class="t" data-en="Download Card" data-ta="அட்டையை பதிவிறக்கம்">Download Card</span>
+      </button>
+    </div>
     <div class="footer">
       <span class="t" data-en="Tamil Nadu Vanigargalin Sangamam" data-ta="தமிழ்நாடு வணிகர்களின் சங்கமம்">Tamil Nadu Vanigargalin Sangamam</span> &copy; {{ date('Y') }}
     </div>
@@ -341,5 +347,67 @@
     }
   </script>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+  <script>
+    async function downloadCard() {
+      const btn = document.getElementById('downloadCardBtn');
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;"></span> Downloading...';
+
+      try {
+        const frontUrl = @json($member->card_front_url ?? '');
+        const backUrl = @json($member->card_back_url ?? '');
+
+        if (frontUrl && backUrl) {
+          // Use pre-generated card images from Cloudinary
+          const frontImg = await loadImage(frontUrl);
+          const backImg = await loadImage(backUrl);
+
+          const gap = 40;
+          const canvas = document.createElement('canvas');
+          canvas.width = frontImg.width + backImg.width + gap;
+          canvas.height = Math.max(frontImg.height, backImg.height) + 50;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Labels
+          ctx.font = 'bold 28px Inter, sans-serif';
+          ctx.fillStyle = '#333';
+          ctx.textAlign = 'center';
+          ctx.fillText('Front', frontImg.width / 2, 35);
+          ctx.fillText('Back', frontImg.width + gap + backImg.width / 2, 35);
+
+          // Draw cards
+          ctx.drawImage(frontImg, 0, 50);
+          ctx.drawImage(backImg, frontImg.width + gap, 50);
+
+          const link = document.createElement('a');
+          link.download = '{{ $member->unique_id ?? "card" }}_card.png';
+          link.href = canvas.toDataURL('image/png', 1.0);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          alert(lang === 'ta' ? 'அட்டை படங்கள் இன்னும் உருவாக்கப்படவில்லை.' : 'Card images not yet generated. Please try from the chatbot.');
+        }
+      } catch(e) {
+        console.error('Download error:', e);
+        alert('Download failed. Please try again.');
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+
+    function loadImage(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = url;
+      });
+    }
+  </script>
 </body>
 </html>

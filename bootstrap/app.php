@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.auth' => \App\Http\Middleware\AdminAuthMiddleware::class,
             'validate.admin.api.key' => \App\Http\Middleware\ValidateAdminApiKey::class,
         ]);
+        
+        $middleware->validateCsrfTokens(except: [
+            'webhook/*',
+            'api/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

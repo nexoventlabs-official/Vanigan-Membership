@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\MongoService;
 use App\Services\TrackingMongoService;
 use App\Services\CloudinaryService;
+use App\Services\WhatsAppMongoService;
 use App\Models\AssemblyConstituency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -463,6 +464,43 @@ class AdminPanelController extends Controller
 
             $pages = (int) ceil($total / max($limit, 1));
 
+            // Add zone lookup for each voter based on assembly name
+            $zoneData = config('zone_data');
+            if ($zoneData && !empty($zoneData['assembly_map'])) {
+                $asmMap = $zoneData['assembly_map'];
+                foreach ($voters as &$voter) {
+                    $assemblyName = $voter['ASSEMBLY_NAME'] ?? '';
+                    if (empty($assemblyName)) continue;
+                    
+                    $assemblyUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName)));
+                    $matched = $asmMap[$assemblyUpper] ?? null;
+                    
+                    if (!$matched) {
+                        // Remove (SC), (ST) suffixes and special characters for matching
+                        $normalizedInput = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $assemblyUpper);
+                        $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $normalizedInput);
+                        $normalizedInput = preg_replace('/\s+/', ' ', trim($normalizedInput));
+                        foreach ($asmMap as $key => $val) {
+                            $normalizedKey = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $key);
+                            $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $normalizedKey);
+                            $normalizedKey = preg_replace('/\s+/', ' ', trim($normalizedKey));
+                            if ($normalizedKey === $normalizedInput) {
+                                $matched = $val;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if ($matched) {
+                        $voter['ZONE'] = $matched['z'];
+                    } elseif (!empty($zoneData['district_zone'])) {
+                        $districtUpper = strtoupper(trim($voter['DISTRICT_NAME'] ?? ''));
+                        $voter['ZONE'] = $zoneData['district_zone'][$districtUpper] ?? '';
+                    }
+                }
+                unset($voter);
+            }
+
             return view('admin.voters', [
                 'voters' => $voters,
                 'total' => $total,
@@ -683,5 +721,96 @@ class AdminPanelController extends Controller
         } catch (\Exception $e) {
             abort(500, 'Database error: ' . $e->getMessage());
         }
+    }
+
+    public function whatsapp(Request $request)
+    {
+        $whatsAppMongo = app(WhatsAppMongoService::class);
+        
+        $page = max(1, (int) $request->input('page', 1));
+        $search = $request->input('search', '');
+        $status = $request->input('status', '');
+
+        $result = $whatsAppMongo->getWhatsAppUsers($page, 20, $search ?: null, $status ?: null);
+        $stats = $whatsAppMongo->getStats();
+
+        $total = $result['total'];
+        $pages = (int) ceil($total / 20);
+
+        return view('admin.whatsapp', [
+            'users' => $result['users'],
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'search' => $search,
+            'status' => $status,
+            'stats' => $stats,
+        ]);
+    }
+
+    /**
+     * Flow Images management page.
+     */
+    public function flowImages()
+    {
+        $flowImageService = app(\App\Services\FlowImageService::class);
+        $images = $flowImageService->getAllImages();
+        $requiredKeys = \App\Services\FlowImageService::getRequiredKeys();
+
+        return view('admin.flow-images', compact('images', 'requiredKeys'));
+    }
+
+    /**
+     * Upload a flow image.
+     */
+    public function uploadFlowImage(Request $request)
+    {
+        $request->validate([
+            'key' => 'required|string|max:50',
+            'image' => 'required|image|max:5120',
+            'label' => 'nullable|string|max:100',
+        ]);
+
+        try {
+            $key = $request->input('key');
+            $label = $request->input('label', '');
+            $image = $request->file('image');
+
+            // Upload to Cloudinary
+            $result = $this->cloudinary->uploadApi()->upload($image->getRealPath(), [
+                'folder' => 'vanigan/flow_images',
+                'public_id' => $key . '_' . time(),
+                'overwrite' => true,
+                'resource_type' => 'image',
+            ]);
+
+            $imageUrl = $result['secure_url'] ?? '';
+
+            if (empty($imageUrl)) {
+                return back()->with('error', 'Image upload failed.');
+            }
+
+            $flowImageService = app(\App\Services\FlowImageService::class);
+            $flowImageService->setImage($key, $imageUrl, $label);
+
+            return back()->with('success', "Image '{$key}' uploaded successfully.");
+
+        } catch (Exception $e) {
+            Log::error('uploadFlowImage error: ' . $e->getMessage());
+            return back()->with('error', 'Upload failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete a flow image.
+     */
+    public function deleteFlowImage(Request $request)
+    {
+        $request->validate(['key' => 'required|string']);
+
+        $flowImageService = app(\App\Services\FlowImageService::class);
+        $flowImageService->deleteImage($request->input('key'));
+
+        return back()->with('success', 'Image deleted.');
     }
 }

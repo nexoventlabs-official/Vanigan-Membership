@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VanigamController;
 use App\Http\Controllers\AdminPanelController;
+use App\Http\Controllers\WhatsAppController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,5 +52,15 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::get('/reports', [AdminPanelController::class, 'reports'])->name('admin.reports');
     Route::get('/loan-requests', [AdminPanelController::class, 'loanRequests'])->name('admin.loan_requests');
     Route::get('/not-registered', [AdminPanelController::class, 'notRegistered'])->name('admin.not_registered');
+    Route::get('/whatsapp', [AdminPanelController::class, 'whatsapp'])->name('admin.whatsapp');
+    Route::get('/flow-images', [AdminPanelController::class, 'flowImages'])->name('admin.flow_images');
+    Route::post('/flow-images/upload', [AdminPanelController::class, 'uploadFlowImage'])->name('admin.flow_images.upload');
+    Route::post('/flow-images/delete', [AdminPanelController::class, 'deleteFlowImage'])->name('admin.flow_images.delete');
     Route::post('/logout', [AdminPanelController::class, 'logout'])->name('admin.logout');
 });
+
+// ── WhatsApp Webhook ──────────────────────────────────────────────────
+Route::match(['get', 'post'], '/webhook/whatsapp', [WhatsAppController::class, 'webhook'])->name('whatsapp.webhook');
+
+// ── WhatsApp Flow Endpoint (Meta calls this for flow data) ──────────
+Route::post('/webhook/flow', [\App\Http\Controllers\FlowEndpointController::class, 'handle'])->name('whatsapp.flow');

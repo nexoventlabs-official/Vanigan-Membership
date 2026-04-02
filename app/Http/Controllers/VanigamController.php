@@ -228,10 +228,13 @@ class VanigamController extends Controller
                 $assemblyUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName)));
                 $matched = $asmMap[$assemblyUpper] ?? null;
                 if (!$matched) {
-                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $assemblyUpper);
+                    // Remove (SC), (ST) suffixes and special characters for matching
+                    $normalizedInput = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $assemblyUpper);
+                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $normalizedInput);
                     $normalizedInput = preg_replace('/\s+/', ' ', trim($normalizedInput));
                     foreach ($asmMap as $key => $val) {
-                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $key);
+                        $normalizedKey = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $key);
+                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $normalizedKey);
                         $normalizedKey = preg_replace('/\s+/', ' ', trim($normalizedKey));
                         if ($normalizedKey === $normalizedInput) {
                             $matched = $val;
@@ -242,6 +245,12 @@ class VanigamController extends Controller
                 if ($matched) {
                     $district = $matched['d'];
                     $zone = $matched['z'];
+                } elseif (!empty($zoneData['district_zone'])) {
+                    // Fallback: district-based zone lookup
+                    $districtUpper = strtoupper(trim($district));
+                    if (!empty($zoneData['district_zone'][$districtUpper])) {
+                        $zone = $zoneData['district_zone'][$districtUpper];
+                    }
                 }
             }
 
@@ -402,9 +411,9 @@ class VanigamController extends Controller
                 'dob' => 'nullable|string|max:20',
                 'blood_group' => 'nullable|string|max:10',
                 'address' => 'nullable|string|max:300',
-                'skipped_details' => 'nullable|boolean',
+                'skipped_details' => 'nullable|in:true,false,1,0,yes,no',
                 'pin' => 'nullable|digits:4',
-                'manually_entered' => 'nullable|boolean',  // Flag for manually entered voter data
+                'manually_entered' => 'nullable|in:true,false,1,0,yes,no',  // Flag for manually entered voter data
             ]);
 
             $mobile = $request->input('mobile');
@@ -417,7 +426,7 @@ class VanigamController extends Controller
             $bloodGroup = $request->input('blood_group', '');
             $address = $request->input('address', '');
             $zone = $request->input('zone', '');
-            $skippedDetails = $request->input('skipped_details', false);
+            $skippedDetails = filter_var($request->input('skipped_details', false), FILTER_VALIDATE_BOOLEAN);
 
             // Correct district & zone from static config (MySQL districts can be wrong)
             $zoneData = config('zone_data');
@@ -426,10 +435,13 @@ class VanigamController extends Controller
                 $assemblyUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assembly)));
                 $matched = $asmMap[$assemblyUpper] ?? null;
                 if (!$matched) {
-                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $assemblyUpper);
+                    // Remove (SC), (ST) suffixes and special characters for matching
+                    $normalizedInput = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $assemblyUpper);
+                    $normalizedInput = preg_replace('/[\.\-\(\)]/', '', $normalizedInput);
                     $normalizedInput = preg_replace('/\s+/', ' ', trim($normalizedInput));
                     foreach ($asmMap as $key => $val) {
-                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $key);
+                        $normalizedKey = preg_replace('/\s*\((SC|ST)\)\s*$/i', '', $key);
+                        $normalizedKey = preg_replace('/[\.\-\(\)]/', '', $normalizedKey);
                         $normalizedKey = preg_replace('/\s+/', ' ', trim($normalizedKey));
                         if ($normalizedKey === $normalizedInput) {
                             $matched = $val;
@@ -440,6 +452,12 @@ class VanigamController extends Controller
                 if ($matched) {
                     $district = ucwords(strtolower($matched['d']));
                     $zone = ucwords(strtolower($matched['z']));
+                } elseif (!empty($zoneData['district_zone'])) {
+                    // Fallback: district-based zone lookup
+                    $districtUpper = strtoupper(trim($district));
+                    if (!empty($zoneData['district_zone'][$districtUpper])) {
+                        $zone = ucwords(strtolower($zoneData['district_zone'][$districtUpper]));
+                    }
                 }
             }
             // Ensure Title Case even if not matched from config
@@ -502,7 +520,7 @@ class VanigamController extends Controller
                 'contact_number' => '+91 ' . $mobile,
                 'details_completed' => !$skippedDetails,
                 'referred_by' => $request->input('referrer_unique_id', ''),
-                'manually_entered' => $request->input('manually_entered', false),  // Flag for manual entries
+                'manually_entered' => filter_var($request->input('manually_entered', false), FILTER_VALIDATE_BOOLEAN),  // Flag for manual entries
                 'created_at' => now()->toISOString(),
             ];
 
@@ -524,11 +542,12 @@ class VanigamController extends Controller
 
             // If manually entered, also save to the separate manual_entries collection
             // This keeps manual entries isolated for admin review while still generating cards
-            if ($request->input('manually_entered', false)) {
+            $isManualEntry = filter_var($request->input('manually_entered', false), FILTER_VALIDATE_BOOLEAN);
+            if ($isManualEntry) {
                 $this->mongo->storeManualEntry($memberData);
             }
 
-            Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}" . ($request->input('manually_entered') ? ' (Manual Entry)' : ''));
+            Log::info("Vanigam member created: {$uniqueId} for EPIC: {$epicNo}" . ($isManualEntry ? ' (Manual Entry)' : ''));
 
             // Remove from tracking DB — user has completed registration
             $this->tracking->removeByMobile($mobile);
@@ -1100,11 +1119,21 @@ class VanigamController extends Controller
             $baseUrl = rtrim($request->getSchemeAndHttpHost(), '/');
             $referralLink = $baseUrl . '/refer/' . $uniqueId . '/' . $referralId;
 
+            // Count actual referred members instead of using stale referral_count field
+            $referredMembers = $this->mongo->getMembersReferredBy($uniqueId);
+            $actualCount = count($referredMembers);
+
+            // Sync referral_count field if it's out of sync
+            $storedCount = $member['referral_count'] ?? 0;
+            if ($actualCount !== $storedCount) {
+                $this->mongo->syncReferralCount($uniqueId, $actualCount);
+            }
+
             return response()->json([
                 'success' => true,
                 'referral_id' => $referralId,
                 'referral_link' => $referralLink,
-                'referral_count' => $member['referral_count'] ?? 0,
+                'referral_count' => $actualCount,
             ]);
         } catch (Exception $e) {
             Log::error('VanigamController::getReferral Error: ' . $e->getMessage());

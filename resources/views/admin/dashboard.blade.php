@@ -33,6 +33,8 @@
     .stat-icon.purple { background: #f3e5f5; color: #7b1fa2; }
     .stat-icon.teal { background: #e0f2f1; color: #00695c; }
     .stat-icon.red { background: #fce4ec; color: #c62828; }
+    .stat-icon.yellow { background: #fffde7; color: #f9a825; }
+    .stat-icon.pink { background: #fce4ec; color: #d81b60; }
     .stat-info h3 { font-size: 1.5rem; font-weight: 800; color: #1a1a1a; line-height: 1; margin-bottom: 4px; }
     .stat-info p { font-size: 0.78rem; color: #888; font-weight: 500; }
 
@@ -88,6 +90,8 @@
       <a href="{{ route('admin.reports') }}"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
       <a href="{{ route('admin.loan_requests') }}"><i class="bi bi-cash-coin"></i> Loan Requests</a>
       <a href="{{ route('admin.not_registered') }}"><i class="bi bi-person-x"></i> Not Registered</a>
+      <a href="{{ route('admin.whatsapp') }}"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+      <a href="{{ route('admin.flow_images') }}"><i class="bi bi-images"></i> Flow Images</a>
       <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">@csrf<button type="submit"><i class="bi bi-box-arrow-right"></i> Logout</button></form>
     </div>
   </nav>
@@ -126,6 +130,14 @@
       <div class="stat-card">
         <div class="stat-icon red"><i class="bi bi-clipboard-data-fill"></i></div>
         <div class="stat-info"><h3>{{ number_format($stats['detailsCompleted']) }}</h3><p>Profiles Complete</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-info"><h3>{{ number_format($stats['pendingMembers'] ?? 0) }}</h3><p>Pending</p></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pink"><i class="bi bi-cash-coin"></i></div>
+        <div class="stat-info"><h3>{{ number_format($stats['totalLoanRequests'] ?? 0) }}</h3><p>Loan Requests</p></div>
       </div>
     </div>
 
