@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VanigamController;
 use App\Http\Controllers\AdminPanelController;
+use App\Http\Controllers\SubAdminPanelController;
 use App\Http\Controllers\WhatsAppController;
 
 /*
@@ -57,6 +58,21 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::post('/flow-images/upload', [AdminPanelController::class, 'uploadFlowImage'])->name('admin.flow_images.upload');
     Route::post('/flow-images/delete', [AdminPanelController::class, 'deleteFlowImage'])->name('admin.flow_images.delete');
     Route::post('/logout', [AdminPanelController::class, 'logout'])->name('admin.logout');
+});
+
+// ── Sub-Admin Panel ────────────────────────────────────────────────────
+Route::get('/sub-admin/login', [SubAdminPanelController::class, 'showLogin'])->name('sub_admin.login');
+Route::post('/sub-admin/login', [SubAdminPanelController::class, 'login'])->name('sub_admin.login.submit');
+
+Route::prefix('sub-admin')->middleware('sub_admin.auth')->group(function () {
+    Route::get('/dashboard',      [SubAdminPanelController::class, 'dashboard'])->name('sub_admin.dashboard');
+    Route::get('/members',                 [SubAdminPanelController::class, 'users'])->name('sub_admin.users');
+    Route::get('/members/{uniqueId}',      [SubAdminPanelController::class, 'userDetail'])->name('sub_admin.user.detail');
+    Route::get('/reports',        [SubAdminPanelController::class, 'reports'])->name('sub_admin.reports');
+    Route::get('/loan-requests',  [SubAdminPanelController::class, 'loanRequests'])->name('sub_admin.loan_requests');
+    Route::get('/not-registered', [SubAdminPanelController::class, 'notRegistered'])->name('sub_admin.not_registered');
+    Route::get('/whatsapp',       [SubAdminPanelController::class, 'whatsapp'])->name('sub_admin.whatsapp');
+    Route::post('/logout',        [SubAdminPanelController::class, 'logout'])->name('sub_admin.logout');
 });
 
 // ── WhatsApp Webhook ──────────────────────────────────────────────────

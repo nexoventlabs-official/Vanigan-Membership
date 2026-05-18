@@ -1196,6 +1196,23 @@ class VanigamController extends Controller
                 return response()->json(['success' => false, 'message' => 'Member not found.', 'error_code' => 'MEMBER_NOT_FOUND'], 404);
             }
 
+            // Prevent duplicate loan requests for the same member (web + WhatsApp parity).
+            $existing = $this->mongo->getLoanRequestByUniqueId($uniqueId);
+            if ($existing) {
+                Log::info("Loan request already exists for unique_id={$uniqueId}; skipping duplicate insert.");
+                return response()->json([
+                    'success' => true,
+                    'already_applied' => true,
+                    'message' => 'You have already submitted a loan request. Our team will contact you soon.',
+                    'existing' => [
+                        'business_type' => $existing['business_type'] ?? '',
+                        'business_name' => $existing['business_name'] ?? '',
+                        'status' => $existing['status'] ?? 'pending',
+                        'created_at' => $existing['created_at'] ?? '',
+                    ],
+                ]);
+            }
+
             // Store loan request
             $loanRequest = [
                 'unique_id' => $uniqueId,

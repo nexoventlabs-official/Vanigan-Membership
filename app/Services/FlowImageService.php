@@ -125,6 +125,8 @@ class FlowImageService
             'flow_loan_pvt_ltd' => 'Pvt Ltd Company Icon (Loan)',
             'flow_loan_partnership' => 'Partnership Business Icon (Loan)',
             'flow_loan_import_export' => 'Import Export Business Icon (Loan)',
+            'flow_loan_proprietorship' => 'Proprietorship Icon (Loan)',
+            'flow_loan_freelancer' => 'Freelancer Icon (Loan)',
             'welcome_image' => 'Welcome Message Image',
         ];
     }

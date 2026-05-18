@@ -585,6 +585,7 @@ class AdminPanelController extends Controller
 
     public function notRegistered(Request $request)
     {
+        $export = $request->input('export') === '1';
         $page = max(1, (int) $request->input('page', 1));
         $limit = 20;
         $search = $request->input('search', '');
@@ -614,6 +615,76 @@ class AdminPanelController extends Controller
             default:
                 // 'all' — no date filter
                 break;
+        }
+
+        // Export mode: return ALL filtered records as JSON for PDF generation
+        if ($export) {
+            $all = $this->tracking->getIncompleteRegistrations(
+                1,
+                1000000,
+                $search ?: null,
+                $step ?: null,
+                $from ?: null,
+                $to ?: null
+            );
+
+            // Resolve district/zone server-side using zone config
+            $zoneConfig = config('zone_data');
+            $asmMap = $zoneConfig['assembly_map'] ?? [];
+            $distZone = $zoneConfig['district_zone'] ?? [];
+
+            $resolveDz = function (?string $assemblyName) use ($asmMap, $distZone): array {
+                $asmUpper = strtoupper(trim(preg_replace('/\s+/', ' ', $assemblyName ?? '')));
+                $matched = $asmMap[$asmUpper] ?? null;
+                if (!$matched) {
+                    $norm = preg_replace('/[\. \-\(\)]/', '', $asmUpper);
+                    foreach ($asmMap as $k => $v) {
+                        if (preg_replace('/[\. \-\(\)]/', '', $k) === $norm) { $matched = $v; break; }
+                    }
+                }
+                $district = $matched['district'] ?? null;
+                $zone = $district ? ($distZone[$district] ?? null) : null;
+                return ['d' => $district, 'z' => $zone];
+            };
+
+            $rows = [];
+            foreach (($all['users'] ?? []) as $i => $u) {
+                $dz = $resolveDz($u['assembly'] ?? '');
+                $startedAt = !empty($u['started_at'])
+                    ? \Carbon\Carbon::parse($u['started_at'])->setTimezone('Asia/Kolkata')->format('d M Y, h:i A')
+                    : '—';
+                $lastActivity = !empty($u['last_activity'])
+                    ? \Carbon\Carbon::parse($u['last_activity'])->setTimezone('Asia/Kolkata')->format('d M Y, h:i A')
+                    : '—';
+                $stepLabel = $u['last_step'] ?? 'unknown';
+                $stepDisplay = ucwords(str_replace('_', ' ', $stepLabel));
+                $refName = $u['referrer_name'] ?? '';
+                $refId = $u['referrer_unique_id'] ?? '';
+                $referredBy = $refId ? trim(($refName ?: '—') . ' (' . $refId . ')') : '—';
+
+                $rows[] = [
+                    $i + 1,
+                    $u['mobile'] ?? '',
+                    $u['name'] ?? '—',
+                    $u['epic_no'] ?? '—',
+                    $u['assembly'] ?? '—',
+                    $dz['d'] ?? ucwords(strtolower($u['district'] ?? '—')),
+                    $dz['z'] ?? '—',
+                    $stepDisplay,
+                    $referredBy,
+                    $startedAt,
+                    $lastActivity,
+                ];
+            }
+
+            return response()->json([
+                'rows' => $rows,
+                'total' => $all['total'] ?? count($rows),
+                'filter' => $filter,
+                'from' => $from,
+                'to' => $to,
+                'step' => $step,
+            ]);
         }
 
         $data = $this->tracking->getIncompleteRegistrations($page, $limit, $search ?: null, $step ?: null, $from ?: null, $to ?: null);

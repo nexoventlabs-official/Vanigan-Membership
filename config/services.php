@@ -53,4 +53,10 @@ return [
         'password_hash' => env('ADMIN_PASSWORD_HASH'),
     ],
 
+    'sub_admin' => [
+        'username' => env('SUB_ADMIN_USERNAME'),
+        'password' => env('SUB_ADMIN_PASSWORD'),
+        'password_hash' => env('SUB_ADMIN_PASSWORD_HASH'),
+    ],
+
 ];

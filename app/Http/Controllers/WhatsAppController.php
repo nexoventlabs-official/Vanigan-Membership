@@ -443,8 +443,9 @@ class WhatsAppController extends Controller
                 "We provide up to ₹25 Lakhs interest-free loan for:\n\n" .
                 "🏢 Pvt Ltd Companies\n" .
                 "🤝 Partnership Businesses\n" .
-                "🌐 Import & Export Businesses\n\n" .
-                "📌 Note: Available for all business types except Proprietorship.\n\n" .
+                "🌐 Import & Export Businesses\n" .
+                "� Proprietorships\n" .
+                "💼 Freelancers\n\n" .
                 "Would you like to apply?",
                 [
                     ['id' => 'loan_yes', 'text' => 'Yes, Apply'],
@@ -473,6 +474,8 @@ class WhatsAppController extends Controller
                 ['id' => 'pvt_ltd', 'title' => 'Pvt Ltd Company', 'description' => 'Private Limited company', 'icon' => 'flow_loan_pvt_ltd'],
                 ['id' => 'partnership', 'title' => 'Partnership Business', 'description' => 'Partnership Deed company', 'icon' => 'flow_loan_partnership'],
                 ['id' => 'import_export', 'title' => 'Import Export Business', 'description' => 'Import & Export company', 'icon' => 'flow_loan_import_export'],
+                ['id' => 'proprietorship', 'title' => 'Proprietorship', 'description' => 'Sole proprietorship business', 'icon' => 'flow_loan_proprietorship'],
+                ['id' => 'freelancer', 'title' => 'Freelancer', 'description' => 'Self-employed professional', 'icon' => 'flow_loan_freelancer'],
             ]);
 
             $this->whatsApp->sendFlowMessage($phone, [
@@ -512,7 +515,13 @@ class WhatsAppController extends Controller
             $businessName = $params['business_name'] ?? '';
 
             // Map IDs to display names
-            $typeMap = ['pvt_ltd' => 'Pvt Ltd Company', 'partnership' => 'Partnership Business', 'import_export' => 'Import Export Business'];
+            $typeMap = [
+                'pvt_ltd' => 'Pvt Ltd Company',
+                'partnership' => 'Partnership Business',
+                'import_export' => 'Import Export Business',
+                'proprietorship' => 'Proprietorship',
+                'freelancer' => 'Freelancer',
+            ];
             $displayType = $typeMap[$businessType] ?? $businessType;
 
             if ($member && !empty($member['unique_id'])) {

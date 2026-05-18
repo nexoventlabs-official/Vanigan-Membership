@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
@@ -60,12 +61,21 @@
       padding: 8px 14px; background: #2e7d32; color: #fff; border: none; border-radius: 10px;
       font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: inherit;
     }
+    .download-wrap { position: relative; display: inline-block; }
     .download-btn {
-      padding: 8px 16px; background: linear-gradient(135deg, #c62828, #e53935); color: #fff;
+      padding: 8px 16px; background: linear-gradient(135deg, #2e7d32, #43a047); color: #fff;
       border: none; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
-      font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: box-shadow 0.2s;
+      font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: box-shadow 0.2s;
     }
-    .download-btn:hover { box-shadow: 0 4px 12px rgba(198,40,40,0.3); }
+    .download-btn:hover { box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
+    .download-btn:disabled { opacity: 0.7; cursor: wait; }
+    .download-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); min-width: 150px; z-index: 60; overflow: hidden; }
+    .download-menu.open { display: block; }
+    .download-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border: none; background: #fff; font-size: 0.85rem; font-weight: 600; font-family: inherit; text-align: left; cursor: pointer; color: #333; }
+    .download-menu button + button { border-top: 1px solid #f0f2f5; }
+    .download-menu button:hover { background: #f7fbf7; }
+    .download-menu .dl-pdf { color: #c62828; }
+    .download-menu .dl-xls { color: #1b5e20; }
 
     /* Filters */
     .filters { background: #fff; border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
@@ -233,7 +243,13 @@
         <button type="submit" class="apply-btn"><i class="bi bi-funnel"></i> Apply</button>
       </form>
       <div class="filter-divider"></div>
-      <button class="download-btn" onclick="downloadPDF()"><i class="bi bi-file-earmark-pdf"></i> Download PDF</button>
+      <div class="download-wrap">
+        <button class="download-btn" type="button" onclick="toggleDownloadMenu(event)"><i class="bi bi-download"></i> Download <i class="bi bi-chevron-down" style="font-size:0.68rem;"></i></button>
+        <div class="download-menu" id="downloadMenu">
+          <button type="button" class="dl-pdf" onclick="closeDownloadMenu();downloadPDF();"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</button>
+          <button type="button" class="dl-xls" onclick="closeDownloadMenu();downloadExcel();"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
+        </div>
+      </div>
     </div>
 
     <!-- Search / Step Filter -->
@@ -356,78 +372,120 @@
   </div>
 
   <script>
-  function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('l', 'mm', 'a4'); // landscape
-
-    // Title
-    const filter = '{{ $filter }}';
-    let title = 'Not Registered Members Report';
-    let subtitle = 'All Time';
-    if (filter === 'today') subtitle = 'Today: {{ $from ?? "" }}';
-    else if (filter === 'weekly') subtitle = 'Weekly: {{ $from ?? "" }} to {{ $to ?? "" }}';
-    else if (filter === 'monthly') subtitle = 'Monthly: {{ $from ?? "" }} to {{ $to ?? "" }}';
-    else if (filter === 'custom') subtitle = 'Custom: {{ $from ?? "" }} to {{ $to ?? "" }}';
-
-    const step = '{{ $step }}';
-    if (step) subtitle += ' | Step: ' + step.replace(/_/g, ' ');
-
-    doc.setFontSize(16);
-    doc.setTextColor(0, 122, 56);
-    doc.text(title, 14, 15);
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(subtitle, 14, 22);
-    doc.text('Total: {{ $total }} incomplete registrations', 14, 28);
-    doc.text('Generated: ' + new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }), 14, 34);
-
-    // Build table data from the current page
-    const rows = [];
-    const table = document.getElementById('reportTable');
-    if (table) {
-      const tbody = table.querySelector('tbody');
-      const trs = tbody.querySelectorAll('tr');
-      trs.forEach((tr, idx) => {
-        const tds = tr.querySelectorAll('td');
-        rows.push([
-          tds[0]?.textContent?.trim() || '',
-          tds[1]?.textContent?.trim() || '',
-          tds[2]?.textContent?.trim() || '',
-          tds[3]?.textContent?.trim() || '',
-          tds[4]?.textContent?.trim() || '',
-          tds[5]?.textContent?.trim() || '',
-          tds[6]?.textContent?.trim() || '',
-          tds[7]?.textContent?.trim() || '',
-          tds[8]?.textContent?.trim() || '',
-          tds[9]?.textContent?.trim() || '',
-          tds[10]?.textContent?.trim() || '',
-        ]);
-      });
-    }
-
-    doc.autoTable({
-      startY: 38,
-      head: [['#', 'Mobile', 'Name', 'EPIC No', 'Assembly', 'District', 'Zone', 'Last Step', 'Referred By', 'Started At', 'Last Activity']],
-      body: rows,
-      styles: { fontSize: 7.5, cellPadding: 2.5 },
-      headStyles: { fillColor: [0, 122, 56], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
-      alternateRowStyles: { fillColor: [245, 250, 245] },
-      columnStyles: {
-        0: { cellWidth: 10 },
-        1: { cellWidth: 25 },
-        7: { cellWidth: 30 },
-      },
-      margin: { left: 14, right: 14 },
-    });
-
-    // File name
-    let fileName = 'Not_Registered_Report';
-    if (filter !== 'all') fileName += '_' + filter;
-    if (step) fileName += '_' + step;
-    fileName += '.pdf';
-
-    doc.save(fileName);
+  // ── Download menu toggle ──
+  function toggleDownloadMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('downloadMenu');
+    if (!menu) return;
+    menu.classList.toggle('open');
   }
+  function closeDownloadMenu() {
+    const menu = document.getElementById('downloadMenu');
+    if (menu) menu.classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.download-wrap')) closeDownloadMenu();
+  });
+
+  // Shared helper — fetch ALL filtered records as JSON (no pagination).
+  async function fetchAllNotRegistered() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', '1');
+    params.delete('page');
+    const res = await fetch('{{ route('admin.not_registered') }}?' + params.toString(), {
+      headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin',
+    });
+    if (!res.ok) throw new Error('Export request failed (' + res.status + ')');
+    return res.json();
+  }
+
+  function withBusyButton(fn) {
+    return async function () {
+      const btn = document.querySelector('.download-btn');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Preparing...';
+      }
+      try { await fn(); }
+      catch (err) { console.error(err); alert('Failed: ' + err.message); }
+      finally { if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; } }
+    };
+  }
+
+  // ── Excel export ──
+  const downloadExcel = withBusyButton(async function () {
+    if (typeof XLSX === 'undefined') { alert('Excel library not loaded.'); return; }
+    const data = await fetchAllNotRegistered();
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    const header = ['#', 'Mobile', 'Name', 'EPIC No', 'Assembly', 'District', 'Zone', 'Last Step', 'Referred By', 'Started At', 'Last Activity'];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    ws['!cols'] = [ {wch:5},{wch:14},{wch:22},{wch:18},{wch:18},{wch:16},{wch:14},{wch:20},{wch:28},{wch:22},{wch:22} ];
+    XLSX.utils.book_append_sheet(wb, ws, 'Not Registered');
+
+    const filter = data.filter || '{{ $filter }}';
+    const step = data.step || '';
+    let fileName = 'Not_Registered_Report';
+    if (filter && filter !== 'all') fileName += '_' + filter;
+    if (step) fileName += '_' + step;
+    XLSX.writeFile(wb, fileName + '.xlsx');
+  });
+
+  // ── PDF export (unchanged behaviour, now invoked from menu) ──
+  const downloadPDF = withBusyButton(async function () {
+    const data = await fetchAllNotRegistered();
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    const total = data.total ?? rows.length;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('l', 'mm', 'a4'); // landscape
+
+      const filter = data.filter || '{{ $filter }}';
+      const from = data.from || '';
+      const to = data.to || '';
+      const step = data.step || '';
+
+      let title = 'Not Registered Members Report';
+      let subtitle = 'All Time';
+      if (filter === 'today') subtitle = 'Today: ' + from;
+      else if (filter === 'weekly') subtitle = 'Weekly: ' + from + ' to ' + to;
+      else if (filter === 'monthly') subtitle = 'Monthly: ' + from + ' to ' + to;
+      else if (filter === 'custom') subtitle = 'Custom: ' + from + ' to ' + to;
+      if (step) subtitle += ' | Step: ' + step.replace(/_/g, ' ');
+
+      doc.setFontSize(16);
+      doc.setTextColor(0, 122, 56);
+      doc.text(title, 14, 15);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(subtitle, 14, 22);
+      doc.text('Total: ' + total + ' incomplete registrations', 14, 28);
+      doc.text('Generated: ' + new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }), 14, 34);
+
+      doc.autoTable({
+        startY: 38,
+        head: [['#', 'Mobile', 'Name', 'EPIC No', 'Assembly', 'District', 'Zone', 'Last Step', 'Referred By', 'Started At', 'Last Activity']],
+        body: rows,
+        styles: { fontSize: 7.5, cellPadding: 2.5 },
+        headStyles: { fillColor: [0, 122, 56], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+        alternateRowStyles: { fillColor: [245, 250, 245] },
+        columnStyles: {
+          0: { cellWidth: 10 },
+          1: { cellWidth: 25 },
+          7: { cellWidth: 30 },
+        },
+        margin: { left: 14, right: 14 },
+      });
+
+      let fileName = 'Not_Registered_Report';
+      if (filter !== 'all') fileName += '_' + filter;
+      if (step) fileName += '_' + step;
+      fileName += '.pdf';
+
+      doc.save(fileName);
+  });
   </script>
 </body>
 </html>

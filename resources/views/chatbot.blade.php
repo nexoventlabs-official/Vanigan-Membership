@@ -1270,8 +1270,8 @@
         // Request Loan
         btn_request_loan: { en: 'Request Loan', ta: 'கடன் கோரிக்கை' },
         loan_intro: {
-          en: 'We have dedicated schemes for Pvt Ltd companies, Partnership Businesses & Import Export businesses, wherein we provide upto 25L interest free loan.<br><br><strong>📌 Note:</strong> We provide loans for every business type <u>except Proprietorship</u>.<br><br>Do you have any of these businesses: Pvt Ltd companies, Partnership Businesses or Import Export businesses?',
-          ta: 'Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் மற்றும் இறக்குமதி ஏற்றுமதி வணிகங்களுக்கு பிரத்யேக திட்டங்கள் உள்ளன, இதில் 25 லட்சம் வரை வட்டியில்லா கடன் வழங்குகிறோம்.<br><br><strong>📌 குறிப்பு:</strong> தனியுரிமை (Proprietorship) <u>தவிர</u> அனைத்து வணிக வகைகளுக்கும் கடன் வழங்குகிறோம்.<br><br>உங்களிடம் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் அல்லது இறக்குமதி ஏற்றுமதி வணிகங்கள் உள்ளதா?'
+          en: 'We provide up to ₹25 Lakhs interest-free loan for Pvt Ltd companies, Partnership Businesses, Import Export businesses, Proprietorships and Freelancers.<br><br>Would you like to apply for a loan?',
+          ta: 'Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள், இறக்குமதி ஏற்றுமதி வணிகங்கள், தனியுரிமை (Proprietorship) மற்றும் சுயதொழிலாளர்களுக்கு (Freelancers) 25 லட்சம் வரை வட்டியில்லா கடன் வழங்குகிறோம்.<br><br>கடன் விண்ணப்பிக்க விரும்புகிறீர்களா?'
         },
         btn_yes: { en: 'Yes', ta: 'ஆம்' },
         btn_no: { en: 'No', ta: 'இல்லை' },
@@ -1280,12 +1280,14 @@
           ta: 'அருமை! உங்கள் வணிக வகையைத் தேர்ந்தெடுக்கவும்:'
         },
         loan_no_eligible: {
-          en: 'Currently, our interest-free loan schemes are available only for Pvt Ltd companies, Partnership Businesses & Import Export businesses. We will notify you when new schemes are available.',
-          ta: 'தற்போது, வட்டியில்லா கடன் திட்டங்கள் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள் மற்றும் இறக்குமதி ஏற்றுமதி வணிகங்களுக்கு மட்டுமே கிடைக்கும். புதிய திட்டங்கள் வரும்போது உங்களுக்குத் தெரிவிப்போம்.'
+          en: 'Currently, our interest-free loan schemes are available for Pvt Ltd companies, Partnership Businesses, Import Export businesses, Proprietorships and Freelancers. We will notify you when new schemes are available.',
+          ta: 'தற்போது, வட்டியில்லா கடன் திட்டங்கள் Pvt Ltd நிறுவனங்கள், கூட்டாண்மை வணிகங்கள், இறக்குமதி ஏற்றுமதி வணிகங்கள், தனியுரிமை (Proprietorship) மற்றும் சுயதொழிலாளர்களுக்கு (Freelancers) கிடைக்கும். புதிய திட்டங்கள் வரும்போது உங்களுக்குத் தெரிவிப்போம்.'
         },
         btn_pvt_ltd: { en: 'Pvt Ltd Company', ta: 'Pvt Ltd நிறுவனம்' },
         btn_partnership: { en: 'Partnership Business', ta: 'கூட்டாண்மை வணிகம்' },
         btn_import_export: { en: 'Import Export Business', ta: 'இறக்குமதி ஏற்றுமதி வணிகம்' },
+        btn_proprietorship: { en: 'Proprietorship', ta: 'தனியுரிமை வணிகம்' },
+        btn_freelancer: { en: 'Freelancer', ta: 'சுயதொழிலாளர்' },
         loan_enter_business_name: {
           en: 'Please share your business name:',
           ta: 'உங்கள் வணிகப் பெயரைப் பகிரவும்:'
@@ -2084,6 +2086,8 @@
         h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Pvt Ltd Company\')" style="width:100%;justify-content:center;"><i class="bi bi-building"></i> ' + L('btn_pvt_ltd') + '</button>';
         h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Partnership Business\')" style="width:100%;justify-content:center;"><i class="bi bi-people"></i> ' + L('btn_partnership') + '</button>';
         h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Import Export Business\')" style="width:100%;justify-content:center;"><i class="bi bi-globe2"></i> ' + L('btn_import_export') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Proprietorship\')" style="width:100%;justify-content:center;"><i class="bi bi-person-badge"></i> ' + L('btn_proprietorship') + '</button>';
+        h += '<button class="action-btn confirm" onclick="doSelectBusinessType(\'Freelancer\')" style="width:100%;justify-content:center;"><i class="bi bi-laptop"></i> ' + L('btn_freelancer') + '</button>';
         h += '</div>';
         await botReply(h, 0);
       };
@@ -2100,7 +2104,14 @@
 
       window.doSelectBusinessType = async function (type) {
         loanBusinessType = type;
-        const displayType = type === 'Pvt Ltd Company' ? L('btn_pvt_ltd') : type === 'Partnership Business' ? L('btn_partnership') : L('btn_import_export');
+        const typeLabelMap = {
+          'Pvt Ltd Company': L('btn_pvt_ltd'),
+          'Partnership Business': L('btn_partnership'),
+          'Import Export Business': L('btn_import_export'),
+          'Proprietorship': L('btn_proprietorship'),
+          'Freelancer': L('btn_freelancer'),
+        };
+        const displayType = typeLabelMap[type] || type;
         userMsg('<i class="bi bi-building"></i> ' + displayType);
         state = S.LOAN_BUSINESS_NAME;
         let h = '<i class="bi bi-pencil" style="color:#2e7d32;font-size:1.2rem;"></i> <strong>' + L('loan_enter_business_name') + '</strong>';

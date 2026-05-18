@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #333; min-height: 100vh; }
@@ -76,9 +77,17 @@
     .empty-state { text-align: center; padding: 50px 20px; color: #999; font-size: 0.9rem; }
     .empty-state i { font-size: 2.5rem; color: #ccc; display: block; margin-bottom: 10px; }
 
-    /* Download Button */
+    /* Download Button + Menu */
+    .download-wrap { position: relative; display: inline-block; }
     .download-btn { padding: 8px 18px; border-radius: 8px; border: 2px solid #2e7d32; background: #fff; color: #2e7d32; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
     .download-btn:hover { background: #2e7d32; color: #fff; }
+    .download-menu { display: none; position: absolute; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); min-width: 150px; z-index: 60; overflow: hidden; }
+    .download-menu.open { display: block; }
+    .download-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border: none; background: #fff; font-size: 0.85rem; font-weight: 600; font-family: inherit; text-align: left; cursor: pointer; color: #333; }
+    .download-menu button + button { border-top: 1px solid #f0f2f5; }
+    .download-menu button:hover { background: #f7fbf7; }
+    .download-menu .dl-pdf { color: #c62828; }
+    .download-menu .dl-xls { color: #1b5e20; }
 
     /* Date range label */
     .date-label { font-size: 0.78rem; color: #888; font-weight: 500; }
@@ -100,7 +109,7 @@
 
     /* Print/PDF styles */
     @media print {
-      .navbar, .filter-bar, .download-btn, .no-print { display: none !important; }
+      .navbar, .filter-bar, .download-btn, .download-wrap, .no-print { display: none !important; }
       body { background: #fff; }
       .container { max-width: 100%; padding: 0; }
       .section { box-shadow: none; border: 1px solid #ddd; }
@@ -209,7 +218,13 @@
       <div class="section-header">
         <h3><i class="bi bi-list-ul" style="color:#2e7d32;"></i> Registered Members ({{ number_format($total) }})</h3>
         @if($total > 0)
-        <button class="download-btn" onclick="downloadPDF()"><i class="bi bi-file-earmark-pdf"></i> Download PDF</button>
+        <div class="download-wrap">
+          <button class="download-btn" type="button" onclick="toggleDownloadMenu(event)"><i class="bi bi-download"></i> Download <i class="bi bi-chevron-down" style="font-size:0.68rem;"></i></button>
+          <div class="download-menu" id="downloadMenu">
+            <button type="button" class="dl-pdf" onclick="closeDownloadMenu();downloadPDF();"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</button>
+            <button type="button" class="dl-xls" onclick="closeDownloadMenu();downloadExcel();"><i class="bi bi-file-earmark-excel-fill"></i> Excel</button>
+          </div>
+        </div>
         @endif
       </div>
 
@@ -303,6 +318,79 @@
   </div>
 
   <script>
+    // ── Download menu toggle ──
+    function toggleDownloadMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('downloadMenu');
+      if (!menu) return;
+      menu.classList.toggle('open');
+    }
+    function closeDownloadMenu() {
+      const menu = document.getElementById('downloadMenu');
+      if (menu) menu.classList.remove('open');
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.download-wrap')) closeDownloadMenu();
+    });
+
+    // ── Excel export (same columns/filters as PDF) ──
+    function downloadExcel() {
+      const table = document.getElementById('reportTable');
+      if (!table || typeof XLSX === 'undefined') { alert('Excel library not loaded.'); return; }
+
+      const filter = '{{ $filter }}';
+      const from = '{{ $from }}';
+      const to = '{{ $to }}';
+      const assemblyFilter = '{{ $assembly ?? '' }}';
+      const districtFilter = '{{ $district ?? '' }}';
+      const zoneFilter = '{{ $zone ?? '' }}';
+
+      let filterLabel = 'Today';
+      if (filter === 'weekly') filterLabel = 'This Week';
+      else if (filter === 'monthly') filterLabel = 'This Month';
+      else if (filter === 'custom') filterLabel = 'Custom Range';
+
+      const header = ['#', 'Name', 'Unique ID', 'Assembly', 'District', 'Zone', 'Mobile', 'Registered At', 'Referred By', 'Referral Count', 'Your Members'];
+      const rows = [header];
+      table.querySelectorAll('tbody tr').forEach((tr, idx) => {
+        const c = tr.querySelectorAll('td');
+        const yourMembersEl = c[11];
+        let yourMembers = '';
+        if (yourMembersEl) {
+          const links = yourMembersEl.querySelectorAll('a');
+          if (links.length > 0) {
+            yourMembers = Array.from(links).map(a => a.innerText.trim()).join(', ');
+          }
+        }
+        rows.push([
+          idx + 1,
+          c[2]?.innerText?.trim() || '',
+          c[3]?.innerText?.trim() || '',
+          c[4]?.innerText?.trim() || '',
+          c[5]?.innerText?.trim() || '',
+          c[6]?.innerText?.trim() || '',
+          c[7]?.innerText?.trim() || '',
+          c[8]?.innerText?.trim() || '',
+          c[9]?.innerText?.trim() || '',
+          c[10]?.innerText?.trim() || '0',
+          yourMembers,
+        ]);
+      });
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [ {wch:5},{wch:24},{wch:16},{wch:18},{wch:16},{wch:16},{wch:14},{wch:20},{wch:22},{wch:8},{wch:30} ];
+      XLSX.utils.book_append_sheet(wb, ws, 'Members');
+
+      const parts = ['TNVS_Report'];
+      if (assemblyFilter) parts.push(assemblyFilter.replace(/[^a-zA-Z0-9]/g, '_'));
+      if (districtFilter) parts.push(districtFilter.replace(/[^a-zA-Z0-9]/g, '_'));
+      if (zoneFilter) parts.push(zoneFilter.replace(/[^a-zA-Z0-9]/g, '_'));
+      parts.push(filterLabel.replace(/\s/g, '_'));
+      if (from && to) parts.push(from + '_to_' + to);
+      XLSX.writeFile(wb, parts.join('_') + '.xlsx');
+    }
+
     function downloadPDF() {
       // Build a printable document for PDF generation
       const table = document.getElementById('reportTable');

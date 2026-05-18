@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\AdminAuthMiddleware::class,
+            'sub_admin.auth' => \App\Http\Middleware\SubAdminAuthMiddleware::class,
             'validate.admin.api.key' => \App\Http\Middleware\ValidateAdminApiKey::class,
         ]);
         

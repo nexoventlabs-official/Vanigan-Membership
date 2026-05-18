@@ -645,18 +645,28 @@ class MongoService
                 ];
             }
 
-            $total = $loanRequestsCollection->countDocuments($filter);
             $cursor = $loanRequestsCollection->find($filter, ['sort' => ['created_at' => -1]]);
 
+            // Dedupe by unique_id — keep the most recent record per member
+            // (sort is DESC on created_at, so the first occurrence seen is the newest).
             $requests = [];
             $uniqueIds = [];
+            $seenUniqueIds = [];
             foreach ($cursor as $doc) {
                 $r = $this->toArray($doc);
-                if ($r) {
-                    $requests[] = $r;
-                    if (!empty($r['unique_id'])) $uniqueIds[] = $r['unique_id'];
+                if (!$r) continue;
+                $uid = $r['unique_id'] ?? '';
+                if ($uid !== '') {
+                    if (isset($seenUniqueIds[$uid])) {
+                        continue; // skip duplicate for same member
+                    }
+                    $seenUniqueIds[$uid] = true;
+                    $uniqueIds[] = $uid;
                 }
+                $requests[] = $r;
             }
+            // After deduping, the true count = number of records we kept.
+            $total = count($requests);
 
             // Resolve member photos and names in bulk
             if (!empty($uniqueIds)) {
